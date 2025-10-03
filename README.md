@@ -44,5 +44,6 @@ Website được xây dựng theo mô hình **MVC** với 3 phần chính:
 
 ---
 
-## 📎 GitHub Repo
-👉 [DACN_Jurni](https://github.com/ledait hanhlong/DACN_Jurni)
+##  GitHub Repo
+ [DACN_Jurni](https://github.com/ledait hanhlong/DACN_Jurni)
+

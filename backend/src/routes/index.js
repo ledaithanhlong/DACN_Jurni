@@ -1,0 +1,28 @@
+import { Router } from 'express';
+import authRouter from './auth.routes.js';
+import hotelsRouter from './hotels.routes.js';
+import flightsRouter from './flights.routes.js';
+import carsRouter from './cars.routes.js';
+import activitiesRouter from './activities.routes.js';
+import bookingsRouter from './bookings.routes.js';
+import favoritesRouter from './favorites.routes.js';
+import vouchersRouter from './vouchers.routes.js';
+import notificationsRouter from './notifications.routes.js';
+import uploadRouter from './upload.routes.js';
+
+const router = Router();
+
+router.use('/auth', authRouter);
+router.use('/hotels', hotelsRouter);
+router.use('/flights', flightsRouter);
+router.use('/cars', carsRouter);
+router.use('/activities', activitiesRouter);
+router.use('/bookings', bookingsRouter);
+router.use('/favorites', favoritesRouter);
+router.use('/vouchers', vouchersRouter);
+router.use('/notifications', notificationsRouter);
+router.use('/upload', uploadRouter);
+
+export default router;
+
+

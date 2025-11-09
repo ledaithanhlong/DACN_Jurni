@@ -1,32 +1,56 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useAuth } from '@clerk/clerk-react';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import AdminUsers from '../components/admin/AdminUsers.jsx';
+import AdminFlights from '../components/admin/AdminFlights.jsx';
+import AdminCars from '../components/admin/AdminCars.jsx';
+import AdminActivities from '../components/admin/AdminActivities.jsx';
+import AdminHotels from '../components/admin/AdminHotels.jsx';
+import AdminVouchers from '../components/admin/AdminVouchers.jsx';
 
 export default function AdminDashboard() {
-  const { getToken } = useAuth();
-  const [form, setForm] = useState({ name: '', location: '', price: '' });
-  const submit = async (e) => {
-    e.preventDefault();
-    const token = await getToken();
-    await axios.post(`${API}/hotels`, { ...form, price: Number(form.price) }, { headers: { Authorization: `Bearer ${token}` } });
-    alert('Hotel created');
-  };
+  const [activeTab, setActiveTab] = useState('users');
+
+  const tabs = [
+    { id: 'users', label: 'Quản lý Người dùng', icon: '👥' },
+    { id: 'hotels', label: 'Quản lý Khách sạn', icon: '🏨' },
+    { id: 'flights', label: 'Quản lý Chuyến bay', icon: '✈️' },
+    { id: 'cars', label: 'Quản lý Xe cho thuê', icon: '🚗' },
+    { id: 'activities', label: 'Quản lý Hoạt động', icon: '🎯' },
+    { id: 'vouchers', label: 'Quản lý Voucher', icon: '🎫' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-bold">Admin Dashboard</h1>
-      <div className="bg-white p-4 rounded shadow">
-        <div className="font-semibold mb-2">Create Hotel</div>
-        <form onSubmit={submit} className="grid gap-2">
-          <input className="border p-2 rounded" placeholder="Name" value={form.name} onChange={e=>setForm(f=>({...f, name: e.target.value}))} />
-          <input className="border p-2 rounded" placeholder="Location" value={form.location} onChange={e=>setForm(f=>({...f, location: e.target.value}))} />
-          <input className="border p-2 rounded" placeholder="Price" value={form.price} onChange={e=>setForm(f=>({...f, price: e.target.value}))} />
-          <button className="bg-sky-600 text-white px-4 py-2 rounded">Create</button>
-        </form>
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Bảng điều khiển Quản trị</h1>
+          <div className="flex gap-2 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-sky-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {activeTab === 'users' && <AdminUsers />}
+        {activeTab === 'hotels' && <AdminHotels />}
+        {activeTab === 'flights' && <AdminFlights />}
+        {activeTab === 'cars' && <AdminCars />}
+        {activeTab === 'activities' && <AdminActivities />}
+        {activeTab === 'vouchers' && <AdminVouchers />}
       </div>
     </div>
   );
 }
-

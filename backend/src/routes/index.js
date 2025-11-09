@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRouter from './auth.routes.js';
+import usersRouter from './users.routes.js';
 import hotelsRouter from './hotels.routes.js';
 import flightsRouter from './flights.routes.js';
 import carsRouter from './cars.routes.js';
@@ -13,6 +14,7 @@ import uploadRouter from './upload.routes.js';
 const router = Router();
 
 router.use('/auth', authRouter);
+router.use('/users', usersRouter);
 router.use('/hotels', hotelsRouter);
 router.use('/flights', flightsRouter);
 router.use('/cars', carsRouter);

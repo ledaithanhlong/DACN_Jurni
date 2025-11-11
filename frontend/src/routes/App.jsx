@@ -25,10 +25,10 @@ const NavUserSection = () => {
 
   return (
     <>
-      <Link to="/favorites" className="text-sm hover:text-sky-200">Yêu thích</Link>
-      <Link to="/notifications" className="text-sm hover:text-sky-200">Thông báo</Link>
+      <Link to="/favorites" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Yêu thích</Link>
+      <Link to="/notifications" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thông báo</Link>
       {isAdmin && (
-        <Link to="/admin" className="text-sm bg-blue-600 px-3 py-1 rounded hover:bg-blue-700">
+        <Link to="/admin" className="text-sm bg-white text-blue-600 px-3 py-1 rounded hover:bg-blue-50 transition shadow-md font-medium">
           Quản trị
         </Link>
       )}
@@ -39,17 +39,17 @@ const NavUserSection = () => {
 
 const Nav = ({ clerkEnabled }) => {
   return (
-    <div className="bg-sky-700 text-white shadow-lg">
+    <div className="fixed top-0 left-0 right-0 bg-gradient-to-br from-sky-400 via-blue-400 to-indigo-500 shadow-lg z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-xl font-bold">Traveloka</Link>
-            <div className="hidden md:flex items-center gap-4 text-sm">
-              <Link to="/hotels" className="hover:text-sky-200">Khách sạn</Link>
-              <Link to="/flights" className="hover:text-sky-200">Vé máy bay</Link>
-              <Link to="/cars" className="hover:text-sky-200">Cho thuê xe</Link>
-              <Link to="/activities" className="hover:text-sky-200">Hoạt động & Vui chơi</Link>
-              <Link to="/vouchers" className="hover:text-sky-200">Voucher</Link>
+            <Link to="/" className="text-2xl font-bold text-white drop-shadow-md">Traveloka</Link>
+            <div className="hidden md:flex items-center gap-5 text-sm">
+              <Link to="/hotels" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Khách sạn</Link>
+              <Link to="/flights" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Vé máy bay</Link>
+              <Link to="/cars" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Cho thuê xe</Link>
+              <Link to="/activities" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Hoạt động & Vui chơi</Link>
+              <Link to="/vouchers" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Voucher</Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -59,16 +59,16 @@ const Nav = ({ clerkEnabled }) => {
                   <NavUserSection />
                 </SignedIn>
                 <SignedOut>
-                  <Link to="/sign-in" className="bg-white text-sky-700 px-4 py-2 rounded-lg hover:bg-gray-100 font-medium">
+                  <Link to="/sign-in" className="text-white/90 hover:text-white px-4 py-2 font-medium transition drop-shadow-sm">
                     Đăng Nhập
                   </Link>
-                  <Link to="/sign-up" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 font-medium">
+                  <Link to="/sign-up" className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 font-medium transition shadow-md">
                     Đăng ký
                   </Link>
                 </SignedOut>
               </>
             ) : (
-              <span className="text-sm text-gray-300">Auth disabled</span>
+              <span className="text-sm text-white/70">Auth disabled</span>
             )}
           </div>
         </div>
@@ -165,19 +165,19 @@ export default function App({ clerkEnabled }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <Nav clerkEnabled={clerkEnabled} />
+      <div className="pt-16">
+        {/* Sync user when signed in */}
+        {clerkEnabled && (
+          <SignedIn>
+            <SyncUser />
+          </SignedIn>
+        )}
 
-      {/* Sync user when signed in */}
-      {clerkEnabled && (
-        <SignedIn>
-          <SyncUser />
-        </SignedIn>
-      )}
-
-      <Routes>
-        <Route path="/sign-in" element={<SignInPage />} />
-        <Route path="/sign-up" element={<SignUpPage />} />
-        <Route path="/sign-up/verify-email-address" element={<VerifyEmailPage />} />
-        <Route path="/" element={<div className="max-w-7xl mx-auto px-4 py-6"><HomePage /></div>} />
+        <Routes>
+          <Route path="/sign-in" element={<SignInPage />} />
+          <Route path="/sign-up" element={<SignUpPage />} />
+          <Route path="/sign-up/verify-email-address" element={<VerifyEmailPage />} />
+          <Route path="/" element={<div className="pt-0"><HomePage /></div>} />
         <Route path="/hotels" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelsPage /></div>} />
         <Route path="/hotels/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelDetail /></div>} />
         <Route path="/flights" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightsPage /></div>} />
@@ -186,8 +186,9 @@ export default function App({ clerkEnabled }) {
         <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />
         <Route path="/favorites" element={<div className="max-w-7xl mx-auto px-4 py-6"><FavoritesPage /></div>} />
         <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
-        <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
-      </Routes>
+          <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
+        </Routes>
+      </div>
     </div>
   );
 }

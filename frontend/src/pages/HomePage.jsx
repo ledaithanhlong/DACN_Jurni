@@ -55,16 +55,17 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
+    <div>
       <TravelokaHero />
-
-      {/* Service Links */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <ServiceLink href="/hotels" title="Khách sạn" subtitle="Great deals every day" emoji="🏨" />
-        <ServiceLink href="/flights" title="Vé máy bay" subtitle="Fly to anywhere" emoji="✈️" />
-        <ServiceLink href="/cars" title="Cho thuê xe" subtitle="Daily rentals" emoji="🚗" />
-        <ServiceLink href="/activities" title="Hoạt động & Vui chơi" subtitle="Things to do" emoji="🎟️" />
-      </div>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="space-y-8 pb-12">
+          {/* Service Links */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <ServiceLink href="/hotels" title="Khách sạn" subtitle="Great deals every day" iconType="hotels" />
+            <ServiceLink href="/flights" title="Vé máy bay" subtitle="Fly to anywhere" iconType="flights" />
+            <ServiceLink href="/cars" title="Cho thuê xe" subtitle="Daily rentals" iconType="cars" />
+            <ServiceLink href="/activities" title="Hoạt động & Vui chơi" subtitle="Things to do" iconType="activities" />
+          </div>
 
       {/* Promotional Codes Section */}
       <section className="bg-white rounded-xl shadow-sm p-6">
@@ -197,6 +198,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+        </div>
+      </div>
     </div>
   );
 }

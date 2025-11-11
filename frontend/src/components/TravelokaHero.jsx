@@ -77,13 +77,21 @@ export default function TravelokaHero() {
                         />
                       </div>
                       <div className="md:col-span-1">
-                        <label className="block text-sm text-gray-600 mb-1">Ngày</label>
+                        <label className="block text-sm text-gray-600 mb-1">Ngày khởi hành</label>
                         <input
                           type="date"
                           className="w-full border rounded-lg px-4 py-2"
                           value={search.date}
                           onChange={e => setSearch({ ...search, date: e.target.value })}
                         />
+                      </div>
+                      <div className="md:col-span-5">
+                        <button
+                          onClick={handleSearch}
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition text-lg"
+                        >
+                          Tìm kiếm
+                        </button>
                       </div>
                     </>
                   ) : service === 'hotels' ? (

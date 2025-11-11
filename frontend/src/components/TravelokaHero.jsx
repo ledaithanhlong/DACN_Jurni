@@ -227,7 +227,7 @@ export default function TravelokaHero() {
           <div className="flex-1 flex items-center justify-center px-4 pt-6">
             <div className="text-center text-white mb-8">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 drop-shadow-lg">
-                App du lịch hàng đầu, một chạm đi bất cứ đâu
+                App du lịch hàng đầu, một chạm đi bất cứ đâu bạn muốn
               </h1>
             </div>
           </div>

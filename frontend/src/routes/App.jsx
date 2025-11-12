@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { SignedIn, SignedOut, UserButton, useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import HomePage from '../pages/HomePage.jsx';
@@ -38,9 +38,15 @@ const NavUserSection = () => {
 };
 
 const Nav = ({ clerkEnabled }) => {
-  const [isSolid, setIsSolid] = useState(false);
+  const location = useLocation();
+  const [isSolid, setIsSolid] = useState(location.pathname !== '/');
 
   useEffect(() => {
+    if (location.pathname !== '/') {
+      setIsSolid(true);
+      return undefined;
+    }
+
     const handleScroll = () => {
       setIsSolid(window.scrollY > 120);
     };
@@ -48,7 +54,7 @@ const Nav = ({ clerkEnabled }) => {
     handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   return (
     <div

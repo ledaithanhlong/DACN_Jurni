@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import { SignedIn, SignedOut, UserButton, useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
@@ -38,8 +38,24 @@ const NavUserSection = () => {
 };
 
 const Nav = ({ clerkEnabled }) => {
+  const [isSolid, setIsSolid] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsSolid(window.scrollY > 120);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <div className="fixed top-0 left-0 right-0 z-50">
+    <div
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        isSolid ? 'bg-blue-900/95 backdrop-blur shadow-lg' : 'bg-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-6">

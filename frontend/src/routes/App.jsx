@@ -39,11 +39,11 @@ const NavUserSection = () => {
 
 const Nav = ({ clerkEnabled }) => {
   return (
-    <div className="fixed top-0 left-0 right-0 bg-gradient-to-br from-sky-400 via-blue-400 to-indigo-500 shadow-lg z-50">
+    <div className="fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-2xl font-bold text-white drop-shadow-md">Traveloka</Link>
+            <Link to="/" className="text-2xl font-bold text-white drop-shadow-md">Jurni</Link>
             <div className="hidden md:flex items-center gap-5 text-sm">
               <Link to="/hotels" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Khách sạn</Link>
               <Link to="/flights" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Vé máy bay</Link>

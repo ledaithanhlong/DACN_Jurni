@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import TravelokaHero from '../components/TravelokaHero.jsx';
+import JurniHero from '../components/JurniHero.jsx';
 import ServiceLink from '../components/ServiceLink.jsx';
 import { SectionHeader, Card } from '../components/Section.jsx';
 
@@ -42,11 +42,11 @@ export default function HomePage() {
   ];
 
   const promoCodes = [
-    { title: 'Giảm đến 50,000 cho lần đặt vé máy bay đầu tiên', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Traveloka', code: 'TVLKBANMOI', discount: '50,000' },
-    { title: 'Giảm đến 8% cho lần đặt phòng khách sạn đầu tiên', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Traveloka', code: 'TVLKBANMOI', discount: '8%' },
-    { title: 'Giảm đến 8% cho lần đặt vé tham quan/hoạt động đầu tiên', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Traveloka', code: 'TVLKBANMOI', discount: '8%' },
-    { title: '12% giảm Đưa đón sân bay', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Traveloka', code: 'TVLKBANMOI', discount: '12%' },
-    { title: '10% giảm Thuê xe', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Traveloka', code: 'TVLKBANMOI', discount: '10%' },
+    { title: 'Giảm đến 50,000 cho lần đặt vé máy bay đầu tiên', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Jurni', code: 'JRNBANMOI', discount: '50,000' },
+    { title: 'Giảm đến 8% cho lần đặt phòng khách sạn đầu tiên', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Jurni', code: 'JRNBANMOI', discount: '8%' },
+    { title: 'Giảm đến 8% cho lần đặt vé tham quan/hoạt động đầu tiên', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Jurni', code: 'JRNBANMOI', discount: '8%' },
+    { title: '12% giảm Đưa đón sân bay', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Jurni', code: 'JRNBANMOI', discount: '12%' },
+    { title: '10% giảm Thuê xe', desc: 'Áp dụng cho lần đặt đầu tiên trên ứng dụng Jurni', code: 'JRNBANMOI', discount: '10%' },
   ];
 
   const copyToClipboard = (text) => {
@@ -56,7 +56,7 @@ export default function HomePage() {
 
   return (
     <div>
-      <TravelokaHero />
+      <JurniHero />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="space-y-8 pb-12">
           {/* Service Links */}

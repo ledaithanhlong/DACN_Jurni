@@ -163,9 +163,9 @@ function SyncUser() {
 
 export default function App({ clerkEnabled }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Nav clerkEnabled={clerkEnabled} />
-      <div className="pt-16">
+      <main className="flex-1 pt-16">
         {/* Sync user when signed in */}
         {clerkEnabled && (
           <SignedIn>
@@ -188,7 +188,33 @@ export default function App({ clerkEnabled }) {
         <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
           <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
         </Routes>
-      </div>
+      </main>
+      <footer className="bg-blue-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
+          <div>
+            <div className="text-xl font-semibold tracking-wide">Jurni</div>
+            <p className="mt-3 text-sm text-white/80">© 2025 Jurni – Khám phá Việt Nam theo cách của bạn.</p>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">Thông tin liên hệ</h3>
+            <ul className="space-y-2 text-sm text-white/80">
+              <li>Source: <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="hover:text-white underline">github.com/ledaithanhlong/DACN_Jurni</a></li>
+              <li>Hotline: <a href="tel:0769749465" className="hover:text-white">0769 749 465</a></li>
+              <li>Địa chỉ: TP. Hồ Chí Minh, Việt Nam</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">Liên kết nhanh</h3>
+            <nav className="flex flex-col space-y-2 text-sm">
+              <Link to="/" className="text-white/80 hover:text-white">Trang chủ</Link>
+              <Link to="/about" className="text-white/80 hover:text-white">Giới thiệu</Link>
+              <Link to="/activities" className="text-white/80 hover:text-white">Tour trong nước</Link>
+              <Link to="/support" className="text-white/80 hover:text-white">Liên hệ / Hỗ trợ</Link>
+              <Link to="/terms" className="text-white/80 hover:text-white">Điều khoản &amp; Chính sách</Link>
+            </nav>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

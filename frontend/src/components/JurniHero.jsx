@@ -466,7 +466,7 @@ export default function JurniHero() {
                       <div className="md:col-span-5 flex gap-3">
                         <button
                           onClick={handleSearch}
-                          className="flex-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 px-6 transition text-lg shadow-xl"
+                          className="flex-1 rounded-lg bg-blue-600 hover:bg-orange-600 text-white font-semibold py-4 px-6 transition text-lg shadow-xl"
                         >
                           Tìm kiếm
                         </button>
@@ -634,7 +634,7 @@ export default function JurniHero() {
                       <div className="md:col-span-1 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-600 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>
@@ -796,13 +796,13 @@ export default function JurniHero() {
                             onChange={e => setSearch({ ...search, insurance: e.target.checked })}
                             className="w-5 h-5 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
                           />
-                          <span className="text-sm text-gray-700">Bảo hiểm</span>
+                          <span className="text-sm text-white/85">Bảo hiểm</span>
                         </label>
                       </div>
                       <div className="md:col-span-3 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-600 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>
@@ -968,7 +968,7 @@ export default function JurniHero() {
                       <div className="md:col-span-2 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-600 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>

@@ -3,8 +3,8 @@ import React from 'react';
 export function SectionHeader({ title, href }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <h2 className="text-xl font-bold">{title}</h2>
-      {href && <a className="text-orange-500 hover:text-orange-600 text-sm font-semibold" href={href}>Xem tất cả →</a>}
+      <h2 className="text-xl font-bold text-blue-900">{title}</h2>
+      {href && <a className="text-blue-600 hover:text-blue-700 text-sm font-semibold" href={href}>Xem tất cả →</a>}
     </div>
   );
 }
@@ -15,7 +15,7 @@ export function Card({ image, title, subtitle, price, rating, discount }) {
   };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition-all duration-300 cursor-pointer group">
+    <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-lg transition-all duration-300 cursor-pointer group border border-blue-50">
       <div className="relative">
         {image && (
           <img 
@@ -25,7 +25,7 @@ export function Card({ image, title, subtitle, price, rating, discount }) {
           />
         )}
         {discount && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+          <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">
             {discount}
           </div>
         )}
@@ -37,15 +37,15 @@ export function Card({ image, title, subtitle, price, rating, discount }) {
         )}
       </div>
       <div className="p-4">
-        <div className="font-semibold text-gray-900 truncate mb-1 group-hover:text-orange-500 transition" title={title}>
+        <div className="font-semibold text-gray-900 truncate mb-1 group-hover:text-blue-600 transition" title={title}>
           {title}
         </div>
         {subtitle && (
-          <div className="text-sm text-gray-600 truncate mb-2">{subtitle}</div>
+          <div className="text-sm text-blue-800/70 truncate mb-2">{subtitle}</div>
         )}
         {price != null && (
           <div className="mt-2">
-            <div className="text-orange-500 font-bold text-lg">
+            <div className="text-blue-600 font-bold text-lg">
               {formatPrice(price)} VND
             </div>
             {discount && (

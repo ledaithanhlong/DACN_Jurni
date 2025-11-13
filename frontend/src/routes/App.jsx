@@ -15,6 +15,7 @@ import AdminDashboard from '../pages/AdminDashboard.jsx';
 import SignInPage from '../pages/SignInPage.jsx';
 import SignUpPage from '../pages/SignUpPage.jsx';
 import VerifyEmailPage from '../pages/VerifyEmailPage.jsx';
+import PaymentPage from '../pages/PaymentPage.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -25,6 +26,7 @@ const NavUserSection = () => {
 
   return (
     <>
+      <Link to="/checkout" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thanh toán</Link>
       <Link to="/favorites" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Yêu thích</Link>
       <Link to="/notifications" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thông báo</Link>
       {isAdmin && (
@@ -200,33 +202,61 @@ export default function App({ clerkEnabled }) {
           <Route path="/sign-up" element={<SignUpPage />} />
           <Route path="/sign-up/verify-email-address" element={<VerifyEmailPage />} />
           <Route path="/" element={<div className="pt-0"><HomePage /></div>} />
-        <Route path="/hotels" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelsPage /></div>} />
-        <Route path="/hotels/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelDetail /></div>} />
-        <Route path="/flights" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightsPage /></div>} />
-        <Route path="/cars" element={<div className="max-w-7xl mx-auto px-4 py-6"><CarsPage /></div>} />
-        <Route path="/activities" element={<div className="max-w-7xl mx-auto px-4 py-6"><ActivitiesPage /></div>} />
-        <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />
-        <Route path="/favorites" element={<div className="max-w-7xl mx-auto px-4 py-6"><FavoritesPage /></div>} />
-        <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
+          <Route path="/hotels" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelsPage /></div>} />
+          <Route path="/hotels/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelDetail /></div>} />
+          <Route path="/flights" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightsPage /></div>} />
+          <Route path="/cars" element={<div className="max-w-7xl mx-auto px-4 py-6"><CarsPage /></div>} />
+          <Route path="/activities" element={<div className="max-w-7xl mx-auto px-4 py-6"><ActivitiesPage /></div>} />
+          <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />
+          <Route path="/favorites" element={<div className="max-w-7xl mx-auto px-4 py-6"><FavoritesPage /></div>} />
+          <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
           <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
+          <Route path="/checkout" element={<PaymentPage />} />
         </Routes>
+        
       </main>
       <footer className="bg-blue-900 text-white">
         <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
           <div>
             <div className="text-xl font-semibold tracking-wide">Jurni</div>
-            <p className="mt-3 text-sm text-white/80">© 2025 Jurni – Khám phá Việt Nam theo cách của bạn.</p>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">Thông tin liên hệ</h3>
-            <ul className="space-y-2 text-sm text-white/80">
-              <li>Source: <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="hover:text-white underline">github.com/ledaithanhlong/DACN_Jurni</a></li>
-              <li>Hotline: <a href="tel:0769749465" className="hover:text-white">0769 749 465</a></li>
-              <li>Địa chỉ: TP. Hồ Chí Minh, Việt Nam</li>
+            <p className="mt-3 text-sm text-white/80">
+              © 2025 Jurni – Khám phá Việt Nam theo cách của bạn.
+            </p>
+            <p className="mt-2 text-sm text-white/80">
+              Nhóm thực hiện: <span className="font-semibold">Nước Code Dừa</span>
+            </p>
+            <ul className="mt-1 text-sm text-white/80 list-disc list-inside">
+              <li>Nguyễn Huy Sơn</li>
+              <li>Lê Đại Thanh Long</li>
+              <li>Nguyễn Khắc Minh Hiếu</li>
             </ul>
           </div>
+
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">Liên kết nhanh</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
+            Thông tin liên hệ
+          </h3>
+          <ul className="space-y-2 text-sm text-white/80">
+            <li>
+              Giảng viên hướng dẫn: <span className="font-semibold">Trần Đăng Khoa</span>
+            </li>
+            <li>
+              Lớp học: <span className="font-semibold">22DTHD4</span>
+            </li>
+            <li>
+              Source code:{" "}
+              <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold">
+                Nước Code Dừa's GitHub repository
+              </a>
+            </li>
+            <li>Địa chỉ: Trường Đại học Công nghệ TP.HCM (HUTECH)</li>
+          </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
+              Liên kết nhanh
+            </h3>
             <nav className="flex flex-col space-y-2 text-sm">
               <Link to="/" className="text-white/80 hover:text-white">Trang chủ</Link>
               <Link to="/about" className="text-white/80 hover:text-white">Giới thiệu</Link>

@@ -16,6 +16,13 @@ import SignInPage from '../pages/SignInPage.jsx';
 import SignUpPage from '../pages/SignUpPage.jsx';
 import VerifyEmailPage from '../pages/VerifyEmailPage.jsx';
 import PaymentPage from '../pages/PaymentPage.jsx';
+import AboutPage from '../pages/AboutPage.jsx';
+import SupportPage from '../pages/SupportPage.jsx';
+import TermsPage from '../pages/TermsPage.jsx';
+import ServicesPage from '../pages/ServicesPage.jsx';
+import PriceAlertPage from '../pages/PriceAlertPage.jsx';
+import FlightIdeasPage from '../pages/FlightIdeasPage.jsx';
+import ChatWidget from '../components/ChatWidget.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -26,7 +33,7 @@ const NavUserSection = () => {
 
   return (
     <>
-      <Link to="/checkout" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thanh toán</Link>
+      <Link to="/checkout" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thanh toán</Link> 
       <Link to="/favorites" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Yêu thích</Link>
       <Link to="/notifications" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thông báo</Link>
       {isAdmin && (
@@ -212,9 +219,16 @@ export default function App({ clerkEnabled }) {
           <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
           <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
           <Route path="/checkout" element={<PaymentPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/price-alerts" element={<div className="max-w-7xl mx-auto px-4 py-6"><PriceAlertPage /></div>} />
+          <Route path="/flight-ideas" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightIdeasPage /></div>} />
         </Routes>
         
       </main>
+      <ChatWidget />
       <footer className="bg-blue-900 text-white">
         <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
           <div>
@@ -260,6 +274,7 @@ export default function App({ clerkEnabled }) {
             <nav className="flex flex-col space-y-2 text-sm">
               <Link to="/" className="text-white/80 hover:text-white">Trang chủ</Link>
               <Link to="/about" className="text-white/80 hover:text-white">Giới thiệu</Link>
+              <Link to="/services" className="text-white/80 hover:text-white">Dịch vụ</Link>
               <Link to="/activities" className="text-white/80 hover:text-white">Tour trong nước</Link>
               <Link to="/support" className="text-white/80 hover:text-white">Liên hệ / Hỗ trợ</Link>
               <Link to="/terms" className="text-white/80 hover:text-white">Điều khoản &amp; Chính sách</Link>

@@ -78,9 +78,9 @@ export default function JurniHero() {
   const toSuggestionsRef = useRef(null);
   const locationSuggestionsRef = useRef(null);
 
-  const inputBaseClass = "w-full rounded-lg px-4 py-3 border border-white/60 bg-transparent text-white placeholder-white/70 focus:border-white focus:outline-none focus:ring-0 transition";
-  const selectBaseClass = "w-full rounded-lg px-4 py-3 border border-white/60 bg-transparent text-white focus:border-white focus:outline-none focus:ring-0 transition";
-  const ghostButtonClass = "w-full rounded-lg px-4 py-3 border border-white/60 bg-transparent text-white text-left hover:bg-white/15 transition";
+  const inputBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 placeholder-blue-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition";
+  const selectBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition appearance-none";
+  const ghostButtonClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 text-left hover:bg-white transition";
 
   // Popular destinations with estimated prices
   const popularDestinations = {
@@ -114,24 +114,43 @@ export default function JurniHero() {
 
   const calculateEstimatedPrice = () => {
     if (service === 'flights' && search.from && search.to) {
-      const basePrice = 800000;
+      // Tìm giá từ popularDestinations nếu có route khớp
+      const matchedRoute = popularDestinations.flights.find(
+        dest => dest.from === search.from && dest.to === search.to
+      );
+      const basePrice = matchedRoute ? matchedRoute.price : 800000;
       const classMultiplier = { economy: 1, premium: 1.3, business: 2, first: 3.5 };
       const passengerCount = search.passengers.adults + search.passengers.children * 0.7;
       const price = Math.round(basePrice * classMultiplier[search.class] * passengerCount);
       setEstimatedPrice(price);
     } else if (service === 'hotels' && search.from && search.date && search.time) {
+      // Tìm giá từ popularDestinations nếu có location khớp
+      const matchedLocation = popularDestinations.hotels.find(
+        dest => dest.location === search.from
+      );
+      const basePricePerNight = matchedLocation ? matchedLocation.price : 500000;
       const nights = search.time && search.date ? Math.max(1, Math.ceil((new Date(search.time) - new Date(search.date)) / (1000 * 60 * 60 * 24))) : 1;
-      const basePrice = { standard: 500000, deluxe: 800000, suite: 1500000, family: 1200000 };
-      const price = Math.round(basePrice[search.roomType] * nights * search.rooms);
+      const roomTypeMultiplier = { standard: 1, deluxe: 1.6, suite: 3, family: 2.4 };
+      const price = Math.round(basePricePerNight * roomTypeMultiplier[search.roomType] * nights * search.rooms);
       setEstimatedPrice(price);
     } else if (service === 'cars' && search.pickupLocation && search.date && search.time) {
+      // Tìm giá từ popularDestinations nếu có location khớp
+      const matchedLocation = popularDestinations.cars.find(
+        dest => dest.location === search.pickupLocation
+      );
+      const basePricePerDay = matchedLocation ? matchedLocation.price : 500000;
       const days = search.time && search.date ? Math.max(1, Math.ceil((new Date(search.time) - new Date(search.date)) / (1000 * 60 * 60 * 24))) : 1;
-      const basePrice = { economy: 400000, compact: 500000, suv: 800000, luxury: 1500000, pickup: 900000 };
-      const price = Math.round(basePrice[search.carType] * days);
+      const carTypeMultiplier = { economy: 0.8, compact: 1, suv: 1.6, luxury: 3, pickup: 1.8 };
+      const price = Math.round(basePricePerDay * carTypeMultiplier[search.carType] * days);
       setEstimatedPrice(price);
     } else if (service === 'activities' && search.from) {
-      const basePrice = { all: 500000, adventure: 800000, culture: 400000, nature: 600000, entertainment: 700000, sports: 900000 };
-      const price = Math.round(basePrice[search.activityType] * (search.participants.adults + search.participants.children * 0.5));
+      // Tìm giá từ popularDestinations nếu có location khớp
+      const matchedActivity = popularDestinations.activities.find(
+        dest => dest.location === search.from
+      );
+      const basePricePerPerson = matchedActivity ? matchedActivity.price : 500000;
+      const activityTypeMultiplier = { all: 1, adventure: 1.6, culture: 0.8, nature: 1.2, entertainment: 1.4, sports: 1.8 };
+      const price = Math.round(basePricePerPerson * activityTypeMultiplier[search.activityType] * (search.participants.adults + search.participants.children * 0.5));
       setEstimatedPrice(price);
     } else {
       setEstimatedPrice(null);
@@ -206,8 +225,15 @@ export default function JurniHero() {
 
   const handleSearch = () => {
     if (service === 'hotels') navigate('/hotels');
-    else if (service === 'flights') navigate('/flights');
-    else if (service === 'cars') navigate('/cars');
+    else if (service === 'flights') {
+      navigate('/flights', {
+        state: {
+          from: search.from,
+          to: search.to,
+          date: search.date
+        }
+      });
+    } else if (service === 'cars') navigate('/cars');
     else if (service === 'activities') navigate('/activities');
   };
 
@@ -388,27 +414,27 @@ export default function JurniHero() {
                         {showPassengerMenu && (
                           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-medium text-gray-700">Người lớn</span>
+                              <span className="text-sm font-semibold text-blue-900">Người lớn</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updatePassengers('adults', -1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-gray-800">{search.passengers.adults}</span>
-                                <button onClick={() => updatePassengers('adults', 1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updatePassengers('adults', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.passengers.adults}</span>
+                                <button onClick={() => updatePassengers('adults', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-medium text-gray-700">Trẻ em</span>
+                              <span className="text-sm font-semibold text-blue-900">Trẻ em</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updatePassengers('children', -1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-gray-800">{search.passengers.children}</span>
-                                <button onClick={() => updatePassengers('children', 1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updatePassengers('children', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.passengers.children}</span>
+                                <button onClick={() => updatePassengers('children', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-gray-700">Em bé</span>
+                              <span className="text-sm font-semibold text-blue-900">Em bé</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updatePassengers('infants', -1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-gray-800">{search.passengers.infants}</span>
-                                <button onClick={() => updatePassengers('infants', 1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updatePassengers('infants', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.passengers.infants}</span>
+                                <button onClick={() => updatePassengers('infants', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                           </div>
@@ -466,14 +492,20 @@ export default function JurniHero() {
                       <div className="md:col-span-5 flex gap-3">
                         <button
                           onClick={handleSearch}
-                          className="flex-1 rounded-lg bg-blue-600 hover:bg-orange-600 text-white font-semibold py-4 px-6 transition text-lg shadow-xl"
+                          className="flex-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 transition text-lg shadow-xl"
                         >
                           Tìm kiếm
                         </button>
-                        <button className="px-6 py-4 border border-white/50 text-white rounded-lg hover:bg-white/10 transition">
+                        <button 
+                          onClick={() => navigate('/flight-ideas')}
+                          className="px-6 py-4 border border-white/50 text-white rounded-lg hover:bg-white/10 transition"
+                        >
                           Khám phá ý tưởng chuyến bay
                         </button>
-                        <button className="px-6 py-4 border border-white/50 text-white rounded-lg hover:bg-white/10 transition">
+                        <button 
+                          onClick={() => navigate('/price-alerts')}
+                          className="px-6 py-4 border border-white/50 text-white rounded-lg hover:bg-white/10 transition"
+                        >
                           Cảnh báo giá
                         </button>
                       </div>
@@ -550,19 +582,19 @@ export default function JurniHero() {
                         {showGuestMenu && (
                           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-medium text-gray-700">Người lớn</span>
+                              <span className="text-sm font-semibold text-blue-900">Người lớn</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateGuests('adults', -1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-gray-800">{search.guests.adults}</span>
-                                <button onClick={() => updateGuests('adults', 1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updateGuests('adults', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.guests.adults}</span>
+                                <button onClick={() => updateGuests('adults', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-gray-700">Trẻ em</span>
+                              <span className="text-sm font-semibold text-blue-900">Trẻ em</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateGuests('children', -1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-gray-800">{search.guests.children}</span>
-                                <button onClick={() => updateGuests('children', 1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updateGuests('children', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.guests.children}</span>
+                                <button onClick={() => updateGuests('children', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                           </div>
@@ -581,11 +613,11 @@ export default function JurniHero() {
                         {showRoomMenu && (
                           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium text-gray-700">Số phòng</span>
+                              <span className="text-sm font-semibold text-blue-900">Số phòng</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateRooms(-1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-gray-800">{search.rooms}</span>
-                                <button onClick={() => updateRooms(1)} className="w-8 h-8 rounded-full border border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updateRooms(-1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.rooms}</span>
+                                <button onClick={() => updateRooms(1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                           </div>
@@ -634,7 +666,7 @@ export default function JurniHero() {
                       <div className="md:col-span-1 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-blue-600 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>
@@ -802,7 +834,7 @@ export default function JurniHero() {
                       <div className="md:col-span-3 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-blue-600 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>
@@ -898,26 +930,26 @@ export default function JurniHero() {
                         <label className="block text-sm font-medium text-white/85 mb-1">Số người</label>
                         <button
                           onClick={() => setShowActivityMenu(!showActivityMenu)}
-                          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-white text-gray-900 text-left hover:border-blue-500 transition"
+                          className="w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 text-left hover:bg-white transition"
                         >
                           {search.participants.adults} Người lớn, {search.participants.children} Trẻ em
                         </button>
                         {showActivityMenu && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-gray-200 rounded-lg shadow-xl p-4 z-40">
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-blue-100 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-medium">Người lớn</span>
+                              <span className="text-sm font-semibold text-blue-900">Người lớn</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateParticipants('adults', -1)} className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center">{search.participants.adults}</span>
-                                <button onClick={() => updateParticipants('adults', 1)} className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updateParticipants('adults', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.participants.adults}</span>
+                                <button onClick={() => updateParticipants('adults', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-medium">Trẻ em</span>
+                              <span className="text-sm font-semibold text-blue-900">Trẻ em</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateParticipants('children', -1)} className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center">{search.participants.children}</span>
-                                <button onClick={() => updateParticipants('children', 1)} className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-blue-500 flex items-center justify-center">+</button>
+                                <button onClick={() => updateParticipants('children', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
+                                <span className="w-8 text-center text-blue-900 font-semibold">{search.participants.children}</span>
+                                <button onClick={() => updateParticipants('children', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
                               </div>
                             </div>
                           </div>
@@ -968,7 +1000,7 @@ export default function JurniHero() {
                       <div className="md:col-span-2 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-blue-600 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>

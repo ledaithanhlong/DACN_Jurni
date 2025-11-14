@@ -1,237 +1,420 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import React, { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-const defaultOrder = {
-  items: [
-    {
-      id: 'FL-001',
-      name: 'Vé máy bay khứ hồi TP.HCM ⇄ Hà Nội',
-      type: 'flight',
-      quantity: 1,
-      price: 1950000,
-    },
-    {
-      id: 'HT-102',
-      name: 'Khách sạn Hanoi Central Boutique (3 đêm)',
-      type: 'hotel',
-      quantity: 1,
-      price: 1650000,
-    },
-  ],
-  currency: 'VND',
-  booking: null,
-};
 
 const formatCurrency = (value = 0, currency = 'VND') => {
   const number = Number(value) || 0;
   return `${new Intl.NumberFormat('vi-VN').format(number)} ${currency}`;
 };
 
+const beneficiaryTemplate = {
+  bank: 'Vietcombank',
+  accountNumber: '1027 239 741',
+  accountName: 'CÔNG TY TNHH JURNI',
+  branch: 'Chi nhánh thành phố Hồ Chí Minh',
+};
+
+const paymentCatalog = {
+  vietnamese: [
+    {
+      id: 'internet-banking',
+      name: 'Internet Banking',
+      description: 'Thanh toán online qua tài khoản ngân hàng nội địa',
+      type: 'bank',
+      badge: 'IB',
+      color: 'from-blue-500 to-indigo-500',
+      logo: '/payment/logos/internet-banking.png',
+      feePercent: 0,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+      banks: ['Vietcombank', 'BIDV', 'VietinBank', 'Agribank', 'ACB', 'Techcombank', 'MBBank', 'VPBank'],
+    },
+    {
+      id: 'atm-card',
+      name: 'Thẻ ATM nội địa',
+      description: 'Thanh toán bằng thẻ ATM đã kích hoạt chức năng online',
+      type: 'atm',
+      badge: 'ATM',
+      color: 'from-emerald-500 to-teal-500',
+      logo: '/payment/logos/atm-card.png',
+      feePercent: 0.01,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+    {
+      id: 'momo',
+      name: 'Ví MoMo',
+      description: 'Quét mã hoặc duyệt thanh toán ngay trong ứng dụng MoMo',
+      type: 'ewallet',
+      badge: 'MoMo',
+      color: 'from-pink-500 to-rose-500',
+      logo: '/payment/logos/momo.png',
+      feePercent: 0.01,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+    {
+      id: 'zalopay',
+      name: 'ZaloPay',
+      description: 'Duyệt thanh toán qua ví ZaloPay',
+      type: 'ewallet',
+      badge: 'ZP',
+      color: 'from-sky-500 to-cyan-500',
+      logo: '/payment/logos/zalopay.png',
+      feePercent: 0.01,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+    {
+      id: 'viettelpay',
+      name: 'ViettelPay',
+      description: 'Thanh toán nhanh qua ViettelPay',
+      type: 'ewallet',
+      badge: 'VT',
+      color: 'from-amber-500 to-orange-500',
+      logo: '/payment/logos/viettelpay.png',
+      feePercent: 0.01,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+    {
+      id: 'vnpay-qr',
+      name: 'VNPAY QR',
+      description: 'Quét mã QRPay hỗ trợ tất cả ngân hàng/ ví liên kết',
+      type: 'qr',
+      badge: 'QR',
+      color: 'from-purple-500 to-fuchsia-500',
+      logo: '/payment/logos/vnpay.png',
+      feePercent: 0,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+  ],
+  international: [
+    {
+      id: 'visa',
+      name: 'Visa',
+      description: 'Thanh toán bằng thẻ Visa Credit/Debit',
+      type: 'card',
+      badge: 'Visa',
+      color: 'from-blue-600 to-blue-400',
+      logo: '/payment/logos/visa.png',
+      feePercent: 0.025,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+    {
+      id: 'mastercard',
+      name: 'Mastercard',
+      description: 'Thanh toán bằng thẻ Mastercard Credit/Debit',
+      type: 'card',
+      badge: 'MC',
+      color: 'from-orange-500 to-red-500',
+      logo: '/payment/logos/mastercard.png',
+      feePercent: 0.025,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+    {
+      id: 'amex',
+      name: 'American Express',
+      description: 'Thanh toán bằng thẻ American Express',
+      type: 'card',
+      badge: 'Amex',
+      color: 'from-slate-600 to-slate-400',
+      logo: '/payment/logos/amex.png',
+      feePercent: 0.03,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+    {
+      id: 'paypal',
+      name: 'PayPal',
+      description: 'Thanh toán quốc tế qua PayPal',
+      type: 'paypal',
+      badge: 'PP',
+      color: 'from-indigo-500 to-blue-400',
+      logo: '/payment/logos/paypal.png',
+      feePercent: 0.035,
+      feeFixed: 0,
+      beneficiary: beneficiaryTemplate,
+    },
+  ],
+};
+
+const Badge = ({ text, gradient }) => (
+  <span
+    className={`inline-flex items-center justify-center rounded-full bg-gradient-to-r ${gradient} px-2.5 py-1 text-xs font-semibold text-white shadow-sm`}
+  >
+    {text}
+  </span>
+);
+
+const PaymentLogo = ({ logo, badge, gradient }) => {
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt={badge}
+        className="h-8 w-auto object-contain drop-shadow-sm"
+        onError={(e) => {
+          e.currentTarget.style.display = 'none';
+        }}
+      />
+    );
+  }
+  return <Badge text={badge} gradient={gradient} />;
+};
+
 export default function PaymentPage() {
   const { state } = useLocation();
-  const order = state?.order || defaultOrder;
-  const [config, setConfig] = useState({ paymentMethods: [], currency: 'VND', bankAccount: null });
-  const [loadingConfig, setLoadingConfig] = useState(true);
+  const order = state?.order;
   const [form, setForm] = useState({
     fullName: state?.customer?.name || '',
     email: state?.customer?.email || '',
     phone: state?.customer?.phone || '',
     notes: '',
+    paymentCategory: 'vietnamese',
     paymentMethod: '',
+    cardName: '',
     cardNumber: '',
     cardExpiry: '',
     cardCvc: '',
     walletPhone: '',
+    selectedBank: '',
     bankReference: '',
+    paypalEmail: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState({ type: null, message: '', reference: '' });
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await axios.get(`${API}/payments/config`);
-        if (!mounted) return;
-        setConfig(res.data);
-        setForm((prev) => ({
-          ...prev,
-          paymentMethod: state?.preferredMethod || res.data?.paymentMethods?.[0]?.id || '',
-        }));
-      } catch (err) {
-        if (!mounted) return;
-        setStatus({
-          type: 'error',
-          message: err.response?.data?.error || 'Không thể tải cấu hình thanh toán. Vui lòng thử lại.',
-        });
-      } finally {
-        if (mounted) setLoadingConfig(false);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-    };
-  }, [state?.preferredMethod]);
-
+  const hasOrder = Boolean(order?.items?.length);
   const subtotal = useMemo(() => {
-    if (!order?.items?.length) return 0;
-    return order.items.reduce((total, item) => total + item.price * item.quantity, 0);
-  }, [order]);
+    if (!hasOrder) return 0;
+    return order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }, [order, hasOrder]);
 
-  const selectedMethod = useMemo(
-    () => config.paymentMethods?.find((method) => method.id === form.paymentMethod),
-    [config.paymentMethods, form.paymentMethod],
-  );
+  const selectedMethod = useMemo(() => {
+    const catalog = [...paymentCatalog.vietnamese, ...paymentCatalog.international];
+    return catalog.find((m) => m.id === form.paymentMethod);
+  }, [form.paymentMethod]);
 
   const methodFee = useMemo(() => {
-    if (!selectedMethod) return 0;
-    const percentFee = subtotal * (selectedMethod.feePercent || 0);
-    const fixedFee = selectedMethod.feeFixed || 0;
-    return Math.round(percentFee + fixedFee);
-  }, [selectedMethod, subtotal]);
+    if (!selectedMethod || !hasOrder) return 0;
+    return Math.round(subtotal * (selectedMethod.feePercent || 0) + (selectedMethod.feeFixed || 0));
+  }, [selectedMethod, subtotal, hasOrder]);
 
-  const total = subtotal + methodFee;
+  const total = hasOrder ? subtotal + methodFee : 0;
 
   const handleChange = (field) => (event) => {
     const { value } = event.target;
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (event) => {
+  const handleCategoryChange = (category) => {
+    setForm((prev) => ({
+      ...prev,
+      paymentCategory: category,
+      paymentMethod: '',
+      cardName: '',
+      cardNumber: '',
+      cardExpiry: '',
+      cardCvc: '',
+      walletPhone: '',
+      selectedBank: '',
+      bankReference: '',
+      paypalEmail: '',
+    }));
+  };
+
+  const handleSubmit = (event) => {
     event.preventDefault();
+    if (!hasOrder) {
+      setStatus({ type: 'error', message: 'Bạn chưa chọn dịch vụ để thanh toán.', reference: '' });
+      return;
+    }
     if (!selectedMethod) {
       setStatus({ type: 'error', message: 'Vui lòng chọn phương thức thanh toán.', reference: '' });
       return;
     }
 
     setSubmitting(true);
-    setStatus({ type: null, message: '', reference: '' });
-
-    try {
-      const payload = {
-        amount: total,
-        currency: config.currency || order.currency || 'VND',
-        paymentMethod: selectedMethod.id,
-        customer: {
-          name: form.fullName,
-          email: form.email,
-          phone: form.phone,
-        },
-        items: order.items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        booking: order.booking,
-        metadata: {
-          notes: form.notes,
-          methodFee,
-        },
-      };
-
-      const res = await axios.post(`${API}/payments/checkout`, payload);
-      setStatus({
-        type: 'success',
-        message: res.data?.message || 'Thanh toán thành công!',
-        reference: res.data?.payment?.reference || '',
-      });
-    } catch (err) {
-      setStatus({
-        type: 'error',
-        message: err.response?.data?.error || 'Thanh toán thất bại. Vui lòng kiểm tra lại thông tin.',
-        reference: '',
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    setStatus({ type: 'success', message: 'Đang xử lý yêu cầu thanh toán...', reference: `PAY-${Date.now()}` });
+    setTimeout(() => setSubmitting(false), 600);
   };
 
-  const renderMethodExtras = () => {
+  const renderMethodForm = () => {
     if (!selectedMethod) return null;
-
-    if (selectedMethod.type === 'card') {
-      return (
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="md:col-span-2">
-            <label className="text-sm font-medium text-blue-900">Số thẻ</label>
+    switch (selectedMethod.type) {
+      case 'card':
+      case 'atm':
+        return (
+          <div className="space-y-4 rounded-2xl border border-blue-100 bg-white/80 p-5">
+            <h3 className="font-semibold text-blue-900">Thông tin thẻ</h3>
+            <div>
+              <label className="text-sm font-medium text-blue-900">Tên chủ thẻ *</label>
+              <input
+                value={form.cardName}
+                onChange={handleChange('cardName')}
+                className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                placeholder="NGUYEN VAN A"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-blue-900">Số thẻ *</label>
+              <input
+                value={form.cardNumber}
+                onChange={handleChange('cardNumber')}
+                className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                placeholder="XXXX XXXX XXXX XXXX"
+                inputMode="numeric"
+                maxLength={19}
+                required
+              />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium text-blue-900">Ngày hết hạn *</label>
+                <input
+                  value={form.cardExpiry}
+                  onChange={handleChange('cardExpiry')}
+                  className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  placeholder="MM/YY"
+                  maxLength={5}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-blue-900">Mã CVV *</label>
+                <input
+                  value={form.cardCvc}
+                  onChange={handleChange('cardCvc')}
+                  className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  placeholder="123"
+                  inputMode="numeric"
+                  maxLength={4}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+        );
+      case 'ewallet':
+        return (
+          <div className="space-y-3 rounded-2xl border border-blue-100 bg-white/80 p-5">
+            <h3 className="font-semibold text-blue-900">Thông tin ví điện tử</h3>
+            <label className="text-sm font-medium text-blue-900">Số điện thoại đăng ký ví *</label>
             <input
-              value={form.cardNumber}
-              onChange={handleChange('cardNumber')}
-              placeholder="XXXX XXXX XXXX XXXX"
-              className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-              inputMode="numeric"
+              value={form.walletPhone}
+              onChange={handleChange('walletPhone')}
+              className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              placeholder="0901 234 567"
+              required
+            />
+            <p className="text-xs text-blue-600/70">Số điện thoại phải trùng với tài khoản ví {selectedMethod.name}.</p>
+          </div>
+        );
+      case 'bank':
+        return (
+          <div className="space-y-3 rounded-2xl border border-blue-100 bg-white/80 p-5">
+            <h3 className="font-semibold text-blue-900">Thông tin chuyển khoản</h3>
+            <label className="text-sm font-medium text-blue-900">Chọn ngân hàng *</label>
+            <select
+              value={form.selectedBank}
+              onChange={handleChange('selectedBank')}
+              className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              required
+            >
+              <option value="">-- Chọn ngân hàng --</option>
+              {selectedMethod.banks?.map((bank) => (
+                <option key={bank} value={bank}>
+                  {bank}
+                </option>
+              ))}
+            </select>
+            <label className="text-sm font-medium text-blue-900">Nội dung chuyển khoản</label>
+            <input
+              value={form.bankReference}
+              onChange={handleChange('bankReference')}
+              className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              placeholder="JURNI + HỌ TÊN"
             />
           </div>
-          <div>
-            <label className="text-sm font-medium text-blue-900">Ngày hết hạn</label>
-            <input
-              value={form.cardExpiry}
-              onChange={handleChange('cardExpiry')}
-              placeholder="MM/YY"
-              className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-            />
+        );
+      case 'qr':
+        return (
+          <div className="space-y-4 rounded-2xl border border-blue-100 bg-white/80 p-5">
+            <h3 className="font-semibold text-blue-900">Quét mã QR</h3>
+            <div className="flex items-center justify-center rounded-2xl border border-dashed border-blue-200 bg-blue-50/60 p-6">
+              <img
+                src="/payment/vnpay.png"
+                alt="VNPAY QR"
+                className="h-56 w-56 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+            <p className="text-xs text-blue-700/80 text-center">
+              Sử dụng ứng dụng ngân hàng hoặc ví điện tử hỗ trợ VNPAY để quét mã và hoàn tất thanh toán.
+            </p>
           </div>
-          <div>
-            <label className="text-sm font-medium text-blue-900">Mã bảo mật (CVV)</label>
+        );
+      case 'paypal':
+        return (
+          <div className="space-y-3 rounded-2xl border border-blue-100 bg-white/80 p-5">
+            <h3 className="font-semibold text-blue-900">Thông tin PayPal</h3>
+            <label className="text-sm font-medium text-blue-900">Email PayPal *</label>
             <input
-              value={form.cardCvc}
-              onChange={handleChange('cardCvc')}
-              placeholder="123"
-              className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-              inputMode="numeric"
-              maxLength={4}
+              type="email"
+              value={form.paypalEmail}
+              onChange={handleChange('paypalEmail')}
+              className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              placeholder="you@example.com"
+              required
             />
+            <p className="text-xs text-blue-600/70">Bạn sẽ được chuyển hướng tới PayPal để xác nhận thanh toán.</p>
           </div>
-        </div>
-      );
+        );
+      default:
+        return null;
     }
-
-    if (selectedMethod.type === 'ewallet') {
-      return (
-        <div>
-          <label className="text-sm font-medium text-blue-900">Số điện thoại ví</label>
-          <input
-            value={form.walletPhone}
-            onChange={handleChange('walletPhone')}
-            placeholder="Nhập số điện thoại đã đăng ký ví"
-            className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-      );
-    }
-
-    if (selectedMethod.type === 'bank') {
-      return (
-        <div>
-          <label className="text-sm font-medium text-blue-900">Nội dung chuyển khoản</label>
-          <input
-            value={form.bankReference}
-            onChange={handleChange('bankReference')}
-            placeholder="Ví dụ: JURNI {HỌ TÊN}"
-            className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-      );
-    }
-
-    return null;
   };
+
+  const renderBeneficiary = () => {
+    if (!selectedMethod?.beneficiary) return null;
+    const info = selectedMethod.beneficiary;
+    return (
+      <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-5 text-sm text-blue-900">
+        <div className="flex items-center gap-2 text-blue-700">
+          <span className="text-base font-semibold">Tài khoản hưởng thụ</span>
+        </div>
+        <div className="mt-3 space-y-1">
+          <p>Ngân hàng: <span className="font-semibold">{info.bank}</span></p>
+          <p>Số tài khoản: <span className="font-semibold">{info.accountNumber}</span></p>
+          <p>Chủ tài khoản: <span className="font-semibold">{info.accountName}</span></p>
+          {info.branch && <p>Chi nhánh: <span className="font-semibold">{info.branch}</span></p>}
+        </div>
+        <p className="mt-3 text-xs text-blue-600/80">
+          Vui lòng đối chiếu thông tin trước khi chuyển khoản. Bạn có thể chỉnh sửa nội dung này trong file cấu hình.
+        </p>
+      </div>
+    );
+  };
+
+  const activeMethods =
+    form.paymentCategory === 'vietnamese' ? paymentCatalog.vietnamese : paymentCatalog.international;
 
   return (
     <div className="bg-gradient-to-b from-white via-blue-50/40 to-white py-12">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="mb-8">
+      <div className="mx-auto max-w-7xl px-4">
+        <header className="mb-8 space-y-2">
           <span className="text-xs uppercase tracking-[0.3em] text-blue-500">Thanh toán</span>
-          <h1 className="mt-2 text-3xl font-semibold text-blue-900">Hoàn tất đặt dịch vụ của bạn</h1>
-          <p className="mt-2 text-sm text-blue-700/80 max-w-2xl">
-            Điền thông tin thanh toán để hoàn tất đặt chỗ. Dữ liệu của bạn được bảo vệ bằng chuẩn bảo mật PCI-DSS.
+          <h1 className="text-3xl font-semibold text-blue-900">Hoàn tất đặt dịch vụ</h1>
+          <p className="text-sm text-blue-700/80 max-w-2xl">
+            Vui lòng nhập thông tin liên hệ và chọn phương thức thanh toán phù hợp. Chúng tôi mã hóa mọi dữ liệu thẻ theo chuẩn PCI-DSS.
           </p>
-        </div>
+        </header>
 
         {status.type && (
           <div
@@ -243,14 +426,12 @@ export default function PaymentPage() {
           >
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-semibold">
-                  {status.type === 'success' ? 'Thanh toán thành công' : 'Có lỗi xảy ra'}
-                </p>
+                <p className="font-semibold">{status.type === 'success' ? 'Xử lý thành công' : 'Có lỗi xảy ra'}</p>
                 <p className="mt-1 text-xs leading-5">{status.message}</p>
               </div>
               {status.reference && (
                 <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-blue-700 shadow-sm">
-                  Mã giao dịch: {status.reference}
+                  Mã: {status.reference}
                 </span>
               )}
             </div>
@@ -260,22 +441,21 @@ export default function PaymentPage() {
         <div className="grid gap-8 lg:grid-cols-[1.9fr_1.1fr]">
           <form
             onSubmit={handleSubmit}
-            className="space-y-8 rounded-3xl border border-blue-100 bg-white/80 p-6 shadow-xl shadow-blue-100/40 backdrop-blur"
+            className="space-y-8 rounded-3xl border border-blue-100 bg-white/90 p-6 shadow-xl backdrop-blur"
           >
             <section className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-blue-900">Thông tin liên hệ</h2>
                 <span className="text-xs text-blue-600/70">* Bắt buộc</span>
               </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <label className="text-sm font-medium text-blue-900">Họ và tên *</label>
                   <input
                     value={form.fullName}
                     onChange={handleChange('fullName')}
-                    placeholder="Nhập họ và tên của bạn"
-                    className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    placeholder="Nhập họ và tên"
                     required
                   />
                 </div>
@@ -284,8 +464,8 @@ export default function PaymentPage() {
                   <input
                     value={form.phone}
                     onChange={handleChange('phone')}
-                    placeholder="Nhập số điện thoại"
-                    className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    placeholder="0901 234 567"
                     required
                   />
                 </div>
@@ -296,140 +476,158 @@ export default function PaymentPage() {
                   type="email"
                   value={form.email}
                   onChange={handleChange('email')}
+                  className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                   placeholder="you@example.com"
-                  className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
                   required
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-blue-900">Ghi chú cho đơn đặt (không bắt buộc)</label>
+                <label className="text-sm font-medium text-blue-900">Ghi chú (không bắt buộc)</label>
                 <textarea
                   value={form.notes}
                   onChange={handleChange('notes')}
                   rows={3}
-                  placeholder="Thông tin bổ sung cho đội ngũ Jurni..."
-                  className="mt-1 w-full rounded-lg border border-blue-100 bg-white px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="mt-1 w-full rounded-lg border border-blue-100 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  placeholder="Thông tin bổ sung cho Jurni..."
                 />
               </div>
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold text-blue-900">Phương thức thanh toán</h2>
-              {loadingConfig ? (
-                <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-6 text-sm text-blue-700/80">
-                  Đang tải cấu hình thanh toán...
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {config.paymentMethods?.map((method) => (
-                    <label
-                      key={method.id}
-                      className={`flex cursor-pointer flex-col gap-2 rounded-2xl border px-4 py-3 transition ${
-                        form.paymentMethod === method.id
-                          ? 'border-blue-500 bg-blue-50/80 shadow-lg shadow-blue-100/60'
-                          : 'border-blue-100 hover:border-blue-300 hover:bg-blue-50/60'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <span className="font-semibold text-blue-900">{method.name}</span>
-                          <p className="mt-1 text-sm text-blue-700/80">{method.description}</p>
-                        </div>
-                        <input
-                          type="radio"
-                          name="paymentMethod"
-                          value={method.id}
-                          checked={form.paymentMethod === method.id}
-                          onChange={handleChange('paymentMethod')}
-                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
-                        />
-                      </div>
-                      <p className="text-xs text-blue-600/70">
-                        Phí xử lý: {(method.feePercent * 100).toFixed(1)}% +{' '}
-                        {method.feeFixed ? formatCurrency(method.feeFixed, config.currency) : '0 VND'}
-                      </p>
-                    </label>
-                  ))}
-                </div>
-              )}
-              <div className="rounded-2xl border border-blue-100 bg-white/70 p-5">
-                <h3 className="font-semibold text-blue-900">Thông tin bổ sung</h3>
-                <div className="mt-4 space-y-4">{renderMethodExtras()}</div>
+              <div className="flex gap-3 border-b border-blue-100 pb-2">
+                <button
+                  type="button"
+                  onClick={() => handleCategoryChange('vietnamese')}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                    form.paymentCategory === 'vietnamese'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-blue-700 hover:bg-blue-50'
+                  }`}
+                >
+                  Phương thức Việt Nam
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCategoryChange('international')}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                    form.paymentCategory === 'international'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-blue-700 hover:bg-blue-50'
+                  }`}
+                >
+                  Phương thức Quốc tế
+                </button>
               </div>
 
-              {selectedMethod?.type === 'bank' && config.bankAccount && (
-                <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5 text-sm text-blue-800">
-                  <p className="font-semibold text-blue-900">Thông tin chuyển khoản</p>
-                  <p className="mt-2">Ngân hàng: {config.bankAccount.bank}</p>
-                  <p>Số tài khoản: <span className="font-semibold">{config.bankAccount.accountNumber}</span></p>
-                  <p>Chủ tài khoản: {config.bankAccount.name}</p>
-                  <p className="mt-2 text-xs text-blue-600/80">
-                    Đơn hàng sẽ được xác nhận trong vòng 15 phút sau khi nhận được chuyển khoản.
-                  </p>
-                </div>
-              )}
+              <div className="space-y-3">
+                {activeMethods.map((method) => (
+                  <label
+                    key={method.id}
+                    className={`flex flex-col gap-2 rounded-2xl border px-4 py-3 transition ${
+                      form.paymentMethod === method.id
+                        ? 'border-blue-500 bg-blue-50/80 shadow-lg'
+                        : 'border-blue-100 hover:border-blue-300 hover:bg-blue-50/40'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <PaymentLogo logo={method.logo} badge={method.badge} gradient={method.color} />
+                        <div>
+                          <p className="font-semibold text-blue-900">{method.name}</p>
+                          <p className="text-sm text-blue-700/80">{method.description}</p>
+                        </div>
+                      </div>
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={method.id}
+                        checked={form.paymentMethod === method.id}
+                        onChange={() => setForm((prev) => ({ ...prev, paymentMethod: method.id }))}
+                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500"
+                      />
+                    </div>
+                    <p className="text-xs text-blue-600/70">
+                      Phí xử lý: {(method.feePercent * 100).toFixed(1)}%
+                      {method.feeFixed ? ` + ${formatCurrency(method.feeFixed, 'VND')}` : ''}
+                      {method.feePercent === 0 && method.feeFixed === 0 && ' (Miễn phí)'}
+                    </p>
+                  </label>
+                ))}
+              </div>
+
+              {renderMethodForm()}
+              {renderBeneficiary()}
             </section>
 
             <div className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-6 py-5 text-white shadow-lg">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className="text-sm text-white/80">Tổng thanh toán</p>
-                  <p className="text-2xl font-semibold">{formatCurrency(total, config.currency)}</p>
+                  <p className="text-2xl font-semibold">{formatCurrency(total, order?.currency || 'VND')}</p>
                 </div>
                 <button
                   type="submit"
-                  disabled={submitting}
-                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-700 shadow-lg hover:bg-blue-50 transition disabled:pointer-events-none disabled:opacity-60"
+                  disabled={submitting || !hasOrder}
+                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-700 shadow-lg transition hover:bg-blue-50 disabled:pointer-events-none disabled:opacity-60"
                 >
-                  {submitting ? 'Đang xử lý...' : 'Thanh toán & Hoàn tất đặt chỗ'}
+                  {submitting ? 'Đang xử lý...' : 'Thanh toán & hoàn tất đặt chỗ'}
                 </button>
               </div>
               <p className="text-xs text-white/80">
-                Khi chọn “Thanh toán”, bạn đồng ý với điều khoản sử dụng và chính sách hủy của Jurni.
+                Khi bấm “Thanh toán”, bạn đồng ý với điều khoản sử dụng và chính sách hủy của Jurni.
               </p>
             </div>
           </form>
 
-          <aside className="space-y-6 rounded-3xl border border-blue-100 bg-white/80 p-6 shadow-xl shadow-blue-100/40 backdrop-blur">
-            <div>
-              <h3 className="text-lg font-semibold text-blue-900">Tóm tắt đơn đặt</h3>
-              <ul className="mt-4 space-y-3">
-                {order.items.map((item) => (
-                  <li key={item.id} className="rounded-2xl border border-blue-50 bg-blue-50/50 px-4 py-3">
-                    <div className="flex items-center justify-between text-sm text-blue-800">
-                      <span className="font-semibold text-blue-900">{item.name}</span>
-                      <span>x{item.quantity}</span>
-                    </div>
-                    <p className="mt-1 text-xs uppercase text-blue-600/70 tracking-wide">{item.type}</p>
-                    <p className="mt-2 text-sm font-semibold text-blue-900">
-                      {formatCurrency(item.price * item.quantity, config.currency || order.currency)}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <aside className="space-y-6 rounded-3xl border border-blue-100 bg-white/90 p-6 shadow-xl backdrop-blur">
+            {hasOrder ? (
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900">Tóm tắt đơn đặt</h3>
+                  <ul className="mt-4 space-y-3">
+                    {order.items.map((item) => (
+                      <li key={item.id} className="rounded-2xl border border-blue-50 bg-blue-50/60 px-4 py-3">
+                        <div className="flex items-center justify-between text-sm text-blue-800">
+                          <span className="font-semibold text-blue-900">{item.name}</span>
+                          <span>x{item.quantity}</span>
+                        </div>
+                        <p className="mt-1 text-xs uppercase tracking-wide text-blue-600/70">{item.type}</p>
+                        <p className="mt-2 text-sm font-semibold text-blue-900">
+                          {formatCurrency(item.price * item.quantity, order.currency || 'VND')}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            <div className="rounded-2xl border border-blue-50 bg-blue-50/60 px-4 py-3 text-sm text-blue-800">
-              <div className="flex items-center justify-between">
-                <span>Tạm tính</span>
-                <span className="font-semibold">{formatCurrency(subtotal, config.currency || order.currency)}</span>
+                <div className="rounded-2xl border border-blue-50 bg-blue-50/60 px-4 py-3 text-sm text-blue-800">
+                  <div className="flex items-center justify-between">
+                    <span>Tạm tính</span>
+                    <span className="font-semibold">{formatCurrency(subtotal, order.currency || 'VND')}</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span>Phí xử lý</span>
+                    <span className="font-semibold">{formatCurrency(methodFee, order.currency || 'VND')}</span>
+                  </div>
+                  <div className="mt-2 border-t border-blue-100 pt-2 flex items-center justify-between text-blue-900">
+                    <span className="font-semibold">Tổng</span>
+                    <span className="text-lg font-semibold">{formatCurrency(total, order.currency || 'VND')}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 px-4 py-6 text-center text-blue-800">
+                <h3 className="font-semibold text-blue-900 mb-1">Bạn chưa chọn dịch vụ</h3>
+                <p className="text-sm">Vui lòng quay lại trang dịch vụ để chọn tour, vé máy bay hoặc khách sạn trước khi thanh toán.</p>
               </div>
-              <div className="mt-2 flex items-center justify-between">
-                <span>Phí xử lý</span>
-                <span className="font-semibold">{formatCurrency(methodFee, config.currency || order.currency)}</span>
-              </div>
-              <div className="mt-2 border-t border-blue-100 pt-2 flex items-center justify-between text-blue-900">
-                <span className="font-semibold">Tổng thanh toán</span>
-                <span className="text-lg font-semibold">{formatCurrency(total, config.currency || order.currency)}</span>
-              </div>
-            </div>
+            )}
 
             <div className="rounded-2xl border border-blue-100 bg-white px-4 py-4 text-xs text-blue-700/80">
               <p className="font-semibold text-blue-900">Cam kết Jurni</p>
               <ul className="mt-2 space-y-2">
-                <li>✔︎ Hoàn tiền trong 48h nếu thanh toán thất bại.</li>
-                <li>✔︎ Hỗ trợ trực tuyến 24/7 trong suốt hành trình.</li>
-                <li>✔︎ Mã hóa tiêu chuẩn ngành, bảo mật tuyệt đối thông tin thẻ.</li>
+                <li>✔ Hoàn tiền trong 48h nếu thanh toán thất bại.</li>
+                <li>✔ Hỗ trợ trực tuyến 24/7 trong suốt hành trình.</li>
+                <li>✔ Mã hóa tiêu chuẩn ngành, bảo mật tuyệt đối thông tin thẻ.</li>
               </ul>
             </div>
           </aside>
@@ -438,5 +636,4 @@ export default function PaymentPage() {
     </div>
   );
 }
-
 

@@ -6,7 +6,60 @@ import jsPDF from 'jspdf';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Professional Icon Components
+// Generate QR Code URL using a free QR code API
+const generateQRCode = (text) => {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+};
+
+// Mock data để test
+const mockVoucherData = {
+  booking_code: 'JRN-2025-001',
+  booking_date: '2025-01-15',
+  status: 'Đã thanh toán',
+  payment_method: 'VNPay',
+  customer: {
+    name: 'Nguyễn Văn A',
+    phone: '0901234567',
+    email: 'nguyenvana@example.com'
+  },
+  services: [
+    {
+      type: 'flight',
+      name: 'Vietnam Airlines VN123',
+      description: 'Hồ Chí Minh – Hà Nội',
+      start_date: '2025-01-20',
+      end_date: '2025-01-20',
+      price: 5000000
+    },
+    {
+      type: 'hotel',
+      name: 'Grand Hotel Hanoi',
+      description: 'Phòng Deluxe, 2 đêm',
+      start_date: '2025-01-20',
+      end_date: '2025-01-22',
+      price: 6000000
+    },
+    {
+      type: 'car',
+      name: 'Toyota Vios',
+      description: '5 chỗ, 3 ngày',
+      start_date: '2025-01-20',
+      end_date: '2025-01-23',
+      price: 2400000
+    },
+    {
+      type: 'activity',
+      name: 'Tour Phố Cổ Hà Nội',
+      description: '4 giờ, 2 người',
+      start_date: '2025-01-21',
+      end_date: '2025-01-21',
+      price: 1600000
+    }
+  ],
+  total_price: 15000000
+};
+
+// Icon Components
 const IconPlane = () => (
   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
@@ -50,165 +103,127 @@ const IconPrint = () => (
   </svg>
 );
 
-// Generate QR Code URL using a free QR code API
-const generateQRCode = (text) => {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+// Helper functions
+const formatPrice = (price) => {
+  return new Intl.NumberFormat('vi-VN').format(price || 0);
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
+const getServiceIcon = (type) => {
+  switch (type) {
+    case 'flight':
+      return <IconPlane />;
+    case 'hotel':
+      return <IconHotel />;
+    case 'car':
+      return <IconCar />;
+    case 'activity':
+      return <IconActivity />;
+    default:
+      return <IconActivity />;
+  }
+};
+
+const getServiceEmoji = (type) => {
+  switch (type) {
+    case 'flight':
+      return '✈️';
+    case 'hotel':
+      return '🏨';
+    case 'car':
+      return '🚗';
+    case 'activity':
+      return '🎫';
+    default:
+      return '🎫';
+  }
+};
+
+const getServiceName = (type) => {
+  switch (type) {
+    case 'flight':
+      return 'Vé máy bay';
+    case 'hotel':
+      return 'Khách sạn';
+    case 'car':
+      return 'Thuê xe';
+    case 'activity':
+      return 'Tour & hoạt động';
+    default:
+      return 'Dịch vụ';
+  }
 };
 
 export default function VouchersPage() {
+  const [vouchers, setVouchers] = useState([mockVoucherData]);
+  const [loading, setLoading] = useState(false);
   const { getToken, isSignedIn } = useAuth();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedVoucher, setSelectedVoucher] = useState(null);
 
   useEffect(() => {
-    loadBookings();
-  }, [isSignedIn]);
+    const loadVouchers = async () => {
+      if (!isSignedIn) {
+        setVouchers([mockVoucherData]);
+        return;
+      }
 
-  const loadBookings = async () => {
-    if (!isSignedIn) {
-      setLoading(false);
-      return;
-    }
-    
-    try {
-      const token = await getToken();
-      const res = await axios.get(`${API}/bookings`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      // Chỉ lấy các booking đã confirmed (đã thanh toán)
-      const confirmedBookings = (res.data || []).filter(b => b.status === 'confirmed');
-      setBookings(confirmedBookings);
-    } catch (error) {
-      console.error('Error loading bookings:', error);
-      // Fallback to sample data
-      setBookings(sampleVouchers);
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        setLoading(true);
+        const token = await getToken();
+        const res = await axios.get(`${API}/bookings`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN').format(price || 0);
-  };
+        // Transform bookings to vouchers format
+        const transformedVouchers = res.data.map(booking => ({
+          booking_code: booking.booking_code || `JRN-${booking.id}`,
+          booking_date: booking.created_at,
+          status: booking.status || 'Đã thanh toán',
+          payment_method: booking.payment_method || 'VNPay',
+          customer: {
+            name: booking.customer_name || 'Khách hàng',
+            phone: booking.customer_phone || '',
+            email: booking.customer_email || ''
+          },
+          services: booking.services || [],
+          total_price: booking.total_price || 0
+        }));
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+        setVouchers(transformedVouchers.length > 0 ? transformedVouchers : [mockVoucherData]);
+      } catch (error) {
+        console.error('Error loading vouchers:', error);
+        setVouchers([mockVoucherData]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getServiceIcon = (serviceType) => {
-    switch (serviceType) {
-      case 'flight': return <IconPlane />;
-      case 'hotel': return <IconHotel />;
-      case 'car': return <IconCar />;
-      case 'activity': return <IconActivity />;
-      default: return <IconCheck />;
-    }
-  };
-
-  const getServiceName = (serviceType) => {
-    switch (serviceType) {
-      case 'flight': return 'Vé Máy Bay';
-      case 'hotel': return 'Khách Sạn';
-      case 'car': return 'Thuê Xe';
-      case 'activity': return 'Tour & Hoạt Động';
-      default: return serviceType;
-    }
-  };
-
-  // Sample vouchers for demo
-  const sampleVouchers = [
-    {
-      id: 1,
-      booking_code: 'JRN-2025-001',
-      status: 'confirmed',
-      total_price: 15000000,
-      created_at: new Date().toISOString(),
-      services: [
-        {
-          type: 'flight',
-          name: 'Vietnam Airlines VN123',
-          details: 'Hồ Chí Minh → Hà Nội',
-          date: '2025-01-15 08:00',
-          price: 5000000
-        },
-        {
-          type: 'hotel',
-          name: 'Grand Hotel Hanoi',
-          details: 'Phòng Deluxe, 2 đêm',
-          date: '2025-01-15 - 2025-01-17',
-          price: 6000000
-        },
-        {
-          type: 'car',
-          name: 'Toyota Vios',
-          details: '5 chỗ, 3 ngày',
-          date: '2025-01-15 - 2025-01-18',
-          price: 2400000
-        },
-        {
-          type: 'activity',
-          name: 'Tour Phố Cổ Hà Nội',
-          details: '4 giờ, 2 người',
-          date: '2025-01-16 09:00',
-          price: 1600000
-        }
-      ]
-    },
-    {
-      id: 2,
-      booking_code: 'JRN-2025-002',
-      status: 'confirmed',
-      total_price: 8500000,
-      created_at: new Date().toISOString(),
-      services: [
-        {
-          type: 'flight',
-          name: 'VietJet Air VJ456',
-          details: 'Hà Nội → Đà Nẵng',
-          date: '2025-01-20 10:30',
-          price: 3000000
-        },
-        {
-          type: 'hotel',
-          name: 'Beach Resort Đà Nẵng',
-          details: 'Phòng Superior, 2 đêm',
-          date: '2025-01-20 - 2025-01-22',
-          price: 4000000
-        },
-        {
-          type: 'activity',
-          name: 'Sun World Ba Na Hills',
-          details: 'Cả ngày, 2 người',
-          date: '2025-01-21 08:00',
-          price: 1500000
-        }
-      ]
-    }
-  ];
-
-  const vouchers = bookings.length > 0 ? bookings : sampleVouchers;
+    loadVouchers();
+  }, [isSignedIn, getToken]);
 
   const handlePrint = (voucher) => {
     const printWindow = window.open('', '_blank');
-    const qrCodeUrl = generateQRCode(voucher.booking_code || `JRN-${voucher.id}`);
-    const services = voucher.services || [];
-    
+    const qrCodeUrl = generateQRCode(voucher.booking_code);
+    const bookingCode = voucher.booking_code.replace(/[^a-zA-Z0-9-]/g, '_');
+    const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const fileName = `Voucher-${bookingCode}-${timestamp}`;
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="vi">
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Travel Voucher - ${voucher.booking_code || `JRN-${voucher.id}`}</title>
+        <title>${fileName}</title>
+        <link rel="icon" type="image/png" href="/JurniLogo/favicon-96x96.png" sizes="96x96" />
         <style>
           @page {
             size: A4;
@@ -226,178 +241,126 @@ export default function VouchersPage() {
             color: #1f2937;
             font-size: 11px;
             line-height: 1.4;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
           }
           .voucher-container {
             width: 100%;
-            max-width: 100%;
+            max-width: 210mm;
+            margin: 0 auto;
             background: white;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+            padding: 12px;
+            position: relative;
+          }
+          .seal-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url('/JurniLogo/jurni-seal.png');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 400px 400px;
+          }
+          .voucher-content-wrapper {
+            position: relative;
+            z-index: 1;
           }
           .voucher-header {
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
-            color: white;
-            padding: 16px 12px;
             text-align: center;
-            flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-          }
-          .voucher-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            border-radius: 50%;
-          }
-          .voucher-header::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -10%;
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-            border-radius: 50%;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 12px;
           }
           .voucher-header h1 {
             font-size: 24px;
-            font-weight: 800;
+            font-weight: 900;
+            color: #0A4EC3;
             margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 1.5px;
           }
           .voucher-header .subtitle {
             font-size: 10px;
-            opacity: 0.95;
-            position: relative;
-            z-index: 1;
+            color: #64748b;
             font-weight: 500;
-            letter-spacing: 0.5px;
           }
-          .voucher-body {
-            padding: 12px;
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background: #fafbfc;
+          .header-logo {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 8px;
+            object-fit: contain;
           }
-          .top-section {
+          .info-grid {
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 12px;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
             margin-bottom: 12px;
-            flex-shrink: 0;
           }
-          .booking-info {
-            padding: 12px;
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+          .info-box {
+            background: #f8fafc;
+            border: 2px solid #0A4EC3;
             border-radius: 8px;
-            border: 2px solid #3b82f6;
-            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+            padding: 10px;
+          }
+          .info-box h3 {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
           }
           .info-item {
-            text-align: center;
-            margin-bottom: 8px;
-          }
-          .info-item:last-child {
-            margin-bottom: 0;
+            margin-bottom: 6px;
+            font-size: 10px;
           }
           .info-label {
-            font-size: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
             color: #64748b;
-            margin-bottom: 4px;
-            font-weight: 700;
+            font-size: 8px;
+            margin-bottom: 2px;
           }
           .info-value {
-            font-size: 13px;
-            font-weight: 800;
-            color: #1e40af;
-            letter-spacing: 0.5px;
-          }
-          .booking-code {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            color: #1e40af;
-            text-align: center;
-            padding: 10px;
-            background: white;
-            border: 2.5px dashed #3b82f6;
-            border-radius: 8px;
-            margin-top: 10px;
-            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+            color: #0A4EC3;
+            font-weight: 700;
+            font-size: 11px;
           }
           .qr-section {
             text-align: center;
-            padding: 12px;
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-radius: 8px;
-            border: 2px solid #e2e8f0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-          }
-          .qr-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: #1e40af;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
           }
           .qr-code {
-            display: inline-block;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            margin: 8px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 90px;
+            height: 90px;
+            margin: 8px auto;
             border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 6px;
+            background: white;
           }
           .qr-code img {
-            width: 95px;
-            height: 95px;
-            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
           }
           .qr-note {
-            font-size: 8px;
+            font-size: 9px;
             color: #64748b;
-            margin-top: 8px;
             font-style: italic;
-            line-height: 1.3;
-            padding: 0 4px;
+            margin-top: 8px;
           }
           .services-section {
-            margin-top: 10px;
-            flex: 1;
-            overflow: hidden;
+            margin-bottom: 12px;
           }
           .section-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 800;
-            color: #1e40af;
+            color: #0A4EC3;
             margin-bottom: 10px;
             padding-bottom: 6px;
-            border-bottom: 3px solid #3b82f6;
+            border-bottom: 2px solid #0A4EC3;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-          .services-list {
-            max-height: 200px;
-            overflow-y: auto;
           }
           .service-item {
             background: white;
@@ -405,149 +368,114 @@ export default function VouchersPage() {
             border-radius: 8px;
             padding: 10px;
             margin-bottom: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: all 0.2s;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
           }
-          .service-item:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+          .service-icon {
+            width: 36px;
+            height: 36px;
+            background: #eff6ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+          }
+          .service-content {
+            flex: 1;
           }
           .service-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 6px;
-          }
-          .service-type {
-            font-size: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #64748b;
-            font-weight: 700;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            display: inline-block;
+            margin-bottom: 8px;
           }
           .service-name {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             color: #1f2937;
-            margin-top: 4px;
+            margin-bottom: 3px;
             line-height: 1.3;
-            letter-spacing: 0.2px;
           }
-          .service-price {
-            font-size: 14px;
-            font-weight: 800;
-            color: #1e40af;
-            text-align: right;
-            letter-spacing: 0.3px;
-          }
-          .service-details {
+          .service-description {
             font-size: 10px;
             color: #64748b;
             margin-bottom: 4px;
-            line-height: 1.4;
+            line-height: 1.3;
           }
           .service-date {
             font-size: 9px;
             color: #94a3b8;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-weight: 500;
           }
-          .bottom-section {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 12px;
-            margin-top: 10px;
-            flex-shrink: 0;
+          .service-price {
+            font-size: 13px;
+            font-weight: 800;
+            color: #0A4EC3;
+            text-align: right;
           }
           .total-section {
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+            background: linear-gradient(135deg, #0A4EC3 0%, #2563eb 100%);
             color: white;
             padding: 12px;
             border-radius: 8px;
             text-align: center;
-            box-shadow: 0 4px 8px rgba(30, 58, 138, 0.2);
-            position: relative;
-            overflow: hidden;
-          }
-          .total-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -20%;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-            border-radius: 50%;
+            margin-bottom: 12px;
           }
           .total-label {
             font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            opacity: 0.95;
+            opacity: 0.9;
             margin-bottom: 6px;
-            font-weight: 600;
-            position: relative;
-            z-index: 1;
+            letter-spacing: 0.5px;
           }
           .total-amount {
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 900;
-            letter-spacing: 1px;
-            margin-bottom: 6px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
           }
-          .status-badge {
-            display: inline-block;
-            background: #10b981;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 8px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-            position: relative;
-            z-index: 1;
-          }
-          .instructions {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-left: 4px solid #f59e0b;
-            padding: 10px;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
-          }
-          .instructions h4 {
-            color: #92400e;
-            font-size: 11px;
-            font-weight: 800;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-          .instructions ul {
-            list-style: none;
-            padding: 0;
-          }
-          .instructions li {
-            padding: 3px 0;
-            color: #78350f;
-            font-size: 9px;
+          .payment-info {
             display: flex;
-            align-items: start;
-            gap: 6px;
-            line-height: 1.4;
-            font-weight: 500;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
           }
-          .instructions li::before {
+          .payment-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+          }
+          .instructions-section {
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+          }
+          .instructions-title {
+            font-size: 10px;
+            font-weight: 800;
+            color: #92400e;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+          }
+          .instructions-list {
+            list-style: none;
+          }
+          .instructions-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 5px;
+            font-size: 9px;
+            color: #78350f;
+            line-height: 1.3;
+          }
+          .instructions-list li::before {
             content: '✓';
             color: #10b981;
             font-weight: 800;
@@ -560,148 +488,195 @@ export default function VouchersPage() {
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+          }
+          .seal-section {
+            text-align: center;
+            margin-bottom: 10px;
+            padding: 8px;
+          }
+          .seal-placeholder {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border: 2px dashed #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 78, 195, 0.05);
+            opacity: 0.3;
+          }
+          .seal-note {
+            font-size: 8px;
+            color: #94a3b8;
+            margin-top: 6px;
+            font-style: italic;
           }
           .footer {
             text-align: center;
-            padding: 10px;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            border-top: 2px solid #e2e8f0;
+            padding-top: 10px;
+            border-top: 2px solid #e5e7eb;
             color: #64748b;
-            font-size: 8px;
-            margin-top: 10px;
-            flex-shrink: 0;
+            font-size: 9px;
           }
           .footer-logo {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 900;
-            color: #1e40af;
-            margin-bottom: 4px;
-            letter-spacing: 1px;
+            color: #0A4EC3;
+            margin-bottom: 8px;
             text-transform: uppercase;
+            letter-spacing: 1px;
           }
           .footer div {
-            margin: 2px 0;
-            line-height: 1.3;
-            font-weight: 500;
+            margin: 4px 0;
+            line-height: 1.5;
           }
           @media print {
             body {
               background: white;
-              padding: 0;
-              margin: 0;
             }
             .voucher-container {
-              box-shadow: none;
-              border-radius: 0;
-              height: auto;
-              min-height: 100vh;
-            }
-            .voucher-header::before,
-            .voucher-header::after,
-            .total-section::before {
-              display: none;
-            }
-            .services-list {
-              max-height: none;
-              overflow: visible;
+              max-width: 100%;
+              padding: 0;
             }
             .service-item {
               page-break-inside: avoid;
-            }
-            .top-section, .bottom-section {
-              page-break-inside: avoid;
-            }
-            .service-item:hover {
-              border-color: #e5e7eb;
-              box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             }
           }
         </style>
       </head>
       <body>
         <div class="voucher-container">
+          <div class="seal-background"></div>
+          <div class="voucher-content-wrapper">
           <div class="voucher-header">
-            <h1>Travel Voucher</h1>
+            <img src="/JurniLogo/apple-touch-icon.png" alt="Jurni Logo" class="header-logo" />
+            <h1>TRAVEL VOUCHER</h1>
             <div class="subtitle">Xác nhận dịch vụ đã thanh toán</div>
           </div>
-          
-          <div class="voucher-body">
-            <div class="top-section">
-              <div class="booking-info">
-                <div class="info-item">
-                  <div class="info-label">Mã đặt tour</div>
-                  <div class="info-value">${voucher.booking_code || `JRN-${voucher.id}`}</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Ngày đặt</div>
-                  <div class="info-value">${formatDate(voucher.created_at)}</div>
-                </div>
-                <div class="booking-code" style="margin-top: 10px;">
-                  ${voucher.booking_code || `JRN-${voucher.id}`}
-                </div>
-              </div>
 
+          <div class="info-grid">
+            <div class="info-box">
+              <h3>Thông tin đặt tour</h3>
+              <div class="info-item">
+                <div class="info-label">Mã đặt tour</div>
+                <div class="info-value">${voucher.booking_code}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Ngày đặt</div>
+                <div class="info-value">${formatDate(voucher.booking_date)}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Trạng thái</div>
+                <div class="info-value">${voucher.status}</div>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <h3>Thông tin khách hàng</h3>
+              <div class="info-item">
+                <div class="info-label">Họ tên</div>
+                <div class="info-value">${voucher.customer?.name || 'N/A'}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Số điện thoại</div>
+                <div class="info-value">${voucher.customer?.phone || 'N/A'}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">${voucher.customer?.email || 'N/A'}</div>
+              </div>
+            </div>
+
+            <div class="info-box">
+              <h3>QR Code</h3>
               <div class="qr-section">
-                <div class="qr-title">
-                  Mã QR Code
-                </div>
                 <div class="qr-code">
                   <img src="${qrCodeUrl}" alt="QR Code" />
                 </div>
-                <div class="qr-note">
-                  Quét mã này tại sân bay, khách sạn hoặc điểm nhận xe để xác nhận dịch vụ
-                </div>
+                <div class="qr-note">Quét mã để kiểm tra tình trạng thanh toán</div>
               </div>
             </div>
+          </div>
 
-            <div class="services-section">
-              <div class="section-title">Chi tiết dịch vụ</div>
-              <div class="services-list">
-                ${services.map((service, idx) => `
-                  <div class="service-item">
-                    <div class="service-header">
-                      <div>
-                        <div class="service-type">${getServiceName(service.type)}</div>
-                        <div class="service-name">${service.name}</div>
+          <div class="services-section">
+            <div class="section-title">Chi tiết dịch vụ</div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 2px solid #0A4EC3;">
+                  <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Loại</th>
+                  <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Tên dịch vụ</th>
+                  <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Mô tả</th>
+                  <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Ngày</th>
+                  <th style="text-align: right; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Giá</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${voucher.services?.map(service => `
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 6px 8px;">
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 14px;">${getServiceEmoji(service.type)}</span>
+                        <span style="font-size: 9px; font-weight: 600; color: #4b5563;">${getServiceName(service.type)}</span>
                       </div>
-                      <div class="service-price">${formatPrice(service.price)} VND</div>
-                    </div>
-                    <div class="service-details">${service.details}</div>
-                    <div class="service-date">
-                      📅 ${service.date}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
+                    </td>
+                    <td style="padding: 6px 8px;">
+                      <div style="font-size: 10px; font-weight: 700; color: #111827;">${service.name}</div>
+                    </td>
+                    <td style="padding: 6px 8px;">
+                      <div style="font-size: 9px; color: #4b5563; max-width: 200px; line-height: 1.3;">${service.description || ''}</div>
+                    </td>
+                    <td style="padding: 6px 8px;">
+                      <div style="font-size: 9px; color: #6b7280; white-space: nowrap;">
+                        ${formatDate(service.start_date)}<br/>
+                        ${formatDate(service.end_date)}
+                      </div>
+                    </td>
+                    <td style="padding: 6px 8px; text-align: right;">
+                      <div style="font-size: 10px; font-weight: 800; color: #0A4EC3; white-space: nowrap;">
+                        ${formatPrice(service.price)} VND
+                      </div>
+                    </td>
+                  </tr>
+                `).join('') || ''}
+              </tbody>
+            </table>
+          </div>
 
-            <div class="bottom-section">
-              <div class="instructions">
-                <h4>📋 Hướng dẫn sử dụng voucher</h4>
-                <ul>
-                  <li><strong>Check-in sân bay:</strong> Quét QR code tại quầy check-in hoặc trình mã đặt tour</li>
-                  <li><strong>Nhận phòng khách sạn:</strong> Trình voucher và CMND/CCCD tại quầy lễ tân</li>
-                  <li><strong>Nhận xe:</strong> Đến địa điểm đã đặt, trình voucher và bằng lái xe</li>
-                  <li><strong>Tham gia tour:</strong> Đến điểm hẹn, trình voucher để tham gia hoạt động</li>
-                </ul>
-              </div>
-
-              <div class="total-section">
-                <div class="total-label">Tổng tiền thanh toán</div>
-                <div class="total-amount">${formatPrice(voucher.total_price)} VND</div>
-                <div class="status-badge">✓ Đã thanh toán</div>
-              </div>
+          <div class="total-section">
+            <div class="total-label">Tổng tiền thanh toán</div>
+            <div class="total-amount">${formatPrice(voucher.total_price)} VND</div>
+            <div class="payment-info">
+              <div class="payment-badge" style="border: 2px solid #4ade80; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.3);">✓ Đã thanh toán</div>
+              <div class="payment-badge">${voucher.payment_method || 'VNPay'}</div>
             </div>
+          </div>
+
+          <div class="instructions-section">
+            <div class="instructions-title">Hướng dẫn sử dụng voucher</div>
+            <ul class="instructions-list">
+              <li>Check-in sân bay bằng QR hoặc mã tour</li>
+              <li>Nhận phòng cần voucher + CCCD</li>
+              <li>Nhận xe cần đối chiếu thông tin</li>
+              <li>Tham gia tour trình voucher cho HDV</li>
+            </ul>
+          </div>
+
+          <div class="seal-section">
+            <div class="seal-placeholder">
+              <img src="/JurniLogo/jurni-seal.png" alt="Jurni Seal" style="width: 70px; height: 70px; object-fit: contain;" onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=\\'font-size: 20px; color: #cbd5e1;\\'>🔒</span>';" />
+            </div>
+            <div class="seal-note">Dấu mộc Jurni - Lưu file tại: public/JurniLogo/jurni-seal.png</div>
           </div>
 
           <div class="footer">
             <div class="footer-logo">JURNI TRAVEL</div>
-            <div>123 Đường ABC, Quận XYZ, TP.HCM</div>
-            <div>Hotline: 1900 123 456 | Email: support@jurni.com</div>
-            <div style="margin-top: 10px; font-size: 11px;">
-              Voucher này là tài liệu chính thức xác nhận việc đặt và thanh toán dịch vụ du lịch
+            <div>Phân khu E1, Khu công nghệ cao, Xa lộ Hà Nội, Phường Hiệp Phú, TP. Thủ Đức, TP.HCM</div>
+            <div>Hotline: 0769 749 465 | Email: support@jurni.com</div>
+            <div style="margin-top: 12px; font-size: 9px; color: #94a3b8;">
+              Voucher này là tài liệu chính thức xác nhận việc đặt và thanh toán dịch vụ du lịch.
             </div>
+          </div>
           </div>
         </div>
       </body>
@@ -709,15 +684,14 @@ export default function VouchersPage() {
     `);
     printWindow.document.close();
     
-    // Wait for content to load then print
     setTimeout(() => {
+      printWindow.document.title = fileName;
       printWindow.print();
     }, 500);
   };
 
   const handleDownload = async (voucher) => {
     try {
-      // Tạo một iframe ẩn thay vì window để tránh popup blocker
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
       iframe.style.right = '0';
@@ -729,8 +703,7 @@ export default function VouchersPage() {
       iframe.style.pointerEvents = 'none';
       document.body.appendChild(iframe);
       
-      const qrCodeUrl = generateQRCode(voucher.booking_code || `JRN-${voucher.id}`);
-      const services = voucher.services || [];
+      const qrCodeUrl = generateQRCode(voucher.booking_code);
       
       iframe.contentDocument.open();
       iframe.contentDocument.write(`
@@ -739,7 +712,8 @@ export default function VouchersPage() {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Travel Voucher - ${voucher.booking_code || `JRN-${voucher.id}`}</title>
+          <title>Travel Voucher - ${voucher.booking_code}</title>
+          <link rel="icon" type="image/png" href="/JurniLogo/favicon-96x96.png" sizes="96x96" />
           <style>
             @page {
               size: A4;
@@ -757,178 +731,126 @@ export default function VouchersPage() {
               color: #1f2937;
               font-size: 11px;
               line-height: 1.4;
-              -webkit-font-smoothing: antialiased;
-              -moz-osx-font-smoothing: grayscale;
             }
             .voucher-container {
               width: 100%;
-              max-width: 100%;
+              max-width: 210mm;
+              margin: 0 auto;
               background: white;
-              overflow: hidden;
-              height: 100vh;
-              display: flex;
-              flex-direction: column;
-              box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+              padding: 12px;
+              position: relative;
+            }
+            .seal-background {
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              opacity: 0.05;
+              pointer-events: none;
+              z-index: 0;
+              background-image: url('/JurniLogo/jurni-seal.png');
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 400px 400px;
+            }
+            .voucher-content-wrapper {
+              position: relative;
+              z-index: 1;
             }
             .voucher-header {
-              background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
-              color: white;
-              padding: 16px 12px;
               text-align: center;
-              flex-shrink: 0;
-              position: relative;
-              overflow: hidden;
-            }
-            .voucher-header::before {
-              content: '';
-              position: absolute;
-              top: -50%;
-              right: -20%;
-              width: 200px;
-              height: 200px;
-              background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-              border-radius: 50%;
-            }
-            .voucher-header::after {
-              content: '';
-              position: absolute;
-              bottom: -30%;
-              left: -10%;
-              width: 150px;
-              height: 150px;
-              background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-              border-radius: 50%;
+              padding-bottom: 12px;
+              border-bottom: 2px solid #e5e7eb;
+              margin-bottom: 12px;
             }
             .voucher-header h1 {
               font-size: 24px;
-              font-weight: 800;
+              font-weight: 900;
+              color: #0A4EC3;
               margin-bottom: 4px;
               text-transform: uppercase;
-              letter-spacing: 1px;
-              position: relative;
-              z-index: 1;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              letter-spacing: 1.5px;
             }
             .voucher-header .subtitle {
               font-size: 10px;
-              opacity: 0.95;
-              position: relative;
-              z-index: 1;
+              color: #64748b;
               font-weight: 500;
-              letter-spacing: 0.5px;
             }
-            .voucher-body {
-              padding: 12px;
-              flex: 1;
-              overflow: hidden;
-              display: flex;
-              flex-direction: column;
-              background: #fafbfc;
+            .header-logo {
+              width: 48px;
+              height: 48px;
+              margin: 0 auto 8px;
+              object-fit: contain;
             }
-            .top-section {
+            .info-grid {
               display: grid;
-              grid-template-columns: 1.2fr 1fr;
-              gap: 12px;
+              grid-template-columns: 1fr 1fr 1fr;
+              gap: 10px;
               margin-bottom: 12px;
-              flex-shrink: 0;
             }
-            .booking-info {
-              padding: 12px;
-              background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            .info-box {
+              background: #f8fafc;
+              border: 2px solid #0A4EC3;
               border-radius: 8px;
-              border: 2px solid #3b82f6;
-              box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+              padding: 10px;
+            }
+            .info-box h3 {
+              font-size: 9px;
+              text-transform: uppercase;
+              color: #64748b;
+              margin-bottom: 8px;
+              font-weight: 700;
+              letter-spacing: 0.5px;
             }
             .info-item {
-              text-align: center;
-              margin-bottom: 8px;
-            }
-            .info-item:last-child {
-              margin-bottom: 0;
+              margin-bottom: 6px;
+              font-size: 10px;
             }
             .info-label {
-              font-size: 8px;
-              text-transform: uppercase;
-              letter-spacing: 0.8px;
               color: #64748b;
-              margin-bottom: 4px;
-              font-weight: 700;
+              font-size: 8px;
+              margin-bottom: 2px;
             }
             .info-value {
-              font-size: 13px;
-              font-weight: 800;
-              color: #1e40af;
-              letter-spacing: 0.5px;
-            }
-            .booking-code {
-              font-size: 18px;
-              font-weight: 900;
-              letter-spacing: 2px;
-              color: #1e40af;
-              text-align: center;
-              padding: 10px;
-              background: white;
-              border: 2.5px dashed #3b82f6;
-              border-radius: 8px;
-              margin-top: 10px;
-              box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+              color: #0A4EC3;
+              font-weight: 700;
+              font-size: 11px;
             }
             .qr-section {
               text-align: center;
-              padding: 12px;
-              background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-              border-radius: 8px;
-              border: 2px solid #e2e8f0;
-              box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
-            .qr-title {
-              font-size: 11px;
-              font-weight: 700;
-              color: #1e40af;
-              margin-bottom: 10px;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
             }
             .qr-code {
-              display: inline-block;
-              padding: 12px;
-              background: white;
-              border-radius: 8px;
-              margin: 8px 0;
-              box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+              width: 90px;
+              height: 90px;
+              margin: 8px auto;
               border: 2px solid #e5e7eb;
+              border-radius: 6px;
+              padding: 6px;
+              background: white;
             }
             .qr-code img {
-              width: 95px;
-              height: 95px;
-              display: block;
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
             }
             .qr-note {
-              font-size: 8px;
+              font-size: 9px;
               color: #64748b;
-              margin-top: 8px;
               font-style: italic;
-              line-height: 1.3;
-              padding: 0 4px;
+              margin-top: 8px;
             }
             .services-section {
-              margin-top: 10px;
-              flex: 1;
-              overflow: hidden;
+              margin-bottom: 12px;
             }
             .section-title {
-              font-size: 14px;
+              font-size: 13px;
               font-weight: 800;
-              color: #1e40af;
+              color: #0A4EC3;
               margin-bottom: 10px;
               padding-bottom: 6px;
-              border-bottom: 3px solid #3b82f6;
+              border-bottom: 2px solid #0A4EC3;
               text-transform: uppercase;
-              letter-spacing: 0.5px;
-            }
-            .services-list {
-              max-height: 200px;
-              overflow-y: auto;
             }
             .service-item {
               background: white;
@@ -936,145 +858,114 @@ export default function VouchersPage() {
               border-radius: 8px;
               padding: 10px;
               margin-bottom: 8px;
-              box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-              transition: all 0.2s;
+              display: flex;
+              align-items: flex-start;
+              gap: 10px;
+            }
+            .service-icon {
+              width: 36px;
+              height: 36px;
+              background: #eff6ff;
+              border-radius: 8px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
+              font-size: 18px;
+            }
+            .service-content {
+              flex: 1;
             }
             .service-header {
               display: flex;
               justify-content: space-between;
               align-items: flex-start;
-              margin-bottom: 6px;
-            }
-            .service-type {
-              font-size: 8px;
-              text-transform: uppercase;
-              letter-spacing: 0.8px;
-              color: #64748b;
-              font-weight: 700;
-              background: #f1f5f9;
-              padding: 2px 6px;
-              border-radius: 4px;
-              display: inline-block;
+              margin-bottom: 8px;
             }
             .service-name {
-              font-size: 13px;
+              font-size: 12px;
               font-weight: 700;
               color: #1f2937;
-              margin-top: 4px;
+              margin-bottom: 3px;
               line-height: 1.3;
-              letter-spacing: 0.2px;
             }
-            .service-price {
-              font-size: 14px;
-              font-weight: 800;
-              color: #1e40af;
-              text-align: right;
-              letter-spacing: 0.3px;
-            }
-            .service-details {
+            .service-description {
               font-size: 10px;
               color: #64748b;
               margin-bottom: 4px;
-              line-height: 1.4;
+              line-height: 1.3;
             }
             .service-date {
               font-size: 9px;
               color: #94a3b8;
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              font-weight: 500;
             }
-            .bottom-section {
-              display: grid;
-              grid-template-columns: 1.5fr 1fr;
-              gap: 12px;
-              margin-top: 10px;
-              flex-shrink: 0;
+            .service-price {
+              font-size: 13px;
+              font-weight: 800;
+              color: #0A4EC3;
+              text-align: right;
             }
             .total-section {
-              background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+              background: linear-gradient(135deg, #0A4EC3 0%, #2563eb 100%);
               color: white;
               padding: 12px;
               border-radius: 8px;
               text-align: center;
-              box-shadow: 0 4px 8px rgba(30, 58, 138, 0.2);
-              position: relative;
-              overflow: hidden;
-            }
-            .total-section::before {
-              content: '';
-              position: absolute;
-              top: -50%;
-              right: -20%;
-              width: 100px;
-              height: 100px;
-              background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-              border-radius: 50%;
+              margin-bottom: 12px;
             }
             .total-label {
               font-size: 9px;
               text-transform: uppercase;
-              letter-spacing: 0.8px;
-              opacity: 0.95;
+              opacity: 0.9;
               margin-bottom: 6px;
-              font-weight: 600;
-              position: relative;
-              z-index: 1;
+              letter-spacing: 0.5px;
             }
             .total-amount {
-              font-size: 20px;
+              font-size: 24px;
               font-weight: 900;
-              letter-spacing: 1px;
-              margin-bottom: 6px;
-              position: relative;
-              z-index: 1;
-              text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              margin-bottom: 8px;
             }
-            .status-badge {
-              display: inline-block;
-              background: #10b981;
-              color: white;
-              padding: 4px 10px;
-              border-radius: 12px;
-              font-size: 8px;
-              font-weight: 700;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-              position: relative;
-              z-index: 1;
-            }
-            .instructions {
-              background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-              border-left: 4px solid #f59e0b;
-              padding: 10px;
-              border-radius: 6px;
-              box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
-            }
-            .instructions h4 {
-              color: #92400e;
-              font-size: 11px;
-              font-weight: 800;
-              margin-bottom: 6px;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-            }
-            .instructions ul {
-              list-style: none;
-              padding: 0;
-            }
-            .instructions li {
-              padding: 3px 0;
-              color: #78350f;
-              font-size: 9px;
+            .payment-info {
               display: flex;
-              align-items: start;
-              gap: 6px;
-              line-height: 1.4;
-              font-weight: 500;
+              justify-content: center;
+              gap: 16px;
+              flex-wrap: wrap;
+              margin-top: 12px;
             }
-            .instructions li::before {
+            .payment-badge {
+              background: rgba(255, 255, 255, 0.2);
+              padding: 6px 12px;
+              border-radius: 20px;
+              font-size: 10px;
+              font-weight: 600;
+            }
+            .instructions-section {
+              background: #fef3c7;
+              border-left: 3px solid #f59e0b;
+              padding: 10px;
+              border-radius: 8px;
+              margin-bottom: 10px;
+            }
+            .instructions-title {
+              font-size: 10px;
+              font-weight: 800;
+              color: #92400e;
+              margin-bottom: 8px;
+              text-transform: uppercase;
+            }
+            .instructions-list {
+              list-style: none;
+            }
+            .instructions-list li {
+              display: flex;
+              align-items: flex-start;
+              gap: 6px;
+              margin-bottom: 5px;
+              font-size: 9px;
+              color: #78350f;
+              line-height: 1.3;
+            }
+            .instructions-list li::before {
               content: '✓';
               color: #10b981;
               font-weight: 800;
@@ -1087,115 +978,174 @@ export default function VouchersPage() {
               display: flex;
               align-items: center;
               justify-content: center;
-              box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            }
+            .seal-section {
+              text-align: center;
+              margin-bottom: 10px;
+              padding: 8px;
+            }
+            .seal-placeholder {
+              width: 80px;
+              height: 80px;
+              margin: 0 auto;
+              border: 2px dashed #cbd5e1;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background: rgba(10, 78, 195, 0.05);
+              opacity: 0.3;
+            }
+            .seal-note {
+              font-size: 8px;
+              color: #94a3b8;
+              margin-top: 6px;
+              font-style: italic;
             }
             .footer {
               text-align: center;
-              padding: 10px;
-              background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-              border-top: 2px solid #e2e8f0;
+              padding-top: 10px;
+              border-top: 2px solid #e5e7eb;
               color: #64748b;
-              font-size: 8px;
-              margin-top: 10px;
-              flex-shrink: 0;
+              font-size: 9px;
             }
             .footer-logo {
-              font-size: 14px;
+              font-size: 16px;
               font-weight: 900;
-              color: #1e40af;
-              margin-bottom: 4px;
-              letter-spacing: 1px;
+              color: #0A4EC3;
+              margin-bottom: 8px;
               text-transform: uppercase;
+              letter-spacing: 1px;
             }
             .footer div {
-              margin: 2px 0;
-              line-height: 1.3;
-              font-weight: 500;
+              margin: 4px 0;
+              line-height: 1.5;
             }
           </style>
         </head>
         <body>
           <div class="voucher-container" id="voucher-content">
+            <div class="seal-background"></div>
+            <div class="voucher-content-wrapper">
             <div class="voucher-header">
-              <h1>Travel Voucher</h1>
+              <img src="/JurniLogo/apple-touch-icon.png" alt="Jurni Logo" class="header-logo" />
+              <h1>TRAVEL VOUCHER</h1>
               <div class="subtitle">Xác nhận dịch vụ đã thanh toán</div>
             </div>
-            
-            <div class="voucher-body">
-              <div class="top-section">
-                <div class="booking-info">
-                  <div class="info-item">
-                    <div class="info-label">Mã đặt tour</div>
-                    <div class="info-value">${voucher.booking_code || `JRN-${voucher.id}`}</div>
-                  </div>
-                  <div class="info-item">
-                    <div class="info-label">Ngày đặt</div>
-                    <div class="info-value">${formatDate(voucher.created_at)}</div>
-                  </div>
-                  <div class="booking-code" style="margin-top: 10px;">
-                    ${voucher.booking_code || `JRN-${voucher.id}`}
-                  </div>
-                </div>
 
+            <div class="info-grid">
+              <div class="info-box">
+                <h3>Thông tin đặt tour</h3>
+                <div class="info-item">
+                  <div class="info-label">Mã đặt tour</div>
+                  <div class="info-value">${voucher.booking_code}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Ngày đặt</div>
+                  <div class="info-value">${formatDate(voucher.booking_date)}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Trạng thái</div>
+                  <div class="info-value">${voucher.status}</div>
+                </div>
+              </div>
+
+              <div class="info-box">
+                <h3>Thông tin khách hàng</h3>
+                <div class="info-item">
+                  <div class="info-label">Họ tên</div>
+                  <div class="info-value">${voucher.customer?.name || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Số điện thoại</div>
+                  <div class="info-value">${voucher.customer?.phone || 'N/A'}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Email</div>
+                  <div class="info-value">${voucher.customer?.email || 'N/A'}</div>
+                </div>
+              </div>
+
+              <div class="info-box">
+                <h3>QR Code</h3>
                 <div class="qr-section">
-                  <div class="qr-title">
-                    Mã QR Code
-                  </div>
                   <div class="qr-code">
                     <img src="${qrCodeUrl}" alt="QR Code" />
                   </div>
-                  <div class="qr-note">
-                    Quét mã này tại sân bay, khách sạn hoặc điểm nhận xe để xác nhận dịch vụ
-                  </div>
+                  <div class="qr-note">Quét mã để kiểm tra tình trạng thanh toán</div>
                 </div>
               </div>
+            </div>
 
-              <div class="services-section">
-                <div class="section-title">Chi tiết dịch vụ</div>
-                <div class="services-list">
-                  ${services.map((service, idx) => `
-                    <div class="service-item">
-                      <div class="service-header">
-                        <div>
-                          <div class="service-type">${getServiceName(service.type)}</div>
-                          <div class="service-name">${service.name}</div>
+            <div class="services-section">
+              <div class="section-title">Chi tiết dịch vụ</div>
+              <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                <thead>
+                  <tr style="background: #f8fafc; border-bottom: 2px solid #0A4EC3;">
+                    <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Loại</th>
+                    <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Tên dịch vụ</th>
+                    <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Mô tả</th>
+                    <th style="text-align: left; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Ngày</th>
+                    <th style="text-align: right; padding: 6px 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; color: #374151;">Giá</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${voucher.services?.map(service => `
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                      <td style="padding: 6px 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <span style="font-size: 14px;">${getServiceEmoji(service.type)}</span>
+                          <span style="font-size: 9px; font-weight: 600; color: #4b5563;">${getServiceName(service.type)}</span>
                         </div>
-                        <div class="service-price">${formatPrice(service.price)} VND</div>
-                      </div>
-                      <div class="service-details">${service.details}</div>
-                      <div class="service-date">
-                        📅 ${service.date}
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
+                      </td>
+                      <td style="padding: 6px 8px;">
+                        <div style="font-size: 10px; font-weight: 700; color: #111827;">${service.name}</div>
+                      </td>
+                      <td style="padding: 6px 8px;">
+                        <div style="font-size: 9px; color: #4b5563; max-width: 200px; line-height: 1.3;">${service.description || ''}</div>
+                      </td>
+                      <td style="padding: 6px 8px;">
+                        <div style="font-size: 9px; color: #6b7280; white-space: nowrap;">
+                          ${formatDate(service.start_date)}<br/>
+                          ${formatDate(service.end_date)}
+                        </div>
+                      </td>
+                      <td style="padding: 6px 8px; text-align: right;">
+                        <div style="font-size: 10px; font-weight: 800; color: #0A4EC3; white-space: nowrap;">
+                          ${formatPrice(service.price)} VND
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('') || ''}
+                </tbody>
+              </table>
+            </div>
 
-              <div class="bottom-section">
-                <div class="instructions">
-                  <h4>📋 Hướng dẫn sử dụng voucher</h4>
-                  <ul>
-                    <li><strong>Check-in sân bay:</strong> Quét QR code tại quầy check-in hoặc trình mã đặt tour</li>
-                    <li><strong>Nhận phòng khách sạn:</strong> Trình voucher và CMND/CCCD tại quầy lễ tân</li>
-                    <li><strong>Nhận xe:</strong> Đến địa điểm đã đặt, trình voucher và bằng lái xe</li>
-                    <li><strong>Tham gia tour:</strong> Đến điểm hẹn, trình voucher để tham gia hoạt động</li>
-                  </ul>
-                </div>
-
-                <div class="total-section">
-                  <div class="total-label">Tổng tiền thanh toán</div>
-                  <div class="total-amount">${formatPrice(voucher.total_price)} VND</div>
-                  <div class="status-badge">✓ Đã thanh toán</div>
-                </div>
+            <div class="total-section">
+              <div class="total-label">Tổng tiền thanh toán</div>
+              <div class="total-amount">${formatPrice(voucher.total_price)} VND</div>
+              <div class="payment-info">
+                <div class="payment-badge" style="border: 2px solid #4ade80; box-shadow: 0 1px 3px rgba(74, 222, 128, 0.3);">✓ Đã thanh toán</div>
+                <div class="payment-badge">${voucher.payment_method || 'VNPay'}</div>
               </div>
+            </div>
+
+            <div class="instructions-section">
+              <div class="instructions-title">Hướng dẫn sử dụng voucher</div>
+              <ul class="instructions-list">
+                <li>Check-in sân bay bằng QR hoặc mã tour</li>
+                <li>Nhận phòng cần voucher + CCCD</li>
+                <li>Nhận xe cần đối chiếu thông tin</li>
+                <li>Tham gia tour trình voucher cho HDV</li>
+              </ul>
             </div>
 
             <div class="footer">
               <div class="footer-logo">JURNI TRAVEL</div>
-              <div>123 Đường ABC, Quận XYZ, TP.HCM</div>
-              <div>Hotline: 1900 123 456 | Email: support@jurni.com</div>
-              <div style="margin-top: 10px; font-size: 11px;">
-                Voucher này là tài liệu chính thức xác nhận việc đặt và thanh toán dịch vụ du lịch
+              <div>Phân khu E1, Khu công nghệ cao, Xa lộ Hà Nội, Phường Hiệp Phú, TP. Thủ Đức, TP.HCM</div>
+              <div>Hotline: 0769 749 465 | Email: support@jurni.com</div>
+              <div style="margin-top: 12px; font-size: 9px; color: #94a3b8;">
+                Voucher này là tài liệu chính thức xác nhận việc đặt và thanh toán dịch vụ du lịch.
               </div>
             </div>
           </div>
@@ -1204,7 +1154,6 @@ export default function VouchersPage() {
       `);
       iframe.contentDocument.close();
 
-      // Đợi nội dung và hình ảnh load xong
       await new Promise((resolve) => {
         setTimeout(() => {
           const doc = iframe.contentDocument;
@@ -1235,7 +1184,6 @@ export default function VouchersPage() {
         }, 1000);
       });
 
-      // Chụp màn hình bằng html2canvas
       const element = iframe.contentDocument.getElementById('voucher-content');
       const canvas = await html2canvas(element, {
         scale: 2,
@@ -1248,40 +1196,30 @@ export default function VouchersPage() {
         windowHeight: element.scrollHeight
       });
 
-      // Tạo PDF từ canvas
-      const imgData = canvas.toDataURL('image/png', 1.0);
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      // Tính toán kích thước để vừa với trang A4
-      const ratio = Math.min((pdfWidth - 16) / (imgWidth * 0.264583), (pdfHeight - 16) / (imgHeight * 0.264583));
-      const imgScaledWidth = imgWidth * 0.264583 * ratio;
-      const imgScaledHeight = imgHeight * 0.264583 * ratio;
-      const xOffset = (pdfWidth - imgScaledWidth) / 2;
-      const yOffset = (pdfHeight - imgScaledHeight) / 2;
+      const bookingCode = voucher.booking_code.replace(/[^a-zA-Z0-9-]/g, '_');
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const fileName = `Voucher-${bookingCode}-${timestamp}.jpg`;
 
-      pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgScaledWidth, imgScaledHeight);
-      
-      // Tạo tên file tự động với format: Voucher-{booking_code}-{timestamp}.pdf
-      const bookingCode = (voucher.booking_code || `JRN-${voucher.id}`).replace(/[^a-zA-Z0-9-]/g, '_');
-      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, ''); // YYYYMMDD
-      const fileName = `Voucher-${bookingCode}-${timestamp}.pdf`;
-      
-      // Tải file PDF về máy tự động với tên đã generate
-      pdf.save(fileName);
-
-      // Xóa iframe sau khi tải xong
-      setTimeout(() => {
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
-      }, 1000);
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        }, 100);
+      }, 'image/jpeg', 0.95);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại.');
+      console.error('Error generating JPG:', error);
+      alert('Có lỗi xảy ra khi tạo file JPG. Vui lòng thử lại.');
     }
   };
 
@@ -1289,7 +1227,7 @@ export default function VouchersPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#0A4EC3]"></div>
           <p className="mt-4 text-gray-600">Đang tải voucher...</p>
         </div>
       </div>
@@ -1298,7 +1236,7 @@ export default function VouchersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white py-8">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
@@ -1307,10 +1245,6 @@ export default function VouchersPage() {
           <p className="text-xl text-gray-600">
             Xác nhận dịch vụ đã thanh toán
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-            <IconCheck className="w-4 h-4" />
-            <span>Voucher này có thể dùng để check-in tại sân bay, nhận phòng khách sạn và nhận xe</span>
-          </div>
         </div>
 
         {/* Vouchers List */}
@@ -1318,7 +1252,7 @@ export default function VouchersPage() {
           <div className="text-center py-16">
             <div className="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
               <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <IconCheck className="w-12 h-12 text-blue-600" />
+                <IconCheck className="w-12 h-12 text-[#0A4EC3]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Chưa có voucher</h3>
               <p className="text-gray-600 mb-6">
@@ -1326,7 +1260,7 @@ export default function VouchersPage() {
               </p>
               <a
                 href="/"
-                className="inline-block bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition"
+                className="inline-block bg-[#0A4EC3] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#083a9a] transition"
               >
                 Đặt tour ngay
               </a>
@@ -1334,241 +1268,251 @@ export default function VouchersPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {vouchers.map((voucher) => {
-              const qrCodeUrl = generateQRCode(voucher.booking_code || `JRN-${voucher.id}`);
+            {vouchers.map((voucher, index) => {
+              const qrCodeUrl = generateQRCode(voucher.booking_code);
               
-              return (
+  return (
                 <div
-                  key={voucher.id}
-                  className="bg-white rounded-3xl shadow-2xl border-2 border-blue-100 overflow-hidden"
+                  key={index}
+                  className="bg-white rounded-3xl shadow-2xl border-2 border-blue-100 overflow-hidden relative"
+                  id={`voucher-${index}`}
                 >
-                  {/* Voucher Header */}
-                  <div className="bg-gradient-to-r from-blue-600 to-sky-600 text-white p-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      <div>
-                        <div className="text-sm font-medium text-blue-100 mb-1">Mã đặt tour</div>
-                        <div className="text-3xl font-bold">{voucher.booking_code || `JRN-${voucher.id}`}</div>
-                        <div className="text-sm text-blue-100 mt-2">
-                          Ngày đặt: {formatDate(voucher.created_at)}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-blue-100 mb-1">Tổng tiền</div>
-                          <div className="text-2xl font-bold">{formatPrice(voucher.total_price)} VND</div>
-                          <div className="inline-flex items-center gap-2 mt-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                            <IconCheck className="w-3 h-3" />
-                            Đã thanh toán
+                  {/* Seal Background Watermark */}
+                  <div 
+                    className="absolute inset-0 opacity-5 pointer-events-none z-0"
+                    style={{
+                      backgroundImage: 'url(/JurniLogo/jurni-seal.png)',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      backgroundSize: '400px 400px'
+                    }}
+                  />
+                  
+                  {/* Voucher Content */}
+                  <div className="p-8 relative z-10">
+                    {/* Header */}
+                    <div className="text-center mb-8 pb-6 border-b-2 border-gray-200">
+                      <img 
+                        src="/JurniLogo/apple-touch-icon.png" 
+                        alt="Jurni Logo" 
+                        className="w-16 h-16 mx-auto mb-4 object-contain"
+                      />
+                      <h1 className="text-2xl font-black text-[#0A4EC3] mb-1.5 uppercase tracking-wide">
+                        TRAVEL VOUCHER
+                      </h1>
+                      <p className="text-xs text-gray-600 font-medium">
+                        Xác nhận dịch vụ đã thanh toán
+                      </p>
+                    </div>
+
+                    {/* 3 Columns Info Grid */}
+                    <div className="grid md:grid-cols-3 gap-4 mb-6">
+                      {/* Thông tin đặt tour */}
+                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-lg p-4">
+                        <h3 className="text-[10px] uppercase text-gray-500 font-bold mb-3 tracking-wider">
+                          Thông tin đặt tour
+                        </h3>
+                        <div className="space-y-2.5">
+                          <div>
+                            <div className="text-[10px] text-gray-500 mb-0.5">Mã đặt tour</div>
+                            <div className="text-sm font-bold text-[#0A4EC3]">{voucher.booking_code}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-gray-500 mb-0.5">Ngày đặt</div>
+                            <div className="text-xs font-semibold text-gray-900">{formatDate(voucher.booking_date)}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-gray-500 mb-0.5">Trạng thái</div>
+                            <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                              <IconCheck className="w-2.5 h-2.5" />
+                              {voucher.status}
+                            </div>
                           </div>
                         </div>
-                        <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                          <img
-                            src={qrCodeUrl}
-                            alt="QR Code"
-                            className="w-24 h-24"
-                          />
+                      </div>
+
+                      {/* Thông tin khách hàng */}
+                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-lg p-4">
+                        <h3 className="text-[10px] uppercase text-gray-500 font-bold mb-3 tracking-wider">
+                          Thông tin khách hàng
+                        </h3>
+                        <div className="space-y-2.5">
+                          <div>
+                            <div className="text-[10px] text-gray-500 mb-0.5">Họ tên</div>
+                            <div className="text-xs font-semibold text-gray-900">{voucher.customer?.name || 'N/A'}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-gray-500 mb-0.5">Số điện thoại</div>
+                            <div className="text-xs font-semibold text-gray-900">{voucher.customer?.phone || 'N/A'}</div>
+                          </div>
+                          <div>
+                            <div className="text-[10px] text-gray-500 mb-0.5">Email</div>
+                            <div className="text-xs font-semibold text-gray-900 break-all">{voucher.customer?.email || 'N/A'}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* QR Code */}
+                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-lg p-4">
+                        <h3 className="text-[10px] uppercase text-gray-500 font-bold mb-3 tracking-wider text-center">
+                          QR Code
+                        </h3>
+                        <div className="text-center">
+                          <div className="inline-block p-2 bg-white border-2 border-gray-200 rounded-lg">
+                            <img
+                              src={qrCodeUrl}
+                              alt="QR Code"
+                              className="w-24 h-24"
+                            />
+                          </div>
+                          <p className="text-[10px] text-gray-500 italic mt-2">
+                            Quét mã để kiểm tra tình trạng thanh toán
+                          </p>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Services Details */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-6">Chi tiết dịch vụ</h3>
-                    <div className="space-y-4">
-                      {(voucher.services || []).map((service, idx) => (
-                        <div
-                          key={idx}
-                          className="border-2 border-gray-100 rounded-xl p-5 hover:border-blue-300 transition-all"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                              {getServiceIcon(service.type)}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <h4 className="text-lg font-bold text-gray-900">{service.name}</h4>
-                                <div className="text-lg font-bold text-blue-600">
-                                  {formatPrice(service.price)} VND
-                                </div>
-                              </div>
-                              <div className="text-sm text-gray-600 mb-2">{service.details}</div>
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                </svg>
-                                {service.date}
-                              </div>
-                            </div>
-                          </div>
+                    {/* Chi tiết dịch vụ - Bảng */}
+                    <div className="mb-6">
+                      <h2 className="text-base font-black text-[#0A4EC3] mb-3 pb-2 border-b-2 border-[#0A4EC3] uppercase tracking-wide">
+                        Chi tiết dịch vụ
+                      </h2>
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="bg-[#f8fafc] border-b-2 border-[#0A4EC3]">
+                              <th className="text-left py-2 px-3 text-[10px] uppercase font-bold text-gray-700">Loại</th>
+                              <th className="text-left py-2 px-3 text-[10px] uppercase font-bold text-gray-700">Tên dịch vụ</th>
+                              <th className="text-left py-2 px-3 text-[10px] uppercase font-bold text-gray-700">Mô tả</th>
+                              <th className="text-left py-2 px-3 text-[10px] uppercase font-bold text-gray-700">Ngày</th>
+                              <th className="text-right py-2 px-3 text-[10px] uppercase font-bold text-gray-700">Giá</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {voucher.services?.map((service, idx) => (
+                              <tr 
+                                key={idx}
+                                className="border-b border-gray-200 hover:bg-blue-50 transition-colors"
+                              >
+                                <td className="py-2 px-3">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-base">{getServiceEmoji(service.type)}</span>
+                                    <span className="text-[10px] font-semibold text-gray-600">{getServiceName(service.type)}</span>
+                                  </div>
+                                </td>
+                                <td className="py-2 px-3">
+                                  <div className="text-xs font-bold text-gray-900">{service.name}</div>
+                                </td>
+                                <td className="py-2 px-3">
+                                  <div className="text-[10px] text-gray-600 line-clamp-2 max-w-xs">{service.description}</div>
+                                </td>
+                                <td className="py-2 px-3">
+                                  <div className="text-[10px] text-gray-500 whitespace-nowrap">
+                                    {formatDate(service.start_date)}<br/>
+                                    {formatDate(service.end_date)}
+                                  </div>
+                                </td>
+                                <td className="py-2 px-3 text-right">
+                                  <div className="text-xs font-black text-[#0A4EC3] whitespace-nowrap">
+                                    {formatPrice(service.price)} VND
+        </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Tổng tiền */}
+                    <div className="bg-gradient-to-r from-[#0A4EC3] to-[#2563eb] text-white rounded-lg p-5 mb-5 text-center shadow-lg">
+                      <div className="text-xs uppercase tracking-wider opacity-90 mb-2">
+                        Tổng tiền thanh toán
+                      </div>
+                      <div className="text-3xl font-black mb-3">
+                        {formatPrice(voucher.total_price)} VND
+                      </div>
+                      <div className="flex justify-center gap-3 flex-wrap">
+                        <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold border-2 border-green-400 shadow-sm">
+                          ✓ Đã thanh toán
                         </div>
-                      ))}
+                        <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold">
+                          {voucher.payment_method || 'VNPay'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hướng dẫn sử dụng */}
+                    <div className="bg-[#fef3c7] border-l-3 border-[#f59e0b] rounded-lg p-4 mb-5">
+                      <h3 className="text-xs font-black text-[#92400e] mb-3 uppercase tracking-wide">
+                        📋 Hướng dẫn sử dụng voucher
+                      </h3>
+                      <ul className="space-y-2">
+                        <li className="flex items-start gap-2 text-xs text-[#78350f] leading-tight">
+                          <span className="w-4 h-4 bg-white rounded-full flex items-center justify-center flex-shrink-0 text-green-600 font-bold text-[10px]">
+                            ✓
+                          </span>
+                          <span>Check-in sân bay bằng QR hoặc mã tour</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-xs text-[#78350f] leading-tight">
+                          <span className="w-4 h-4 bg-white rounded-full flex items-center justify-center flex-shrink-0 text-green-600 font-bold text-[10px]">
+                            ✓
+                          </span>
+                          <span>Nhận phòng cần voucher + CCCD</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-xs text-[#78350f] leading-tight">
+                          <span className="w-4 h-4 bg-white rounded-full flex items-center justify-center flex-shrink-0 text-green-600 font-bold text-[10px]">
+                            ✓
+                          </span>
+                          <span>Nhận xe cần đối chiếu thông tin</span>
+                        </li>
+                        <li className="flex items-start gap-2 text-xs text-[#78350f] leading-tight">
+                          <span className="w-4 h-4 bg-white rounded-full flex items-center justify-center flex-shrink-0 text-green-600 font-bold text-[10px]">
+                            ✓
+                          </span>
+                          <span>Tham gia tour trình voucher cho HDV</span>
+                        </li>
+                      </ul>
+                    </div>
+
+
+                    {/* Footer */}
+                    <div className="text-center pt-6 border-t-2 border-gray-200 text-gray-600 text-sm">
+                      <div className="text-xl font-black text-[#0A4EC3] mb-3 uppercase tracking-wider">
+                        JURNI TRAVEL
+                      </div>
+                      <div className="mb-2">
+                        Phân khu E1, Khu công nghệ cao, Xa lộ Hà Nội, Phường Hiệp Phú, TP. Thủ Đức, TP.HCM
+                      </div>
+                      <div className="mb-4">
+                        Hotline: 0769 749 465 | Email: support@jurni.com
+                      </div>
+                      <div className="text-xs text-gray-400 italic">
+                        Voucher này là tài liệu chính thức xác nhận việc đặt và thanh toán dịch vụ du lịch.
+                      </div>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="mt-8 flex flex-wrap gap-4 pt-6 border-t border-gray-200">
                       <button
-                        onClick={() => setSelectedVoucher(voucher)}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2"
-                      >
-                        <IconCheck className="w-5 h-5" />
-                        Xem chi tiết
-                      </button>
-                      <button
                         onClick={() => handlePrint(voucher)}
-                        className="flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2"
+                        className="flex-1 bg-white border-2 border-[#0A4EC3] text-[#0A4EC3] hover:bg-[#0A4EC3] hover:text-white px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2"
                       >
                         <IconPrint className="w-5 h-5" />
                         In voucher
                       </button>
                       <button
                         onClick={() => handleDownload(voucher)}
-                        className="flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2"
+                        className="flex-1 bg-[#0A4EC3] hover:bg-[#083a9a] text-white px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2"
                       >
                         <IconDownload className="w-5 h-5" />
-                        Tải xuống
+                        Tải xuống JPG
                       </button>
                     </div>
                   </div>
                 </div>
               );
             })}
-          </div>
-        )}
-
-        {/* Detail Modal */}
-        {selectedVoucher && (
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedVoucher(null)}
-          >
-            <div
-              className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-sky-600 text-white p-6 flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Chi tiết Travel Voucher</h2>
-                <button
-                  onClick={() => setSelectedVoucher(null)}
-                  className="text-white hover:text-blue-100 text-2xl"
-                >
-                  ×
-                </button>
-              </div>
-              <div className="p-6">
-                <div className="text-center mb-8">
-                  <div className="text-4xl font-bold text-blue-600 mb-2">
-                    {selectedVoucher.booking_code || `JRN-${selectedVoucher.id}`}
-                  </div>
-                  <div className="text-gray-600">Mã đặt tour của bạn</div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-blue-50 rounded-xl p-6">
-                    <div className="text-sm text-gray-600 mb-1">Tổng tiền</div>
-                    <div className="text-3xl font-bold text-blue-600">
-                      {formatPrice(selectedVoucher.total_price)} VND
-                    </div>
-                  </div>
-                  <div className="bg-green-50 rounded-xl p-6">
-                    <div className="text-sm text-gray-600 mb-1">Trạng thái</div>
-                    <div className="flex items-center gap-2">
-                      <IconCheck className="w-6 h-6 text-green-600" />
-                      <span className="text-xl font-bold text-green-600">Đã thanh toán</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">QR Code</h3>
-                  <div className="bg-white border-2 border-blue-200 rounded-xl p-6 text-center">
-                    <img
-                      src={generateQRCode(selectedVoucher.booking_code || `JRN-${selectedVoucher.id}`)}
-                      alt="QR Code"
-                      className="w-48 h-48 mx-auto mb-4"
-                    />
-                    <p className="text-sm text-gray-600">
-                      Quét mã này tại sân bay, khách sạn hoặc điểm nhận xe để xác nhận dịch vụ
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mb-8">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Chi tiết dịch vụ</h3>
-                  <div className="space-y-4">
-                    {(selectedVoucher.services || []).map((service, idx) => (
-                      <div
-                        key={idx}
-                        className="border-2 border-gray-200 rounded-xl p-5 hover:border-blue-300 transition-all"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                            {getServiceIcon(service.type)}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-2">
-                              <div>
-                                <div className="text-xs text-gray-500 mb-1">{getServiceName(service.type)}</div>
-                                <h4 className="text-lg font-bold text-gray-900">{service.name}</h4>
-                              </div>
-                              <div className="text-xl font-bold text-blue-600">
-                                {formatPrice(service.price)} VND
-                              </div>
-                            </div>
-                            <div className="text-sm text-gray-600 mb-2">{service.details}</div>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                              </svg>
-                              {service.date}
-                            </div>
-                          </div>
-                        </div>
-        </div>
-      ))}
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 rounded-xl p-6 mb-6">
-                  <h4 className="font-bold text-gray-900 mb-3">Hướng dẫn sử dụng voucher</h4>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span><strong>Check-in sân bay:</strong> Quét QR code tại quầy check-in hoặc trình mã đặt tour</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span><strong>Nhận phòng khách sạn:</strong> Trình voucher và CMND/CCCD tại quầy lễ tân</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span><strong>Nhận xe:</strong> Đến địa điểm đã đặt, trình voucher và bằng lái xe</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span><strong>Tham gia tour:</strong> Đến điểm hẹn, trình voucher để tham gia hoạt động</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => handlePrint(selectedVoucher)}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2"
-                  >
-                    <IconPrint className="w-5 h-5" />
-                    In voucher
-                  </button>
-                  <button
-                    onClick={() => handleDownload(selectedVoucher)}
-                    className="flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-full font-semibold transition flex items-center justify-center gap-2"
-                  >
-                    <IconDownload className="w-5 h-5" />
-                    Tải xuống PDF
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>

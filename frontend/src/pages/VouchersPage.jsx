@@ -241,14 +241,20 @@ export default function VouchersPage() {
             color: #1f2937;
             font-size: 11px;
             line-height: 1.4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
           }
           .voucher-container {
             width: 100%;
             max-width: 210mm;
             margin: 0 auto;
             background: white;
-            padding: 12px;
+            padding: 8px;
             position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
           }
           .seal-background {
             position: absolute;
@@ -267,6 +273,9 @@ export default function VouchersPage() {
           .voucher-content-wrapper {
             position: relative;
             z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
           }
           .voucher-header {
             text-align: center;
@@ -275,7 +284,7 @@ export default function VouchersPage() {
             margin-bottom: 12px;
           }
           .voucher-header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 900;
             color: #0A4EC3;
             margin-bottom: 4px;
@@ -288,22 +297,22 @@ export default function VouchersPage() {
             font-weight: 500;
           }
           .header-logo {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 8px;
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 6px;
             object-fit: contain;
           }
           .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
           }
           .info-box {
             background: #f8fafc;
             border: 2px solid #0A4EC3;
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px;
           }
           .info-box h3 {
             font-size: 9px;
@@ -331,12 +340,12 @@ export default function VouchersPage() {
             text-align: center;
           }
           .qr-code {
-            width: 90px;
-            height: 90px;
-            margin: 8px auto;
+            width: 70px;
+            height: 70px;
+            margin: 6px auto;
             border: 2px solid #e5e7eb;
             border-radius: 6px;
-            padding: 6px;
+            padding: 5px;
             background: white;
           }
           .qr-code img {
@@ -467,27 +476,10 @@ export default function VouchersPage() {
             list-style: none;
           }
           .instructions-list li {
-            display: flex;
-            align-items: flex-start;
-            gap: 6px;
             margin-bottom: 5px;
             font-size: 9px;
             color: #78350f;
             line-height: 1.3;
-          }
-          .instructions-list li::before {
-            content: '✓';
-            color: #10b981;
-            font-weight: 800;
-            font-size: 11px;
-            flex-shrink: 0;
-            background: white;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
           }
           .seal-section {
             text-align: center;
@@ -514,30 +506,46 @@ export default function VouchersPage() {
           }
           .footer {
             text-align: center;
-            padding-top: 10px;
+            padding-top: 8px;
             border-top: 2px solid #e5e7eb;
             color: #64748b;
-            font-size: 9px;
+            font-size: 8px;
+            margin-top: auto;
           }
           .footer-logo {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 900;
             color: #0A4EC3;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
           }
           .footer div {
-            margin: 4px 0;
-            line-height: 1.5;
+            margin: 3px 0;
+            line-height: 1.4;
           }
           @media print {
             body {
               background: white;
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
             }
             .voucher-container {
               max-width: 100%;
               padding: 0;
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+            }
+            .voucher-content-wrapper {
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
+            }
+            .footer {
+              margin-top: auto;
+              position: relative;
             }
             .service-item {
               page-break-inside: avoid;
@@ -599,82 +607,95 @@ export default function VouchersPage() {
             </div>
           </div>
 
-          <div class="services-section" style="position: relative; margin-bottom: 12px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-              <div class="section-title" style="font-size: 15px; font-weight: 800; color: #0A4EC3; margin-bottom: 0; padding-bottom: 6px; border-bottom: 2px solid #0A4EC3; text-transform: uppercase;">Chi tiết dịch vụ</div>
-              <!-- Tổng tiền ở góc phải -->
-              <div style="background: linear-gradient(to right, #10b981, #059669); color: white; padding: 12px; border-radius: 8px; border: 2px solid #34d399; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 180px;">
-                <div style="font-size: 10px; text-transform: uppercase; opacity: 0.95; margin-bottom: 6px; letter-spacing: 0.5px; font-weight: 700; text-align: center;">Tổng tiền thanh toán</div>
-                <div style="font-size: 20px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;">${formatPrice(voucher.total_price)} VND</div>
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                  <div style="background: rgba(255, 255, 255, 0.3); padding: 4px 8px; border-radius: 9999px; font-size: 10px; font-weight: 700; border: 2px solid rgba(255,255,255,0.5); text-align: center;">✓ Đã thanh toán</div>
-                  <div style="background: rgba(255, 255, 255, 0.3); padding: 4px 8px; border-radius: 9999px; font-size: 10px; font-weight: 700; border: 2px solid rgba(255,255,255,0.5); text-align: center;">${voucher.payment_method || 'VNPay'}</div>
-                </div>
-              </div>
+          <div class="services-section" style="position: relative; margin-bottom: 10px;">
+            <div style="margin-bottom: 8px;">
+              <div class="section-title" style="font-size: 14px; font-weight: 800; color: #0A4EC3; margin-bottom: 0; padding-bottom: 6px; border-bottom: 2px solid #0A4EC3; text-transform: uppercase;">Chi tiết dịch vụ</div>
             </div>
-            <table style="width: 100%; border-collapse: collapse; border: 1px solid #d1d5db; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-              <thead>
-                <tr style="background: linear-gradient(to right, #0A4EC3, #2563eb); color: white;">
-                  <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Loại dịch vụ</th>
-                  <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Tên dịch vụ</th>
-                  <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Mô tả</th>
-                  <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Thời gian</th>
-                  <th style="text-align: right; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Thành tiền</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${voucher.services?.map((service, idx) => `
-                  <tr style="border-bottom: 1px solid #e5e7eb; background: ${idx % 2 === 0 ? '#ffffff' : '#f9fafb'};">
-                    <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                      <div style="font-size: 13px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.3px;">${getServiceName(service.type)}</div>
-                    </td>
-                    <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                      <div style="font-size: 15px; font-weight: 700; color: #111827;">${service.name}</div>
-                    </td>
-                    <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                      <div style="font-size: 13px; color: #4b5563; line-height: 1.5;">${service.description || '-'}</div>
-                    </td>
-                    <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                      <div style="font-size: 13px; color: #374151; white-space: nowrap;">
-                        <div style="font-weight: 500;">${formatDate(service.start_date)}</div>
-                        <div style="color: #6b7280;">đến ${formatDate(service.end_date)}</div>
+            <div style="overflow-x: auto; border-radius: 10px; border: 2px solid rgba(10, 78, 195, 0.2); background: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+              <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                <thead>
+                  <tr style="background: linear-gradient(to right, #0A4EC3, #1e5cd8, #2563eb); color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Loại dịch vụ</th>
+                    <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Tên dịch vụ</th>
+                    <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Mô tả</th>
+                    <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Thời gian</th>
+                    <th style="text-align: right; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${voucher.services?.map((service, idx) => `
+                    <tr style="border-bottom: 2px solid #e5e7eb; background: ${idx % 2 === 0 ? '#ffffff' : 'rgba(239, 246, 255, 0.3)'};">
+                      <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                        <div style="font-size: 9px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.2px;">${getServiceName(service.type)}</div>
+                      </td>
+                      <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                        <div style="font-size: 10px; font-weight: 700; color: #111827;">${service.name}</div>
+                      </td>
+                      <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                        <div style="font-size: 9px; color: #374151; line-height: 1.4; font-weight: 500;">${service.description || '-'}</div>
+                      </td>
+                      <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                        <div style="font-size: 9px; color: #1f2937; white-space: nowrap;">
+                          <div style="font-weight: 600;">${formatDate(service.start_date)}</div>
+                          <div style="color: #4b5563; font-size: 8px;">đến ${formatDate(service.end_date)}</div>
+                        </div>
+                      </td>
+                      <td style="padding: 8px 10px; text-align: right;">
+                        <div style="font-size: 10px; font-weight: 900; color: #0A4EC3; white-space: nowrap;">
+                          ${formatPrice(service.price)} VND
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('') || ''}
+                </tbody>
+                <tfoot>
+                  <tr style="background: linear-gradient(to right, #eff6ff, #e0e7ff); border-top: 4px solid #0A4EC3; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);">
+                    <td colspan="4" style="padding: 10px;">
+                      <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="font-size: 10px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.3px;">
+                          Tổng tiền thanh toán
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                          <div style="display: inline-flex; align-items: center; gap: 4px; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 9px; font-weight: 600; border: 2px solid #6ee7b7; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+                            ✓ Đã thanh toán
+                          </div>
+                          <div style="display: inline-flex; align-items: center; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 9999px; font-size: 9px; font-weight: 600; border: 2px solid #93c5fd; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+                            ${voucher.payment_method || 'VNPay'}
+                          </div>
+                        </div>
                       </div>
                     </td>
-                    <td style="padding: 12px 20px; text-align: right;">
-                      <div style="font-size: 15px; font-weight: 900; color: #0A4EC3; white-space: nowrap;">
-                        ${formatPrice(service.price)} VND
+                    <td style="padding: 10px; text-align: right;">
+                      <div style="font-size: 14px; font-weight: 900; color: #0A4EC3; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);">
+                        ${formatPrice(voucher.total_price)} VND
                       </div>
                     </td>
                   </tr>
-                `).join('') || ''}
-              </tbody>
-            </table>
+                </tfoot>
+              </table>
+            </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-bottom: 12px; align-items: stretch;">
+          <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px; align-items: stretch;">
             <!-- PHẦN HƯỚNG DẪN -->
             <div class="instructions-section" 
-                style="background: #fffef5; border-left: 4px solid #fbbf24; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                style="background: #fffef5; border-left: 4px solid #fbbf24; padding: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
               <div class="instructions-title" 
-                  style="font-size: 14px; font-weight: 900; margin-bottom: 16px; color: #78350f; text-transform: uppercase; letter-spacing: 0.5px;">
+                  style="font-size: 10px; font-weight: 900; margin-bottom: 8px; color: #78350f; text-transform: uppercase; letter-spacing: 0.3px;">
                 HƯỚNG DẪN SỬ DỤNG VOUCHER
               </div>
-              <ul class="instructions-list" style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
-                <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                  <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                  <span>Check-in sân bay bằng QR hoặc mã tour</span>
+              <ul class="instructions-list" style="list-style: none; padding: 0; margin: 0; line-height: 1.5;">
+                <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                  Check-in sân bay bằng QR hoặc mã tour
                 </li>
-                <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                  <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                  <span>Nhận phòng cần voucher + CCCD</span>
+                <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                  Nhận phòng cần voucher + CCCD
                 </li>
-                <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                  <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                  <span>Nhận xe cần đối chiếu thông tin</span>
+                <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                  Nhận xe cần đối chiếu thông tin
                 </li>
-                <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                  <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                  <span>Tham gia tour trình voucher cho HDV</span>
+                <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                  Tham gia tour trình voucher cho HDV
                 </li>
               </ul>
             </div>
@@ -688,8 +709,8 @@ export default function VouchersPage() {
                   height: 100%;
                 ">
               <div style="
-                    width: 144px;
-                    height: 144px;
+                    width: 100px;
+                    height: 100px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -701,10 +722,10 @@ export default function VouchersPage() {
                       height: 100%;
                       object-fit: contain;
                     "
-                    onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px;\'><div style=\'font-size: 8px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;\'>VERIFIED & APPROVED</div><div style=\'font-size: 24px; font-weight: 900; color: #0A4EC3; margin-bottom: 4px;\'>JURNI</div><div style=\'font-size: 7px; font-weight: 600; color: #0A4EC3; margin-bottom: 4px;\'>TRAVEL</div><div style=\'font-size: 6px; font-weight: 500; color: #0A4EC3;\'>EST. 2025</div><div style=\'font-size: 6px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px;\'>OFFICIAL AUTHENTICATION SEAL</div></div>';" />
+                    onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px;\'><div style=\'font-size: 7px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;\'>VERIFIED & APPROVED</div><div style=\'font-size: 16px; font-weight: 900; color: #0A4EC3; margin-bottom: 3px;\'>JURNI</div><div style=\'font-size: 6px; font-weight: 600; color: #0A4EC3; margin-bottom: 3px;\'>TRAVEL</div><div style=\'font-size: 5px; font-weight: 500; color: #0A4EC3;\'>EST. 2025</div><div style=\'font-size: 5px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px;\'>OFFICIAL AUTHENTICATION SEAL</div></div>';" />
               </div>
 
-              <div style="margin-top: 8px; font-size: 12px; color: #78350f; font-style: italic;">
+              <div style="margin-top: 6px; font-size: 8px; color: #78350f; font-style: italic;">
                 Chứng nhận bởi JURNI
               </div>
             </div>
@@ -727,7 +748,15 @@ export default function VouchersPage() {
     printWindow.document.close();
     
     setTimeout(() => {
+      // Đảm bảo title được set để browser tự động đề xuất tên file khi in PDF
       printWindow.document.title = fileName;
+      
+      // Thêm meta tag để hỗ trợ một số browser
+      const metaTitle = printWindow.document.createElement('meta');
+      metaTitle.setAttribute('name', 'title');
+      metaTitle.setAttribute('content', fileName);
+      printWindow.document.head.appendChild(metaTitle);
+      
       printWindow.print();
     }, 500);
   };
@@ -773,14 +802,20 @@ export default function VouchersPage() {
               color: #1f2937;
               font-size: 11px;
               line-height: 1.4;
+              min-height: 100vh;
+              display: flex;
+              flex-direction: column;
             }
             .voucher-container {
               width: 100%;
               max-width: 210mm;
               margin: 0 auto;
               background: white;
-              padding: 12px;
+              padding: 8px;
               position: relative;
+              flex: 1;
+              display: flex;
+              flex-direction: column;
             }
             .seal-background {
               position: absolute;
@@ -799,6 +834,9 @@ export default function VouchersPage() {
             .voucher-content-wrapper {
               position: relative;
               z-index: 1;
+              flex: 1;
+              display: flex;
+              flex-direction: column;
             }
             .voucher-header {
               text-align: center;
@@ -807,7 +845,7 @@ export default function VouchersPage() {
               margin-bottom: 12px;
             }
             .voucher-header h1 {
-              font-size: 24px;
+              font-size: 22px;
               font-weight: 900;
               color: #0A4EC3;
               margin-bottom: 4px;
@@ -820,22 +858,22 @@ export default function VouchersPage() {
               font-weight: 500;
             }
             .header-logo {
-              width: 48px;
-              height: 48px;
-              margin: 0 auto 8px;
+              width: 50px;
+              height: 50px;
+              margin: 0 auto 6px;
               object-fit: contain;
             }
             .info-grid {
               display: grid;
               grid-template-columns: 1fr 1fr 1fr;
               gap: 10px;
-              margin-bottom: 12px;
+              margin-bottom: 10px;
             }
             .info-box {
               background: #f8fafc;
               border: 2px solid #0A4EC3;
               border-radius: 8px;
-              padding: 10px;
+              padding: 8px;
             }
             .info-box h3 {
               font-size: 9px;
@@ -863,12 +901,12 @@ export default function VouchersPage() {
               text-align: center;
             }
             .qr-code {
-              width: 90px;
-              height: 90px;
-              margin: 8px auto;
+              width: 70px;
+              height: 70px;
+              margin: 6px auto;
               border: 2px solid #e5e7eb;
               border-radius: 6px;
-              padding: 6px;
+              padding: 5px;
               background: white;
             }
             .qr-code img {
@@ -999,27 +1037,10 @@ export default function VouchersPage() {
               list-style: none;
             }
             .instructions-list li {
-              display: flex;
-              align-items: flex-start;
-              gap: 6px;
               margin-bottom: 5px;
               font-size: 9px;
               color: #78350f;
               line-height: 1.3;
-            }
-            .instructions-list li::before {
-              content: '✓';
-              color: #10b981;
-              font-weight: 800;
-              font-size: 11px;
-              flex-shrink: 0;
-              background: white;
-              width: 16px;
-              height: 16px;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
             }
             .seal-section {
               text-align: center;
@@ -1046,22 +1067,23 @@ export default function VouchersPage() {
             }
             .footer {
               text-align: center;
-              padding-top: 10px;
+              padding-top: 8px;
               border-top: 2px solid #e5e7eb;
               color: #64748b;
-              font-size: 9px;
+              font-size: 8px;
+              margin-top: auto;
             }
             .footer-logo {
-              font-size: 16px;
+              font-size: 14px;
               font-weight: 900;
               color: #0A4EC3;
-              margin-bottom: 8px;
+              margin-bottom: 6px;
               text-transform: uppercase;
-              letter-spacing: 1px;
+              letter-spacing: 0.5px;
             }
             .footer div {
-              margin: 4px 0;
-              line-height: 1.5;
+              margin: 3px 0;
+              line-height: 1.4;
             }
           </style>
         </head>
@@ -1119,82 +1141,95 @@ export default function VouchersPage() {
               </div>
             </div>
 
-            <div class="services-section" style="position: relative; margin-bottom: 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-                <div class="section-title" style="font-size: 15px; font-weight: 800; color: #0A4EC3; margin-bottom: 0; padding-bottom: 6px; border-bottom: 2px solid #0A4EC3; text-transform: uppercase;">Chi tiết dịch vụ</div>
-                <!-- Tổng tiền ở góc phải -->
-                <div style="background: linear-gradient(to right, #10b981, #059669); color: white; padding: 12px; border-radius: 8px; border: 2px solid #34d399; box-shadow: 0 4px 6px rgba(0,0,0,0.1); min-width: 180px;">
-                  <div style="font-size: 10px; text-transform: uppercase; opacity: 0.95; margin-bottom: 6px; letter-spacing: 0.5px; font-weight: 700; text-align: center;">Tổng tiền thanh toán</div>
-                  <div style="font-size: 20px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); text-align: center;">${formatPrice(voucher.total_price)} VND</div>
-                  <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <div style="background: rgba(255, 255, 255, 0.3); padding: 4px 8px; border-radius: 9999px; font-size: 10px; font-weight: 700; border: 2px solid rgba(255,255,255,0.5); text-align: center;">✓ Đã thanh toán</div>
-                    <div style="background: rgba(255, 255, 255, 0.3); padding: 4px 8px; border-radius: 9999px; font-size: 10px; font-weight: 700; border: 2px solid rgba(255,255,255,0.5); text-align: center;">${voucher.payment_method || 'VNPay'}</div>
-                  </div>
-                </div>
+            <div class="services-section" style="position: relative; margin-bottom: 10px;">
+              <div style="margin-bottom: 8px;">
+                <div class="section-title" style="font-size: 14px; font-weight: 800; color: #0A4EC3; margin-bottom: 0; padding-bottom: 6px; border-bottom: 2px solid #0A4EC3; text-transform: uppercase;">Chi tiết dịch vụ</div>
               </div>
-              <table style="width: 100%; border-collapse: collapse; border: 1px solid #d1d5db; font-size: 11px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                <thead>
-                  <tr style="background: linear-gradient(to right, #0A4EC3, #2563eb); color: white;">
-                    <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Loại dịch vụ</th>
-                    <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Tên dịch vụ</th>
-                    <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Mô tả</th>
-                    <th style="text-align: left; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-right: 1px solid rgba(255,255,255,0.2);">Thời gian</th>
-                    <th style="text-align: right; padding: 14px 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Thành tiền</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${voucher.services?.map((service, idx) => `
-                    <tr style="border-bottom: 1px solid #e5e7eb; background: ${idx % 2 === 0 ? '#ffffff' : '#f9fafb'};">
-                      <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                        <div style="font-size: 13px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.3px;">${getServiceName(service.type)}</div>
-                      </td>
-                      <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                        <div style="font-size: 15px; font-weight: 700; color: #111827;">${service.name}</div>
-                      </td>
-                      <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                        <div style="font-size: 13px; color: #4b5563; line-height: 1.5;">${service.description || '-'}</div>
-                      </td>
-                      <td style="padding: 12px 20px; border-right: 1px solid #e5e7eb;">
-                        <div style="font-size: 13px; color: #374151; white-space: nowrap;">
-                          <div style="font-weight: 500;">${formatDate(service.start_date)}</div>
-                          <div style="color: #6b7280;">đến ${formatDate(service.end_date)}</div>
+              <div style="overflow-x: auto; border-radius: 10px; border: 2px solid rgba(10, 78, 195, 0.2); background: white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+                <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+                  <thead>
+                    <tr style="background: linear-gradient(to right, #0A4EC3, #1e5cd8, #2563eb); color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                      <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Loại dịch vụ</th>
+                      <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Tên dịch vụ</th>
+                      <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Mô tả</th>
+                      <th style="text-align: left; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; border-right: 1px solid rgba(255,255,255,0.2);">Thời gian</th>
+                      <th style="text-align: right; padding: 8px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Thành tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${voucher.services?.map((service, idx) => `
+                      <tr style="border-bottom: 2px solid #e5e7eb; background: ${idx % 2 === 0 ? '#ffffff' : 'rgba(239, 246, 255, 0.3)'};">
+                        <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                          <div style="font-size: 9px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.2px;">${getServiceName(service.type)}</div>
+                        </td>
+                        <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                          <div style="font-size: 10px; font-weight: 700; color: #111827;">${service.name}</div>
+                        </td>
+                        <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                          <div style="font-size: 9px; color: #374151; line-height: 1.4; font-weight: 500;">${service.description || '-'}</div>
+                        </td>
+                        <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
+                          <div style="font-size: 9px; color: #1f2937; white-space: nowrap;">
+                            <div style="font-weight: 600;">${formatDate(service.start_date)}</div>
+                            <div style="color: #4b5563; font-size: 8px;">đến ${formatDate(service.end_date)}</div>
+                          </div>
+                        </td>
+                        <td style="padding: 8px 10px; text-align: right;">
+                          <div style="font-size: 10px; font-weight: 900; color: #0A4EC3; white-space: nowrap;">
+                            ${formatPrice(service.price)} VND
+                          </div>
+                        </td>
+                      </tr>
+                    `).join('') || ''}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background: linear-gradient(to right, #eff6ff, #e0e7ff); border-top: 4px solid #0A4EC3; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);">
+                      <td colspan="4" style="padding: 10px;">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                          <div style="font-size: 10px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.3px;">
+                            Tổng tiền thanh toán
+                          </div>
+                          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                            <div style="display: inline-flex; align-items: center; gap: 4px; background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 9999px; font-size: 9px; font-weight: 600; border: 2px solid #6ee7b7; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+                              ✓ Đã thanh toán
+                            </div>
+                            <div style="display: inline-flex; align-items: center; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 9999px; font-size: 9px; font-weight: 600; border: 2px solid #93c5fd; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
+                              ${voucher.payment_method || 'VNPay'}
+                            </div>
+                          </div>
                         </div>
                       </td>
-                      <td style="padding: 12px 20px; text-align: right;">
-                        <div style="font-size: 15px; font-weight: 900; color: #0A4EC3; white-space: nowrap;">
-                          ${formatPrice(service.price)} VND
+                      <td style="padding: 10px; text-align: right;">
+                        <div style="font-size: 14px; font-weight: 900; color: #0A4EC3; white-space: nowrap; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);">
+                          ${formatPrice(voucher.total_price)} VND
                         </div>
                       </td>
                     </tr>
-                  `).join('') || ''}
-                </tbody>
-              </table>
+                  </tfoot>
+                </table>
+              </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr auto; gap: 16px; margin-bottom: 12px; align-items: stretch;">
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-bottom: 10px; align-items: stretch;">
               <!-- PHẦN HƯỚNG DẪN -->
               <div class="instructions-section" 
-                  style="background: #fffef5; border-left: 4px solid #fbbf24; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                  style="background: #fffef5; border-left: 4px solid #fbbf24; padding: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                 <div class="instructions-title" 
-                    style="font-size: 14px; font-weight: 900; margin-bottom: 16px; color: #78350f; text-transform: uppercase; letter-spacing: 0.5px;">
+                    style="font-size: 10px; font-weight: 900; margin-bottom: 8px; color: #78350f; text-transform: uppercase; letter-spacing: 0.3px;">
                   HƯỚNG DẪN SỬ DỤNG VOUCHER
                 </div>
-                <ul class="instructions-list" style="list-style: none; padding: 0; margin: 0; line-height: 1.8;">
-                  <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                    <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                    <span>Check-in sân bay bằng QR hoặc mã tour</span>
+                <ul class="instructions-list" style="list-style: none; padding: 0; margin: 0; line-height: 1.5;">
+                  <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                    Check-in sân bay bằng QR hoặc mã tour
                   </li>
-                  <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                    <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                    <span>Nhận phòng cần voucher + CCCD</span>
+                  <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                    Nhận phòng cần voucher + CCCD
                   </li>
-                  <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                    <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                    <span>Nhận xe cần đối chiếu thông tin</span>
+                  <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                    Nhận xe cần đối chiếu thông tin
                   </li>
-                  <li style="display: flex; align-items: start; gap: 12px; margin-bottom: 12px; font-size: 14px; color: #78350f;">
-                    <span style="width: 20px; height: 20px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #16a34a; font-weight: 700; font-size: 12px;">✓</span>
-                    <span>Tham gia tour trình voucher cho HDV</span>
+                  <li style="margin-bottom: 6px; font-size: 9px; color: #78350f;">
+                    Tham gia tour trình voucher cho HDV
                   </li>
                 </ul>
               </div>
@@ -1208,8 +1243,8 @@ export default function VouchersPage() {
                     height: 100%;
                   ">
                 <div style="
-                      width: 144px;
-                      height: 144px;
+                      width: 100px;
+                      height: 100px;
                       display: flex;
                       align-items: center;
                       justify-content: center;
@@ -1221,10 +1256,10 @@ export default function VouchersPage() {
                         height: 100%;
                         object-fit: contain;
                       "
-                      onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px;\'><div style=\'font-size: 8px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;\'>VERIFIED & APPROVED</div><div style=\'font-size: 24px; font-weight: 900; color: #0A4EC3; margin-bottom: 4px;\'>JURNI</div><div style=\'font-size: 7px; font-weight: 600; color: #0A4EC3; margin-bottom: 4px;\'>TRAVEL</div><div style=\'font-size: 6px; font-weight: 500; color: #0A4EC3;\'>EST. 2025</div><div style=\'font-size: 6px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px;\'>OFFICIAL AUTHENTICATION SEAL</div></div>';" />
+                      onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px;\'><div style=\'font-size: 7px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;\'>VERIFIED & APPROVED</div><div style=\'font-size: 16px; font-weight: 900; color: #0A4EC3; margin-bottom: 3px;\'>JURNI</div><div style=\'font-size: 6px; font-weight: 600; color: #0A4EC3; margin-bottom: 3px;\'>TRAVEL</div><div style=\'font-size: 5px; font-weight: 500; color: #0A4EC3;\'>EST. 2025</div><div style=\'font-size: 5px; font-weight: 700; color: #0A4EC3; text-transform: uppercase; letter-spacing: 1px; margin-top: 3px;\'>OFFICIAL AUTHENTICATION SEAL</div></div>';" />
                 </div>
 
-                <div style="margin-top: 8px; font-size: 12px; color: #78350f; font-style: italic;">
+                <div style="margin-top: 6px; font-size: 8px; color: #78350f; font-style: italic;">
                   Chứng nhận bởi JURNI
                 </div>
               </div>
@@ -1275,15 +1310,59 @@ export default function VouchersPage() {
       });
 
       const element = iframe.contentDocument.getElementById('voucher-content');
+      
+      // Đợi tất cả hình ảnh load xong
+      await new Promise((resolve) => {
+        const images = element.querySelectorAll('img');
+        let loadedCount = 0;
+        const totalImages = images.length;
+        
+        if (totalImages === 0) {
+          resolve();
+          return;
+        }
+        
+        images.forEach((img) => {
+          if (img.complete) {
+            loadedCount++;
+            if (loadedCount === totalImages) resolve();
+          } else {
+            img.onload = () => {
+              loadedCount++;
+              if (loadedCount === totalImages) resolve();
+            };
+            img.onerror = () => {
+              loadedCount++;
+              if (loadedCount === totalImages) resolve();
+            };
+          }
+        });
+        
+        // Timeout sau 5 giây
+        setTimeout(() => resolve(), 5000);
+      });
+      
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
+        allowTaint: false,
         logging: false,
         backgroundColor: '#ffffff',
         width: element.scrollWidth,
         height: element.scrollHeight,
         windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
+        windowHeight: element.scrollHeight,
+        imageTimeout: 15000,
+        removeContainer: false,
+        onclone: (clonedDoc) => {
+          // Đảm bảo tất cả hình ảnh có crossOrigin
+          const clonedImages = clonedDoc.querySelectorAll('img');
+          clonedImages.forEach((img) => {
+            if (img.src && !img.crossOrigin) {
+              img.crossOrigin = 'anonymous';
+            }
+          });
+        }
       });
 
       const bookingCode = voucher.booking_code.replace(/[^a-zA-Z0-9-]/g, '_');
@@ -1291,6 +1370,15 @@ export default function VouchersPage() {
       const fileName = `Voucher-${bookingCode}-${timestamp}.jpg`;
 
       canvas.toBlob((blob) => {
+        if (!blob) {
+          console.error('Failed to create blob from canvas');
+          alert('Có lỗi xảy ra khi tạo file ảnh. Vui lòng thử lại.');
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+          return;
+        }
+        
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -1306,7 +1394,7 @@ export default function VouchersPage() {
             document.body.removeChild(iframe);
           }
         }, 100);
-      }, 'image/jpeg', 0.95);
+      }, 'image/jpeg', 1.0);
     } catch (error) {
       console.error('Error generating JPG:', error);
       alert('Có lỗi xảy ra khi tạo file JPG. Vui lòng thử lại.');
@@ -1386,10 +1474,10 @@ export default function VouchersPage() {
                   />
                   
                   {/* Voucher Content */}
-                  <div className="p-10 relative z-10">
+                  <div className="p-8 relative z-10">
                     {/* Header */}
-                    <div className="text-center mb-10 pb-8 border-b border-gray-200/60">
-                      <div className="mb-5">
+                    <div className="text-center mb-8 pb-6 border-b border-gray-200/60">
+                      <div className="mb-4">
                         <img 
                           src="/JurniLogo/apple-touch-icon.png" 
                           alt="Jurni Logo" 
@@ -1405,9 +1493,9 @@ export default function VouchersPage() {
                     </div>
 
                     {/* 3 Columns Info Grid */}
-                    <div className="grid md:grid-cols-3 gap-5 mb-8">
+                    <div className="grid md:grid-cols-3 gap-5 mb-6">
                       {/* Thông tin đặt tour */}
-                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-xl p-5">
+                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-xl p-4">
                         <h3 className="text-xs uppercase text-gray-600 font-bold mb-4 tracking-widest flex items-center gap-2">
                           <span className="w-1 h-4 bg-[#0A4EC3] rounded-full"></span>
                           Thông tin đặt tour
@@ -1432,7 +1520,7 @@ export default function VouchersPage() {
                       </div>
 
                       {/* Thông tin khách hàng */}
-                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-xl p-5">
+                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-xl p-4">
                         <h3 className="text-xs uppercase text-gray-600 font-bold mb-4 tracking-widest flex items-center gap-2">
                           <span className="w-1 h-4 bg-[#0A4EC3] rounded-full"></span>
                           Thông tin khách hàng
@@ -1454,7 +1542,7 @@ export default function VouchersPage() {
                       </div>
 
                       {/* QR Code */}
-                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-xl p-5">
+                      <div className="bg-[#f8fafc] border-2 border-[#0A4EC3] rounded-xl p-4">
                         <h3 className="text-xs uppercase text-gray-600 font-bold mb-4 tracking-widest text-center flex items-center justify-center gap-2">
                           <span className="w-1 h-4 bg-[#0A4EC3] rounded-full"></span>
                           QR Code
@@ -1464,7 +1552,7 @@ export default function VouchersPage() {
                             <img
                               src={qrCodeUrl}
                               alt="QR Code"
-                              className="w-28 h-28"
+                              className="w-24 h-24"
                             />
                           </div>
                           <p className="text-xs text-gray-500 mt-3 font-medium">
@@ -1475,46 +1563,46 @@ export default function VouchersPage() {
                     </div>
 
                     {/* Chi tiết dịch vụ */}
-                    <div className="mb-8">
-                      <div className="mb-5">
+                    <div className="mb-6">
+                      <div className="mb-4">
                         <h2 className="text-xl font-extrabold text-gray-900 mb-1 uppercase tracking-wide">
                           Chi tiết dịch vụ
                         </h2>
                         <div className="w-16 h-0.5 bg-gradient-to-r from-[#0A4EC3] to-transparent"></div>
                       </div>
-                      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                      <div className="overflow-x-auto rounded-xl border-2 border-[#0A4EC3]/20 bg-white shadow-lg">
                         <table className="w-full border-collapse">
                           <thead>
-                            <tr className="bg-gradient-to-r from-[#0A4EC3] via-[#1e5cd8] to-[#2563eb] text-white">
-                              <th className="text-left py-4 px-6 text-xs uppercase font-bold tracking-widest border-r border-white/10">Loại dịch vụ</th>
-                              <th className="text-left py-4 px-6 text-xs uppercase font-bold tracking-widest border-r border-white/10">Tên dịch vụ</th>
-                              <th className="text-left py-4 px-6 text-xs uppercase font-bold tracking-widest border-r border-white/10">Mô tả</th>
-                              <th className="text-left py-4 px-6 text-xs uppercase font-bold tracking-widest border-r border-white/10">Thời gian</th>
-                              <th className="text-right py-4 px-6 text-xs uppercase font-bold tracking-widest">Thành tiền</th>
+                            <tr className="bg-gradient-to-r from-[#0A4EC3] via-[#1e5cd8] to-[#2563eb] text-white shadow-md">
+                              <th className="text-left py-3 px-5 text-xs uppercase font-bold tracking-widest border-r border-white/20">Loại dịch vụ</th>
+                              <th className="text-left py-3 px-5 text-xs uppercase font-bold tracking-widest border-r border-white/20">Tên dịch vụ</th>
+                              <th className="text-left py-3 px-5 text-xs uppercase font-bold tracking-widest border-r border-white/20">Mô tả</th>
+                              <th className="text-left py-3 px-5 text-xs uppercase font-bold tracking-widest border-r border-white/20">Thời gian</th>
+                              <th className="text-right py-3 px-5 text-xs uppercase font-bold tracking-widest">Thành tiền</th>
                             </tr>
                           </thead>
                           <tbody>
                             {voucher.services?.map((service, idx) => (
                               <tr 
                                 key={idx}
-                                className={`border-b border-gray-100 transition-all duration-150 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-blue-50/50`}
+                                className={`border-b-2 border-gray-200 transition-all duration-150 ${idx % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'} hover:bg-blue-100/50 hover:shadow-sm`}
                               >
-                                <td className="py-4 px-6 border-r border-gray-100">
-                                  <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{getServiceName(service.type)}</div>
+                                <td className="py-3 px-5 border-r-2 border-gray-200">
+                                  <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{getServiceName(service.type)}</div>
                                 </td>
-                                <td className="py-4 px-6 border-r border-gray-100">
+                                <td className="py-3 px-5 border-r-2 border-gray-200">
                                   <div className="text-sm font-bold text-gray-900">{service.name}</div>
                                 </td>
-                                <td className="py-4 px-6 border-r border-gray-100">
-                                  <div className="text-sm text-gray-600 leading-relaxed max-w-xs">{service.description || '-'}</div>
+                                <td className="py-3 px-5 border-r-2 border-gray-200">
+                                  <div className="text-xs text-gray-700 leading-relaxed max-w-xs font-medium">{service.description || '-'}</div>
                                 </td>
-                                <td className="py-4 px-6 border-r border-gray-100">
-                                  <div className="text-sm text-gray-700 whitespace-nowrap">
+                                <td className="py-3 px-5 border-r-2 border-gray-200">
+                                  <div className="text-xs text-gray-800 whitespace-nowrap">
                                     <div className="font-semibold">{formatDate(service.start_date)}</div>
-                                    <div className="text-xs text-gray-500 mt-0.5">đến {formatDate(service.end_date)}</div>
+                                    <div className="text-[10px] text-gray-600 mt-0.5">đến {formatDate(service.end_date)}</div>
                                   </div>
                                 </td>
-                                <td className="py-4 px-6 text-right">
+                                <td className="py-3 px-5 text-right">
                                   <div className="text-sm font-black text-[#0A4EC3] whitespace-nowrap">
                                     {formatPrice(service.price)} VND
                                   </div>
@@ -1523,25 +1611,25 @@ export default function VouchersPage() {
                             ))}
                           </tbody>
                           <tfoot>
-                            <tr className="bg-gray-50 border-t-2 border-gray-300">
-                              <td colSpan="4" className="py-5 px-6">
+                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-4 border-[#0A4EC3] shadow-inner">
+                              <td colSpan="4" className="py-4 px-5">
                                 <div className="flex flex-col gap-2">
                                   <div className="text-sm font-bold text-gray-900 uppercase tracking-wide">
                                     Tổng tiền thanh toán
                                   </div>
                                   <div className="flex flex-wrap gap-2">
-                                    <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-200">
+                                    <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-emerald-300 shadow-sm">
                                       <IconCheck className="w-3 h-3" />
                                       Đã thanh toán
                                     </div>
-                                    <div className="inline-flex items-center bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-blue-200">
+                                    <div className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-blue-300 shadow-sm">
                                       {voucher.payment_method || 'VNPay'}
                                     </div>
                                   </div>
                                 </div>
                               </td>
-                              <td className="py-5 px-6 text-right">
-                                <div className="text-xl font-black text-[#0A4EC3] whitespace-nowrap">
+                              <td className="py-4 px-5 text-right">
+                                <div className="text-lg font-black text-[#0A4EC3] whitespace-nowrap drop-shadow-sm">
                                   {formatPrice(voucher.total_price)} VND
                                 </div>
                               </td>
@@ -1552,36 +1640,24 @@ export default function VouchersPage() {
                     </div>
 
                     {/* Hướng dẫn sử dụng và Dấu mộc */}
-                    <div className="grid grid-cols-[1fr_auto] gap-6 mb-8">
+                    <div className="grid grid-cols-[1fr_auto] gap-5 mb-6">
                       {/* Hướng dẫn sử dụng */}
-                      <div className="bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-white border-l-4 border-amber-400 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                        <h3 className="text-sm font-extrabold text-amber-900 mb-5 uppercase tracking-widest flex items-center gap-2">
+                      <div className="bg-gradient-to-br from-amber-50/80 via-yellow-50/50 to-white border-l-4 border-amber-400 rounded-xl p-5 shadow-sm">
+                        <h3 className="text-sm font-extrabold text-amber-900 mb-4 uppercase tracking-widest flex items-center gap-2">
                           <span className="w-1.5 h-5 bg-amber-400 rounded-full"></span>
                           HƯỚNG DẪN SỬ DỤNG VOUCHER
                         </h3>
-                        <ul className="space-y-3.5">
-                          <li className="flex items-start gap-3.5 text-sm text-amber-900 leading-relaxed">
-                            <span className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-600 font-bold text-xs shadow-sm">
-                              ✓
-                            </span>
+                        <ul className="space-y-3">
+                          <li className="text-sm text-amber-900 leading-relaxed">
                             <span className="font-medium">Check-in sân bay bằng QR hoặc mã tour</span>
                           </li>
-                          <li className="flex items-start gap-3.5 text-sm text-amber-900 leading-relaxed">
-                            <span className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-600 font-bold text-xs shadow-sm">
-                              ✓
-                            </span>
+                          <li className="text-sm text-amber-900 leading-relaxed">
                             <span className="font-medium">Nhận phòng cần voucher + CCCD</span>
                           </li>
-                          <li className="flex items-start gap-3.5 text-sm text-amber-900 leading-relaxed">
-                            <span className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-600 font-bold text-xs shadow-sm">
-                              ✓
-                            </span>
+                          <li className="text-sm text-amber-900 leading-relaxed">
                             <span className="font-medium">Nhận xe cần đối chiếu thông tin</span>
                           </li>
-                          <li className="flex items-start gap-3.5 text-sm text-amber-900 leading-relaxed">
-                            <span className="w-6 h-6 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-600 font-bold text-xs shadow-sm">
-                              ✓
-                            </span>
+                          <li className="text-sm text-amber-900 leading-relaxed">
                             <span className="font-medium">Tham gia tour trình voucher cho HDV</span>
                           </li>
                         </ul>
@@ -1589,14 +1665,14 @@ export default function VouchersPage() {
                       
                       {/* Dấu mộc */}
                       <div className="flex flex-col items-center justify-center">
-                        <div className="w-40 h-40 flex items-center justify-center">
+                        <div className="w-36 h-36 flex items-center justify-center">
                           <img 
                             src="/JurniLogo/jurni-seal.png" 
                             alt="Jurni Seal" 
                             className="w-full h-full object-contain"
                             onError={(e) => {
                               e.target.style.display = 'none';
-                              e.target.parentElement.innerHTML = '<div class="flex flex-col items-center justify-center p-3"><div class="text-[8px] font-bold text-[#0A4EC3] uppercase tracking-wider mb-1">VERIFIED & APPROVED</div><div class="text-2xl font-black text-[#0A4EC3] mb-1">JURNI</div><div class="text-[7px] font-semibold text-[#0A4EC3] mb-1">TRAVEL</div><div class="text-[6px] font-medium text-[#0A4EC3]">EST. 2025</div><div class="text-[6px] font-bold text-[#0A4EC3] uppercase tracking-widest mt-1">OFFICIAL AUTHENTICATION SEAL</div></div>';
+                              e.target.parentElement.innerHTML = '<div class="flex flex-col items-center justify-center p-3"><div class="text-[8px] font-bold text-[#0A4EC3] uppercase tracking-wider mb-1">VERIFIED & APPROVED</div><div class="text-xl font-black text-[#0A4EC3] mb-1">JURNI</div><div class="text-[7px] font-semibold text-[#0A4EC3] mb-1">TRAVEL</div><div class="text-[6px] font-medium text-[#0A4EC3]">EST. 2025</div><div class="text-[6px] font-bold text-[#0A4EC3] uppercase tracking-widest mt-1">OFFICIAL AUTHENTICATION SEAL</div></div>';
                             }}
                           />
                         </div>
@@ -1608,14 +1684,14 @@ export default function VouchersPage() {
 
 
                     {/* Footer */}
-                    <div className="text-center pt-8 border-t border-gray-200/60">
-                      <div className="text-2xl font-extrabold text-[#0A4EC3] mb-4 uppercase tracking-widest">
+                    <div className="text-center pt-6 border-t border-gray-200/60">
+                      <div className="text-xl font-extrabold text-[#0A4EC3] mb-3 uppercase tracking-widest">
                         JURNI TRAVEL
                       </div>
-                      <div className="mb-3 text-sm text-gray-600 font-medium">
+                      <div className="mb-2 text-sm text-gray-600 font-medium">
                         Phân khu E1, Khu công nghệ cao, Xa lộ Hà Nội, Phường Hiệp Phú, TP. Thủ Đức, TP.HCM
                       </div>
-                      <div className="mb-5 text-sm text-gray-600 font-medium">
+                      <div className="mb-4 text-sm text-gray-600 font-medium">
                         <span className="font-semibold">Hotline:</span> 0769 749 465 | <span className="font-semibold">Email:</span> support@jurni.com
                       </div>
                       <div className="text-xs text-gray-400 italic font-medium bg-gray-50/50 py-2 px-4 rounded-lg inline-block">

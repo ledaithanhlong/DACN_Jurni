@@ -80,7 +80,7 @@ export default function JurniHero() {
 
   const inputBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 placeholder-blue-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition";
   const selectBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition appearance-none";
-  const ghostButtonClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 text-left hover:bg-white transition";
+  const ghostButtonClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 text-left hover:bg-white transition whitespace-nowrap";
 
   // Popular destinations with estimated prices
   const popularDestinations = {
@@ -403,7 +403,7 @@ export default function JurniHero() {
                           onChange={e => setSearch({ ...search, date: e.target.value })}
                         />
                       </div>
-                      <div className="md:col-span-1 relative" ref={passengerMenuRef}>
+                      <div className="md:col-span-2 relative" ref={passengerMenuRef}>
                         <label className="block text-sm font-medium text-white/85 mb-1">Hành khách</label>
                         <button
                           onClick={() => setShowPassengerMenu(!showPassengerMenu)}
@@ -571,7 +571,7 @@ export default function JurniHero() {
                           onChange={e => setSearch({ ...search, time: e.target.value })}
                         />
                       </div>
-                      <div className="md:col-span-1 relative" ref={guestMenuRef}>
+                      <div className="md:col-span-2 relative" ref={guestMenuRef}>
                         <label className="block text-sm font-medium text-white/85 mb-1">Số khách</label>
                         <button
                           onClick={() => setShowGuestMenu(!showGuestMenu)}
@@ -930,7 +930,7 @@ export default function JurniHero() {
                         <label className="block text-sm font-medium text-white/85 mb-1">Số người</label>
                         <button
                           onClick={() => setShowActivityMenu(!showActivityMenu)}
-                          className="w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 text-left hover:bg-white transition"
+                          className={ghostButtonClass}
                         >
                           {search.participants.adults} Người lớn, {search.participants.children} Trẻ em
                         </button>

@@ -3,7 +3,7 @@ export default (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    role: { type: DataTypes.ENUM('user', 'admin'), allowNull: false, defaultValue: 'user' },
+    role: { type: DataTypes.ENUM('user', 'admin', 'admin2'), allowNull: false, defaultValue: 'user' },
     clerkId: { type: DataTypes.STRING, allowNull: true }
   }, {
     tableName: 'users',

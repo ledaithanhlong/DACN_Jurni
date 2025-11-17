@@ -66,7 +66,7 @@ export const requireRole = (role) => async (req, res, next) => {
     console.log('requireRole: Final role value:', roleValue, 'Required role:', role);
     
     // Kiểm tra quyền
-    if (role === 'admin' && roleValue !== 'admin') {
+    if (role === 'admin' && roleValue !== 'admin' && roleValue !== 'admin2') {
       console.log('requireRole: Access denied - user is not admin');
       return res.status(403).json({ 
         error: 'Forbidden',
@@ -77,10 +77,38 @@ export const requireRole = (role) => async (req, res, next) => {
     }
     
     req.user = user || null;
+    req.userRole = roleValue;
     console.log('requireRole: Access granted');
     return next();
   } catch (e) {
     console.error('requireRole error:', e);
+    return next(e);
+  }
+};
+
+// Middleware để chỉ cho phép admin hoặc admin2
+export const requireAdminOrAdmin2 = async (req, res, next) => {
+  try {
+    const auth = getAuth(req);
+    if (!auth?.userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const clerkId = auth.userId;
+    const user = await db.User.findOne({ where: { clerkId } });
+    
+    if (!user || (user.role !== 'admin' && user.role !== 'admin2')) {
+      return res.status(403).json({ 
+        error: 'Forbidden',
+        message: 'Admin or Admin Level 2 access required'
+      });
+    }
+    
+    req.user = user;
+    req.userRole = user.role;
+    return next();
+  } catch (e) {
+    console.error('requireAdminOrAdmin2 error:', e);
     return next(e);
   }
 };

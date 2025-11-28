@@ -73,7 +73,8 @@ export default function HotelsPage() {
   const load = async () => {
     try {
       const res = await axios.get(`${API}/hotels`, { params: { q } });
-      setRows(res.data || []);
+      const sanitized = (res.data || []).filter((hotel) => !hotel.status || hotel.status === 'approved');
+      setRows(sanitized);
     } catch (error) {
       console.error('Error loading hotels:', error);
       setRows(sampleHotels);

@@ -25,15 +25,21 @@ const IconCheck = () => (
   </svg>
 );
 
-const IconBed = () => (
+const IconWifi = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
   </svg>
 );
 
-const IconUsers = () => (
+const IconCar = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25m-17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V14.25" />
+  </svg>
+);
+
+const IconSwimming = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
   </svg>
 );
 
@@ -42,6 +48,7 @@ export default function HotelDetail() {
   const navigate = useNavigate();
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [booking, setBooking] = useState({
     checkIn: '',
     checkOut: '',
@@ -58,36 +65,14 @@ export default function HotelDetail() {
         setHotel(res.data);
       } catch (error) {
         console.error('Error loading hotel:', error);
-        // Fallback to sample data if API fails
-        const sampleHotels = [
-          {
-            id: 1,
-            name: 'Khách Sạn Grand Saigon',
-            location: 'Quận 1, TP.HCM',
-            price: 2500000,
-            rating: 5,
-            image_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
-            description: 'Khách sạn 5 sao sang trọng tại trung tâm thành phố, với view đẹp và dịch vụ đẳng cấp quốc tế',
-            amenities: ['Wifi miễn phí', 'Bể bơi', 'Spa', 'Nhà hàng', 'Fitness center', 'Parking'],
-            rooms: 150,
-            checkIn: '14:00',
-            checkOut: '12:00',
-            policies: {
-              cancel: 'Miễn phí hủy trước 48 giờ',
-              children: 'Trẻ em dưới 12 tuổi ở miễn phí',
-              pets: 'Không cho phép thú cưng',
-              smoking: 'Không hút thuốc'
-            }
-          }
-        ];
-        const found = sampleHotels.find(h => h.id === Number(id)) || sampleHotels[0];
-        setHotel({ ...found, id: Number(id) });
+        alert('Không tìm thấy khách sạn');
+        navigate('/hotels');
       } finally {
         setLoading(false);
       }
     };
     loadHotel();
-  }, [id]);
+  }, [id, navigate]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price || 0);
@@ -177,6 +162,33 @@ export default function HotelDetail() {
     ? Math.ceil((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24))
     : 0;
 
+  // Get all images
+  const allImages = [];
+  if (hotel.image_url) allImages.push(hotel.image_url);
+  if (Array.isArray(hotel.images)) {
+    hotel.images.forEach(img => {
+      if (img && !allImages.includes(img)) allImages.push(img);
+    });
+  }
+  const displayImage = allImages[selectedImageIndex] || hotel.image_url || 'https://via.placeholder.com/800x400';
+
+  // Get amenities list
+  const amenitiesList = [];
+  if (hotel.has_wifi) amenitiesList.push({ name: 'WiFi miễn phí', icon: <IconWifi /> });
+  if (hotel.has_parking) amenitiesList.push({ name: 'Chỗ đậu xe', icon: <IconCar /> });
+  if (hotel.has_pool) amenitiesList.push({ name: 'Bể bơi', icon: <IconSwimming /> });
+  if (hotel.has_restaurant) amenitiesList.push({ name: 'Nhà hàng', icon: null });
+  if (hotel.has_gym) amenitiesList.push({ name: 'Phòng gym', icon: null });
+  if (hotel.has_spa) amenitiesList.push({ name: 'Spa', icon: null });
+  if (hotel.has_breakfast) amenitiesList.push({ name: 'Bữa sáng', icon: null });
+  if (Array.isArray(hotel.amenities)) {
+    hotel.amenities.forEach(amenity => {
+      if (amenity && !amenitiesList.find(a => a.name === amenity)) {
+        amenitiesList.push({ name: amenity, icon: null });
+      }
+    });
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -194,65 +206,130 @@ export default function HotelDetail() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Image */}
-            {hotel.image_url && (
-              <div className="rounded-3xl overflow-hidden shadow-2xl">
+            {/* Image Gallery */}
+            <div className="rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative">
                 <img
-                  src={hotel.image_url}
+                  src={displayImage}
                   alt={hotel.name}
                   className="w-full h-96 object-cover"
                 />
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : allImages.length - 1))}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg"
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setSelectedImageIndex((prev) => (prev < allImages.length - 1 ? prev + 1 : 0))}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg"
+                    >
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                      {allImages.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedImageIndex(idx)}
+                          className={`w-2 h-2 rounded-full ${selectedImageIndex === idx ? 'bg-white' : 'bg-white/50'}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-            )}
+              {allImages.length > 1 && (
+                <div className="grid grid-cols-4 gap-2 p-2 bg-gray-100">
+                  {allImages.slice(0, 4).map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImageIndex(idx)}
+                      className={`relative overflow-hidden rounded-lg ${selectedImageIndex === idx ? 'ring-2 ring-blue-500' : ''}`}
+                    >
+                      <img src={img} alt={`${hotel.name} ${idx + 1}`} className="w-full h-20 object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Hotel Info */}
             <div className="bg-white rounded-3xl shadow-lg border-2 border-gray-100 p-8">
               <div className="flex items-start justify-between mb-6">
-                <div>
+                <div className="flex-1">
                   <h1 className="text-4xl font-extrabold text-gray-900 mb-3">{hotel.name}</h1>
-                  <div className="flex items-center gap-2 text-gray-600 mb-4">
-                    <IconLocation className="w-5 h-5" />
-                    <span className="text-lg">{hotel.location}</span>
+                  <div className="flex items-center gap-2 text-gray-600 mb-3">
+                    <IconLocation />
+                    <span className="text-lg">{hotel.address || hotel.location}</span>
                   </div>
-                  {hotel.rating && (
-                    <div className="flex items-center gap-1 bg-yellow-50 px-4 py-2 rounded-full w-fit">
-                      <IconStar className="w-5 h-5 text-yellow-500 fill-current" />
-                      <span className="font-bold text-gray-900">{hotel.rating} sao</span>
-                    </div>
-                  )}
-                </div>
-                <div className="text-right">
-                  <div className="text-3xl font-extrabold text-blue-600">
-                    {formatPrice(hotel.price)} VND
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {hotel.star_rating && (
+                      <div className="flex items-center gap-1 bg-yellow-50 px-4 py-2 rounded-full">
+                        <IconStar className="w-5 h-5 text-yellow-500 fill-current" />
+                        <span className="font-bold text-gray-900">{hotel.star_rating} sao</span>
+                      </div>
+                    )}
+                    {hotel.rating && (
+                      <div className="flex items-center gap-1 bg-blue-50 px-4 py-2 rounded-full">
+                        <IconStar className="w-5 h-5 text-blue-500 fill-current" />
+                        <span className="font-bold text-gray-900">{hotel.rating}/5</span>
+                      </div>
+                    )}
+                    {hotel.total_rooms && (
+                      <div className="text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full">
+                        {hotel.total_rooms} phòng
+                      </div>
+                    )}
+                    {hotel.total_floors && (
+                      <div className="text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full">
+                        {hotel.total_floors} tầng
+                      </div>
+                    )}
                   </div>
-                  <div className="text-sm text-gray-500">/ đêm</div>
                 </div>
               </div>
 
               {hotel.description && (
-                <p className="text-gray-700 leading-relaxed text-lg mb-6">{hotel.description}</p>
+                <div className="mb-6">
+                  <p className="text-gray-700 leading-relaxed text-lg">{hotel.description}</p>
+                </div>
               )}
 
-              {/* Amenities */}
-              {hotel.amenities && hotel.amenities.length > 0 && (
+              {/* Tiện nghi chính */}
+              {amenitiesList.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Tiện nghi</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Tiện ích chính</h3>
                   <div className="grid md:grid-cols-2 gap-3">
-                    {hotel.amenities.map((amenity, idx) => (
+                    {amenitiesList.map((amenity, idx) => (
                       <div key={idx} className="flex items-center gap-3 bg-blue-50 rounded-xl p-4">
-                        <IconCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                        <span className="text-gray-700 font-medium">{amenity}</span>
+                        {amenity.icon || <IconCheck className="w-5 h-5 text-blue-600 flex-shrink-0" />}
+                        <span className="text-gray-700 font-medium">{amenity.name}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Policies */}
-              {hotel.policies && (
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Chính sách</h3>
+              {/* Chính sách */}
+              {hotel.policies && Object.values(hotel.policies).some(v => v) && (
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Chính sách và thông tin liên quan</h3>
                   <div className="space-y-3">
+                    {hotel.check_in_time && hotel.check_out_time && (
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <div className="font-semibold text-gray-900 mb-2">Thời gian nhận phòng/trả phòng</div>
+                        <div className="text-gray-600 text-sm">
+                          <div>Giờ nhận phòng: Từ {hotel.check_in_time}</div>
+                          <div>Giờ trả phòng: Trước {hotel.check_out_time}</div>
+                        </div>
+                      </div>
+                    )}
                     {hotel.policies.cancel && (
                       <div className="flex items-start gap-3 bg-gray-50 rounded-xl p-4">
                         <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -292,12 +369,49 @@ export default function HotelDetail() {
                   </div>
                 </div>
               )}
+
+              {/* Điểm tham quan gần đó */}
+              {Array.isArray(hotel.nearby_attractions) && hotel.nearby_attractions.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Xung quanh {hotel.name} có gì</h3>
+                  <div className="space-y-2">
+                    {hotel.nearby_attractions.map((attraction, idx) => (
+                      <div key={idx} className="flex items-center gap-3 bg-green-50 rounded-xl p-4">
+                        <IconLocation className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <span className="text-gray-700">{attraction}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Phương tiện công cộng */}
+              {Array.isArray(hotel.public_transport) && hotel.public_transport.length > 0 && (
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Phương tiện công cộng gần khách sạn</h3>
+                  <div className="space-y-2">
+                    {hotel.public_transport.map((transport, idx) => (
+                      <div key={idx} className="flex items-center gap-3 bg-purple-50 rounded-xl p-4">
+                        <IconLocation className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                        <span className="text-gray-700">{transport}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Booking Form */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-2xl border-2 border-blue-100 p-6 sticky top-8">
+              <div className="text-right mb-4">
+                <div className="text-3xl font-extrabold text-blue-600">
+                  {formatPrice(hotel.price)} VND
+                </div>
+                <div className="text-sm text-gray-500">/ đêm</div>
+              </div>
+
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Đặt phòng</h2>
               
               <div className="space-y-4 mb-6">
@@ -312,8 +426,8 @@ export default function HotelDetail() {
                     min={new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
                   />
-                  {hotel.checkIn && (
-                    <p className="text-xs text-gray-500 mt-1">Check-in sau {hotel.checkIn}</p>
+                  {hotel.check_in_time && (
+                    <p className="text-xs text-gray-500 mt-1">Check-in sau {hotel.check_in_time}</p>
                   )}
                 </div>
 
@@ -328,8 +442,8 @@ export default function HotelDetail() {
                     min={booking.checkIn || new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
                   />
-                  {hotel.checkOut && (
-                    <p className="text-xs text-gray-500 mt-1">Check-out trước {hotel.checkOut}</p>
+                  {hotel.check_out_time && (
+                    <p className="text-xs text-gray-500 mt-1">Check-out trước {hotel.check_out_time}</p>
                   )}
                 </div>
 

@@ -20,14 +20,14 @@ export function Card({ image, title, subtitle, price, rating, discount }) {
       style={{ 
         backgroundColor: '#FFFFFF',
         borderRadius: '8px',
-        borderColor: '#E3F2FD'
+        borderColor: '#BBDEFB' /* Xanh nhạt vừa #3 */
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = '#FF6B35';
-        e.currentTarget.style.backgroundColor = '#F0F7FF';
+        e.currentTarget.style.backgroundColor = '#E3F2FD'; /* Xanh nhạt #2 */
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = '#E3F2FD';
+        e.currentTarget.style.borderColor = '#BBDEFB'; /* Xanh nhạt vừa #3 */
         e.currentTarget.style.backgroundColor = '#FFFFFF';
       }}
     >
@@ -56,14 +56,14 @@ export function Card({ image, title, subtitle, price, rating, discount }) {
       </div>
       <div className="p-4">
         <div 
-          className="font-semibold truncate mb-1 group-hover:opacity-90 transition" 
+          className="font-semibold truncate mb-1 transition" 
           style={{ color: '#0D47A1' }}
           title={title}
         >
           {title}
         </div>
         {subtitle && (
-          <div className="text-sm truncate mb-2" style={{ color: '#757575' }}>{subtitle}</div>
+          <div className="text-sm truncate mb-2" style={{ color: '#424242' }}>{subtitle}</div>
         )}
         {price != null && (
           <div className="mt-2">

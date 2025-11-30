@@ -48,15 +48,15 @@ export default function ServiceLink({ href, title, subtitle, iconType }) {
       style={{ 
         backgroundColor: '#FFFFFF',
         borderRadius: '8px',
-        borderColor: '#E3F2FD'
+        borderColor: '#90CAF9' /* Xanh nhạt #5 */
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = '#F0F7FF';
+        e.currentTarget.style.backgroundColor = '#FFE8E0'; /* Cam nhạt để nổi bật */
         e.currentTarget.style.borderColor = '#FF6B35';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.backgroundColor = '#FFFFFF';
-        e.currentTarget.style.borderColor = '#E3F2FD';
+        e.currentTarget.style.borderColor = '#90CAF9'; /* Xanh nhạt #5 */
       }}
     >
       <div className="mb-3 group-hover:scale-110 transition-transform" style={{ color: '#FF6B35' }}>

@@ -116,6 +116,7 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="space-y-10 pb-16">
           {/* Service Links */}
+          {/* Xanh rất nhạt #1 */}
           <section className="py-8" style={{ backgroundColor: '#F0F7FF' }}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <ServiceLink href="/hotels" title="Khách sạn" subtitle="Ưu đãi mỗi ngày" iconType="hotels" />
@@ -126,9 +127,10 @@ export default function HomePage() {
           </section>
 
       {/* Promotional Codes Section */}
+      {/* Xanh nhạt #2 */}
       <section 
         className="rounded-lg shadow-md p-6 md:p-8"
-        style={{ backgroundColor: '#F0F7FF', borderRadius: '8px' }}
+        style={{ backgroundColor: '#E3F2FD', borderRadius: '8px' }}
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
@@ -144,17 +146,20 @@ export default function HomePage() {
           </a>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Xanh nhạt vừa #3 */}
           {promoCodes.map((promo, idx) => (
             <div
               key={idx}
               className="border rounded-lg bg-white p-5 shadow-sm hover:shadow-lg transition"
-              style={{ borderRadius: '8px', borderColor: '#E3F2FD' }}
+              style={{ borderRadius: '8px', borderColor: '#BBDEFB' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = '#FF6B35';
-                e.currentTarget.style.backgroundColor = '#F0F7FF';
+                // Cam nhạt để nổi bật
+                e.currentTarget.style.backgroundColor = '#FFE8E0';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#E3F2FD';
+                // Xanh nhạt vừa #3
+                e.currentTarget.style.borderColor = '#BBDEFB';
                 e.currentTarget.style.backgroundColor = '#FFFFFF';
               }}
             >
@@ -171,9 +176,10 @@ export default function HomePage() {
                 </span>
               </div>
               <div className="flex items-center gap-2">
+                {/* Xanh nhạt #4 và #5 */}
                 <div 
                   className="flex-1 rounded-lg px-3 py-2 font-mono text-sm font-semibold"
-                  style={{ backgroundColor: '#F0F7FF', borderRadius: '8px', color: '#0D47A1', border: '1px solid #E3F2FD' }}
+                  style={{ backgroundColor: '#E8F4FD', borderRadius: '8px', color: '#0D47A1', border: '1px solid #90CAF9' }}
                 >
                   {promo.code}
                 </div>
@@ -205,9 +211,10 @@ export default function HomePage() {
             Xem tất cả ưu đãi bay →
           </a>
         </div>
+        {/* Xanh nhạt vừa #3 */}
         <div 
           className="rounded-lg border shadow-md p-6"
-          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', borderColor: '#E3F2FD' }}
+          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', borderColor: '#BBDEFB' }}
         >
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {popularRoutes.map((route, idx) => (
@@ -218,14 +225,16 @@ export default function HomePage() {
                 style={{ 
                   backgroundColor: '#FFFFFF',
                   borderRadius: '8px',
-                  borderColor: '#E3F2FD'
+                  borderColor: '#90CAF9'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = '#FF6B35';
-                  e.currentTarget.style.backgroundColor = '#F0F7FF';
+                  // Cam nhạt để nổi bật
+                  e.currentTarget.style.backgroundColor = '#FFE8E0';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#E3F2FD';
+                  // Xanh nhạt #5
+                  e.currentTarget.style.borderColor = '#90CAF9';
                   e.currentTarget.style.backgroundColor = '#FFFFFF';
                 }}
               >
@@ -248,7 +257,8 @@ export default function HomePage() {
       </section>
 
       {/* Popular Hotels */}
-      <section className="py-8 rounded-lg" style={{ backgroundColor: '#F0F7FF', borderRadius: '8px' }}>
+      {/* Xanh nhạt #4 */}
+      <section className="py-8 rounded-lg" style={{ backgroundColor: '#E8F4FD', borderRadius: '8px' }}>
         <SectionHeader title="Nhiều lựa chọn khách sạn" href="/hotels" />
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {hotels.map(h => (
@@ -265,7 +275,8 @@ export default function HomePage() {
       </section>
 
       {/* Top Flights */}
-      <section className="py-8" style={{ backgroundColor: '#FFFFFF' }}>
+      {/* Xanh rất nhạt #6 */}
+      <section className="py-8" style={{ backgroundColor: '#F5FAFF' }}>
         <SectionHeader title="Vé máy bay phổ biến" href="/flights" />
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {flights.map(f => (
@@ -282,7 +293,8 @@ export default function HomePage() {
       </section>
 
       {/* Things to do */}
-      <section className="py-8 rounded-lg" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
+      {/* Xanh rất nhạt #1 */}
+      <section className="py-8 rounded-lg" style={{ backgroundColor: '#F0F7FF', borderRadius: '8px' }}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold" style={{ color: '#0D47A1' }}>Hoạt động & Vui chơi</h2>
           <a 
@@ -342,7 +354,8 @@ export default function HomePage() {
                   borderColor: 'rgba(255, 255, 255, 0.2)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  // Cam trong suốt để nổi bật
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 107, 53, 0.2)';
                   e.currentTarget.style.borderColor = '#FF6B35';
                 }}
                 onMouseLeave={(e) => {
@@ -366,15 +379,16 @@ export default function HomePage() {
                   </span>
                 </span>
                 <div>
-                  <div className="text-base font-semibold text-white">{option.title}</div>
-                  <p className="mt-2 text-sm text-white/90">
+                  <div className="text-base font-semibold text-white" style={{ color: '#FFFFFF' }}>{option.title}</div>
+                  <p className="mt-2 text-sm" style={{ color: '#FFFFFF' }}>
                     {option.description}
                   </p>
                 </div>
                 <span 
-                  className="mt-auto inline-flex items-center text-sm font-semibold text-white/90 transition"
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#FF6B35'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)'}
+                  className="mt-auto inline-flex items-center text-sm font-semibold transition"
+                  style={{ color: '#FFFFFF' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#FFE8E0'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#FFFFFF'}
                 >
                   Tìm hiểu thêm
                   <span className="ml-2 transition group-hover:translate-x-1">→</span>

@@ -126,7 +126,7 @@ export default function AboutPage() {
           <div className="grid gap-6 md:grid-cols-[1.4fr_1fr] items-center">
             <div>
               <h2 className="text-3xl font-semibold leading-tight">Sẵn sàng đồng hành trên mọi hành trình</h2>
-              <p className="mt-4 text-sm md:text-base text-white/80 leading-relaxed">
+              <p className="mt-4 text-sm md:text-base text-white leading-relaxed">
                 Dù bạn đang lên kế hoạch cho chuyến công tác hay kỳ nghỉ cùng gia đình, Jurni cung cấp công cụ, ưu đãi
                 và đội ngũ chuyên gia để mỗi chuyến đi đều trọn vẹn. Hãy khám phá ngay các dịch vụ và ưu đãi nổi bật của
                 chúng tôi.

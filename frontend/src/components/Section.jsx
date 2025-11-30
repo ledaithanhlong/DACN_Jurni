@@ -24,10 +24,12 @@ export function Card({ image, title, subtitle, price, rating, discount }) {
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = '#FF6B35';
-        e.currentTarget.style.backgroundColor = '#E3F2FD'; /* Xanh nhạt #2 */
+        // Cam nhạt để nổi bật
+        e.currentTarget.style.backgroundColor = '#FFE8E0';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = '#BBDEFB'; /* Xanh nhạt vừa #3 */
+        // Xanh nhạt vừa #3
+        e.currentTarget.style.borderColor = '#BBDEFB';
         e.currentTarget.style.backgroundColor = '#FFFFFF';
       }}
     >

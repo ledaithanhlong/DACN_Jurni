@@ -91,7 +91,7 @@ export default function TermsPage() {
           <p className="font-semibold text-blue-900">Chúng tôi luôn lắng nghe</p>
           <p className="mt-2 leading-relaxed">
             Nếu bạn có câu hỏi, góp ý hoặc cần làm rõ điều khoản, hãy liên hệ bộ phận pháp lý của Jurni qua email
-            <a href="mailto:legal@jurni.vn" className="font-semibold text-blue-600 hover:text-blue-700 transition">
+            <a href="mailto:legal@jurni.vn" className="font-semibold text-orange-600 hover:text-orange-700 transition">
               {' '}
               legal@jurni.vn
             </a>

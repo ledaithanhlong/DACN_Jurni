@@ -69,7 +69,10 @@ export default function FavoritesPage() {
         </p>
         <a
           href="/"
-          className="mt-4 inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
+          className="mt-4 inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-semibold text-white transition"
+          style={{ backgroundColor: '#FF6B35' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF8C42'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
         >
           Khám phá dịch vụ
         </a>
@@ -90,7 +93,7 @@ export default function FavoritesPage() {
         {rows.map((item) => (
           <div
             key={item.id}
-            className="group rounded-3xl border border-blue-100 bg-white/80 p-5 shadow shadow-blue-100/40 transition hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg"
+            className="group rounded-3xl border border-blue-100 bg-white/80 p-5 shadow shadow-blue-100/40 transition hover:-translate-y-1 hover:border-orange-400 hover:shadow-lg"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -117,7 +120,7 @@ export default function FavoritesPage() {
               </span>
               <a
                 href={`/${item.service_type || 'services'}/${item.service_id}`}
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition"
+                className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition"
               >
                 Xem chi tiết →
               </a>

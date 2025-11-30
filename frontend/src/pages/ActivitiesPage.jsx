@@ -406,14 +406,14 @@ export default function ActivitiesPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {statistics.map((stat, idx) => (
-              <div key={idx} className="group relative text-center p-8 bg-white rounded-3xl border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+              <div key={idx} className="group relative text-center p-8 bg-white rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
                 
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {stat.icon}
                   </div>
-                  <div className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                  <div className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
                     {stat.number}
                   </div>
                   <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{stat.label}</div>
@@ -443,14 +443,14 @@ export default function ActivitiesPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, idx) => (
-              <div key={idx} className="group relative bg-white p-8 rounded-3xl border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+              <div key={idx} className="group relative bg-white p-8 rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
                 
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
                     {value.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
                     {value.title}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
@@ -538,12 +538,12 @@ export default function ActivitiesPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((category, idx) => (
-              <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 overflow-hidden text-center">
+              <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden text-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
                 
                 <div className="relative z-10">
                   <div className="text-6xl mb-6 transform group-hover:scale-110 transition-transform duration-300">{category.icon}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{category.name}</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">{category.name}</h3>
                   <div className="text-blue-600 font-semibold">{category.count} hoạt động</div>
                 </div>
                 
@@ -569,7 +569,7 @@ export default function ActivitiesPage() {
             {activities.map((activity) => (
               <div
                 key={activity.id}
-                className="group bg-white rounded-3xl overflow-hidden shadow-lg border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300"
+                className="group bg-white rounded-3xl overflow-hidden shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300"
               >
                 <div className="relative overflow-hidden">
                   {activity.image_url ? (
@@ -604,14 +604,17 @@ export default function ActivitiesPage() {
 
                   <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                     <div>
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-2xl font-bold" style={{ color: '#FF6B35' }}>
                         {formatPrice(activity.price)} VND
                       </div>
                       <div className="text-xs text-gray-500">/ người</div>
                     </div>
                     <button
                       onClick={() => setSelectedActivity(activity)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full font-semibold transition"
+                      className="text-white px-6 py-2 rounded-full font-semibold transition"
+                      style={{ backgroundColor: '#FF6B35' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF8C42'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
                     >
                       Chi tiết
                     </button>
@@ -646,7 +649,7 @@ export default function ActivitiesPage() {
               )}
               <div>
                 <div className="mb-4">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                  <div className="text-3xl font-bold mb-2" style={{ color: '#FF6B35' }}>
                     {formatPrice(selectedActivity.price)} VND
                   </div>
                   <div className="text-gray-600">/ người</div>
@@ -764,7 +767,7 @@ export default function ActivitiesPage() {
                     </div>
                   </div>
                 </div>
-                <button className="mt-4 w-full bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-blue-50 transition">
+                <button className="mt-4 w-full bg-white px-6 py-3 rounded-full font-semibold transition" style={{ color: '#FF6B35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}>
                   Đặt tour ngay
                 </button>
               </div>

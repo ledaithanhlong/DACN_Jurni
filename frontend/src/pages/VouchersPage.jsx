@@ -1433,7 +1433,7 @@ export default function VouchersPage() {
         {vouchers.length === 0 ? (
           <div className="text-center py-16">
             <div className="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
-              <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
                 <IconCheck className="w-12 h-12 text-[#0A4EC3]" />
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Chưa có voucher</h3>
@@ -1585,7 +1585,7 @@ export default function VouchersPage() {
                             {voucher.services?.map((service, idx) => (
                               <tr 
                                 key={idx}
-                                className={`border-b-2 border-gray-200 transition-all duration-150 ${idx % 2 === 0 ? 'bg-white' : 'bg-blue-50/30'} hover:bg-blue-100/50 hover:shadow-sm`}
+                                className={`border-b-2 border-gray-200 transition-all duration-150 ${idx % 2 === 0 ? 'bg-white' : 'bg-orange-50/30'} hover:bg-orange-100/50 hover:shadow-sm`}
                               >
                                 <td className="py-3 px-5 border-r-2 border-gray-200">
                                   <div className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{getServiceName(service.type)}</div>
@@ -1611,7 +1611,7 @@ export default function VouchersPage() {
                             ))}
                           </tbody>
                           <tfoot>
-                            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-4 border-[#0A4EC3] shadow-inner">
+                            <tr className="bg-gradient-to-r from-orange-50 to-orange-100 border-t-4 border-[#0A4EC3] shadow-inner">
                               <td colSpan="4" className="py-4 px-5">
                                 <div className="flex flex-col gap-2">
                                   <div className="text-sm font-bold text-gray-900 uppercase tracking-wide">
@@ -1622,7 +1622,7 @@ export default function VouchersPage() {
                                       <IconCheck className="w-3 h-3" />
                                       Đã thanh toán
                                     </div>
-                                    <div className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-blue-300 shadow-sm">
+                                    <div className="inline-flex items-center bg-orange-100 text-orange-800 px-3 py-1.5 rounded-full text-xs font-semibold border-2 border-orange-300 shadow-sm">
                                       {voucher.payment_method || 'VNPay'}
                                     </div>
                                   </div>

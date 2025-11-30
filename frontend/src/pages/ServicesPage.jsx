@@ -70,13 +70,19 @@ export default function ServicesPage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="/checkout"
-                className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition"
+                className="inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold text-white transition"
+                style={{ backgroundColor: '#FF6B35' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF8C42'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
               >
                 Bắt đầu đặt dịch vụ
               </a>
               <a
                 href="/support"
-                className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition shadow"
+                className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold transition shadow"
+                style={{ color: '#FF6B35' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
               >
                 Nhận tư vấn miễn phí
               </a>
@@ -109,7 +115,7 @@ export default function ServicesPage() {
             {serviceHighlights.map((service) => (
               <div
                 key={service.category}
-                className="rounded-3xl border border-blue-100 bg-white/90 p-6 shadow shadow-blue-100/40 transition hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg"
+                className="rounded-3xl border border-blue-100 bg-white/90 p-6 shadow shadow-blue-100/40 transition hover:-translate-y-1 hover:border-orange-400 hover:shadow-lg"
               >
                 <div className="flex items-start gap-3">
                   <span className="text-3xl">{service.icon}</span>
@@ -128,7 +134,7 @@ export default function ServicesPage() {
                 </ul>
                 <a
                   href={service.href}
-                  className="mt-5 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition"
+                  className="mt-5 inline-flex items-center text-sm font-semibold text-orange-600 hover:text-orange-700 transition"
                 >
                   Khám phá ngay →
                 </a>
@@ -141,7 +147,7 @@ export default function ServicesPage() {
           <div className="grid gap-8 md:grid-cols-[1.4fr_1fr] items-center">
             <div>
               <h2 className="text-3xl font-semibold leading-tight">Giữ trọn cảm hứng cho chuyến đi sắp tới</h2>
-              <p className="mt-4 text-sm md:text-base text-white/80 leading-relaxed">
+              <p className="mt-4 text-sm md:text-base text-white leading-relaxed">
                 Đăng ký nhận bản tin hàng tuần từ Jurni để cập nhật ưu đãi độc quyền, lịch hội thảo du lịch và gợi ý hành
                 trình mới nhất từ đội ngũ chuyên gia địa phương.
               </p>
@@ -160,7 +166,7 @@ export default function ServicesPage() {
               </button>
               <p className="text-xs text-white/70">
                 Bằng việc đăng ký, bạn đồng ý với{' '}
-                <a href="/terms" className="font-semibold text-white hover:text-blue-100 underline decoration-white/40">
+                <a href="/terms" className="font-semibold text-white hover:text-orange-100 underline decoration-white/40">
                   điều khoản sử dụng
                 </a>{' '}
                 và chính sách bảo mật của Jurni.

@@ -83,7 +83,7 @@ export default function NotificationsPage() {
         {rows.map((item) => (
           <div
             key={item.id}
-            className="rounded-3xl border border-blue-100 bg-white/90 p-5 shadow shadow-blue-100/40 transition hover:border-blue-400 hover:shadow-lg"
+            className="rounded-3xl border border-blue-100 bg-white/90 p-5 shadow shadow-blue-100/40 transition hover:border-orange-400 hover:shadow-lg"
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -97,7 +97,7 @@ export default function NotificationsPage() {
             {item.action_url && (
               <a
                 href={item.action_url}
-                className="mt-3 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition"
+                className="mt-3 inline-flex items-center text-sm font-semibold text-orange-600 hover:text-orange-700 transition"
               >
                 Xem chi tiết →
               </a>

@@ -44,13 +44,26 @@ export default function ServiceLink({ href, title, subtitle, iconType }) {
   return (
     <a 
       href={href} 
-      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 flex flex-col items-center text-center group hover:border-blue-500 border border-transparent"
+      className="rounded-lg shadow-md hover:shadow-lg transition-all duration-300 p-5 flex flex-col items-center text-center group border"
+      style={{ 
+        backgroundColor: '#FFFFFF',
+        borderRadius: '8px',
+        borderColor: '#E3F2FD'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#F0F7FF';
+        e.currentTarget.style.borderColor = '#FF6B35';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#FFFFFF';
+        e.currentTarget.style.borderColor = '#E3F2FD';
+      }}
     >
-      <div className="mb-3 group-hover:scale-110 transition-transform text-blue-600">
+      <div className="mb-3 group-hover:scale-110 transition-transform" style={{ color: '#FF6B35' }}>
         <IconComponent className="w-12 h-12" />
       </div>
-      <div className="font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition">{title}</div>
-      <div className="text-xs text-gray-600">{subtitle}</div>
+      <div className="font-bold mb-1 transition" style={{ color: '#0D47A1' }}>{title}</div>
+      <div className="text-xs" style={{ color: '#212121' }}>{subtitle}</div>
     </a>
   );
 }

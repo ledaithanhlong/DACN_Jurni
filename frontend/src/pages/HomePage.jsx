@@ -111,28 +111,34 @@ export default function HomePage() {
   };
 
   return (
-    <div className="bg-gradient-to-b from-white via-blue-50/40 to-white">
+    <div style={{ backgroundColor: '#FFFFFF' }}>
       <JurniHero />
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="space-y-10 pb-16">
           {/* Service Links */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <ServiceLink href="/hotels" title="Khách sạn" subtitle="Ưu đãi mỗi ngày" iconType="hotels" />
-            <ServiceLink href="/flights" title="Vé máy bay" subtitle="Bay mọi điểm đến" iconType="flights" />
-            <ServiceLink href="/cars" title="Cho thuê xe" subtitle="Linh hoạt hành trình" iconType="cars" />
-            <ServiceLink href="/activities" title="Hoạt động & Vui chơi" subtitle="Trải nghiệm đa dạng" iconType="activities" />
-          </div>
+          <section className="py-8" style={{ backgroundColor: '#F0F7FF' }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <ServiceLink href="/hotels" title="Khách sạn" subtitle="Ưu đãi mỗi ngày" iconType="hotels" />
+              <ServiceLink href="/flights" title="Vé máy bay" subtitle="Bay mọi điểm đến" iconType="flights" />
+              <ServiceLink href="/cars" title="Cho thuê xe" subtitle="Linh hoạt hành trình" iconType="cars" />
+              <ServiceLink href="/activities" title="Hoạt động & Vui chơi" subtitle="Trải nghiệm đa dạng" iconType="activities" />
+            </div>
+          </section>
 
       {/* Promotional Codes Section */}
-      <section className="bg-gradient-to-br from-white to-blue-50/60 border border-blue-100 rounded-2xl shadow-sm p-6 md:p-8">
+      <section 
+        className="rounded-lg shadow-md p-6 md:p-8"
+        style={{ backgroundColor: '#F0F7FF', borderRadius: '8px' }}
+      >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-blue-900">Mã ưu đãi tặng bạn mới</h2>
-            <p className="text-sm text-blue-700/80 mt-1">Đăng nhập và áp dụng tại bước thanh toán để kích hoạt ưu đãi.</p>
+            <h2 className="text-2xl font-bold" style={{ color: '#0D47A1' }}>Mã ưu đãi tặng bạn mới</h2>
+            <p className="text-sm mt-1" style={{ color: '#212121' }}>Đăng nhập và áp dụng tại bước thanh toán để kích hoạt ưu đãi.</p>
           </div>
           <a
             href="/promotions"
-            className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 transition"
+            className="inline-flex items-center justify-center rounded-lg px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
+            style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
           >
             Khám phá thêm ưu đãi
           </a>
@@ -141,24 +147,40 @@ export default function HomePage() {
           {promoCodes.map((promo, idx) => (
             <div
               key={idx}
-              className="border border-blue-100 rounded-xl bg-white/80 p-5 shadow-sm hover:shadow-md transition"
+              className="border rounded-lg bg-white p-5 shadow-sm hover:shadow-lg transition"
+              style={{ borderRadius: '8px', borderColor: '#E3F2FD' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#FF6B35';
+                e.currentTarget.style.backgroundColor = '#F0F7FF';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#E3F2FD';
+                e.currentTarget.style.backgroundColor = '#FFFFFF';
+              }}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="font-semibold text-sm text-blue-900 mb-1">{promo.title}</div>
-                  <div className="text-xs text-blue-800/70 mb-3">{promo.desc}</div>
+                  <div className="font-semibold text-sm mb-1" style={{ color: '#0D47A1' }}>{promo.title}</div>
+                  <div className="text-xs mb-3" style={{ color: '#212121' }}>{promo.desc}</div>
                 </div>
-                <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                <span 
+                  className="inline-flex items-center rounded-lg px-3 py-1 text-xs font-semibold text-white"
+                  style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
+                >
                   {promo.discount}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex-1 bg-blue-50 rounded-lg px-3 py-2 font-mono text-sm font-semibold text-blue-800">
+                <div 
+                  className="flex-1 rounded-lg px-3 py-2 font-mono text-sm font-semibold"
+                  style={{ backgroundColor: '#F0F7FF', borderRadius: '8px', color: '#0D47A1', border: '1px solid #E3F2FD' }}
+                >
                   {promo.code}
                 </div>
                 <button
                   onClick={() => copyToClipboard(promo.code)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                  className="text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md hover:opacity-90"
+                  style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
                 >
                   Copy
                 </button>
@@ -169,29 +191,54 @@ export default function HomePage() {
       </section>
 
       {/* Popular Flight Routes */}
-      <section>
+      <section className="py-8" style={{ backgroundColor: '#FFFFFF' }}>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-bold">Vé máy bay giá tốt nhất</h2>
-            <p className="text-sm text-blue-700/80 mt-1">Vô vàn điểm đến hot</p>
+            <h2 className="text-xl font-bold" style={{ color: '#0D47A1' }}>Vé máy bay giá tốt nhất</h2>
+            <p className="text-sm mt-1" style={{ color: '#212121' }}>Vô vàn điểm đến hot</p>
           </div>
-          <a href="/flights" className="text-blue-600 hover:text-blue-700 text-sm font-semibold">
+          <a 
+            href="/flights" 
+            className="text-sm font-semibold transition hover:opacity-80"
+            style={{ color: '#FF6B35' }}
+          >
             Xem tất cả ưu đãi bay →
           </a>
         </div>
-        <div className="bg-white/90 backdrop-blur rounded-2xl border border-blue-100 shadow-sm p-6">
+        <div 
+          className="rounded-lg border shadow-md p-6"
+          style={{ backgroundColor: '#FFFFFF', borderRadius: '8px', borderColor: '#E3F2FD' }}
+        >
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {popularRoutes.map((route, idx) => (
               <a
                 key={idx}
                 href="/flights"
-                className="border border-blue-100 rounded-xl p-4 hover:border-blue-500 hover:shadow-lg transition group bg-white"
+                className="border rounded-lg p-4 transition group"
+                style={{ 
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '8px',
+                  borderColor: '#E3F2FD'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#FF6B35';
+                  e.currentTarget.style.backgroundColor = '#F0F7FF';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#E3F2FD';
+                  e.currentTarget.style.backgroundColor = '#FFFFFF';
+                }}
               >
-                <div className="text-xs text-blue-700/70 mb-1 tracking-wide">{route.type}</div>
-                <div className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition">
+                <div className="text-xs mb-1 tracking-wide" style={{ color: '#212121' }}>{route.type}</div>
+                <div 
+                  className="font-semibold mb-2 transition"
+                  style={{ color: '#0D47A1' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#FF6B35'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#0D47A1'}
+                >
                   {route.from} - {route.to}
                 </div>
-                <div className="text-blue-600 font-bold text-lg">
+                <div className="font-bold text-lg" style={{ color: '#FF9800' }}>
                   Giá tốt nhất từ {formatPrice(route.price)} VND
                 </div>
               </a>
@@ -201,7 +248,7 @@ export default function HomePage() {
       </section>
 
       {/* Popular Hotels */}
-      <section>
+      <section className="py-8 rounded-lg" style={{ backgroundColor: '#F0F7FF', borderRadius: '8px' }}>
         <SectionHeader title="Nhiều lựa chọn khách sạn" href="/hotels" />
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {hotels.map(h => (
@@ -218,7 +265,7 @@ export default function HomePage() {
       </section>
 
       {/* Top Flights */}
-      <section>
+      <section className="py-8" style={{ backgroundColor: '#FFFFFF' }}>
         <SectionHeader title="Vé máy bay phổ biến" href="/flights" />
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {flights.map(f => (
@@ -235,8 +282,17 @@ export default function HomePage() {
       </section>
 
       {/* Things to do */}
-      <section>
-        <SectionHeader title="Hoạt động & Vui chơi" href="/activities" />
+      <section className="py-8 rounded-lg" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold" style={{ color: '#0D47A1' }}>Hoạt động & Vui chơi</h2>
+          <a 
+            className="text-sm font-semibold transition hover:opacity-80" 
+            style={{ color: '#FF6B35' }}
+            href="/activities"
+          >
+            Xem tất cả →
+          </a>
+        </div>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {activities.map(a => (
             <a key={a.id} href={`/activities/${a.id}`} className="block">
@@ -252,19 +308,23 @@ export default function HomePage() {
       </section>
 
       {/* Upgrade Your Trip Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900 via-blue-700 to-sky-600 text-white">
-        <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_45%)]" />
+      <section 
+        className="relative overflow-hidden rounded-lg text-white shadow-xl"
+        style={{ backgroundColor: '#0D47A1', borderRadius: '8px' }}
+      >
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.35),_transparent_45%)]" />
         <div className="relative z-10 grid gap-10 p-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] md:p-12">
           <div className="max-w-md">
-            <h2 className="text-3xl font-semibold leading-tight">
+            <h2 className="text-3xl font-semibold leading-tight text-white">
               Nâng tầm chuyến đi theo cách bạn muốn
             </h2>
-            <p className="mt-4 text-sm text-blue-100">
+            <p className="mt-4 text-sm text-white/90">
               Lên kế hoạch thông minh với các dịch vụ bổ sung được Jurni tuyển chọn riêng cho từng hành trình. Linh hoạt hơn, an tâm hơn và tối ưu ngân sách.
             </p>
             <a
               href="/upgrade-your-trip"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur hover:bg-white/20 transition"
+              className="mt-6 inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold text-white shadow-md transition hover:opacity-90"
+              style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
             >
               Khám phá các gói nâng hạng
               <span aria-hidden>→</span>
@@ -275,24 +335,47 @@ export default function HomePage() {
               <a
                 key={idx}
                 href={option.href}
-                className="group relative flex h-full flex-col gap-3 rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-sm transition hover:bg-white/20"
+                className="group relative flex h-full flex-col gap-3 rounded-lg border p-6 backdrop-blur-sm transition"
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px',
+                  borderColor: 'rgba(255, 255, 255, 0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  e.currentTarget.style.borderColor = '#FF6B35';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }}
               >
                 <span className="relative inline-flex h-12 w-12 items-center justify-center">
                   <span
-                    className={`absolute inset-0 rounded-full bg-gradient-to-br ${option.accent} opacity-90 blur-[2px]`}
+                    className="absolute inset-0 rounded-full opacity-90 blur-[2px]"
+                    style={{ backgroundColor: '#FF9800' }}
                     aria-hidden
                   />
-                  <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-lg ring-1 ring-white/50">
+                  <span 
+                    className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-xl shadow-lg ring-1 ring-white/50 transition"
+                    style={{ borderRadius: '8px' }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#FF6B35'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = '#0D47A1'}
+                  >
                     {option.icon}
                   </span>
                 </span>
                 <div>
-                  <div className="text-base font-semibold">{option.title}</div>
-                  <p className="mt-2 text-sm text-blue-100/90">
+                  <div className="text-base font-semibold text-white">{option.title}</div>
+                  <p className="mt-2 text-sm text-white/90">
                     {option.description}
                   </p>
                 </div>
-                <span className="mt-auto inline-flex items-center text-sm font-semibold text-blue-100/90 transition group-hover:text-white">
+                <span 
+                  className="mt-auto inline-flex items-center text-sm font-semibold text-white/90 transition"
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#FF6B35'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)'}
+                >
                   Tìm hiểu thêm
                   <span className="ml-2 transition group-hover:translate-x-1">→</span>
                 </span>

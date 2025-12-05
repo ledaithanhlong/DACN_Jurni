@@ -295,7 +295,7 @@ export default function HotelsPage() {
   ];
 
   const hotelTypes = [
-    { name: 'Khách sạn 5 sao', icon: '🏨', count: hotels.filter(h => h.rating === 5).length },
+    { name: 'Khách sạn 5 sao', icon: '🏨', count: hotels.filter(h => h.star_rating === 5).length },
     { name: 'Resort bãi biển', icon: '🏖️', count: hotels.filter(h => h.name?.toLowerCase().includes('resort') || h.name?.toLowerCase().includes('beach')).length },
     { name: 'Boutique Hotel', icon: '🏛️', count: hotels.filter(h => h.name?.toLowerCase().includes('boutique')).length },
     { name: 'Eco Lodge', icon: '🌲', count: hotels.filter(h => h.name?.toLowerCase().includes('eco') || h.name?.toLowerCase().includes('lodge')).length }
@@ -565,7 +565,7 @@ export default function HotelsPage() {
                       />
                       <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1">
                         <IconStar className="w-4 h-4 text-yellow-500 fill-current" />
-                        <span className="font-bold text-gray-900">{hotel.rating || 4}</span>
+                        <span className="font-bold text-gray-900">{hotel.star_rating || 4}</span>
                       </div>
                     </div>
                   )}
@@ -652,7 +652,7 @@ export default function HotelsPage() {
                   <h3 className="text-3xl font-bold text-gray-900">{selectedHotel.name}</h3>
                   <div className="flex items-center gap-1 bg-yellow-50 px-4 py-2 rounded-full">
                     <IconStar className="w-5 h-5 text-yellow-500 fill-current" />
-                    <span className="font-bold text-gray-900">{selectedHotel.rating || 4} sao</span>
+                    <span className="font-bold text-gray-900">{selectedHotel.star_rating || 4} sao</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 mb-4">

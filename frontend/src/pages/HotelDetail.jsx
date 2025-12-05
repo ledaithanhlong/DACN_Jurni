@@ -275,12 +275,6 @@ export default function HotelDetail() {
                         <span className="font-bold text-gray-900">{hotel.star_rating} sao</span>
                       </div>
                     )}
-                    {hotel.rating && (
-                      <div className="flex items-center gap-1 bg-blue-50 px-4 py-2 rounded-full">
-                        <IconStar className="w-5 h-5 text-blue-500 fill-current" />
-                        <span className="font-bold text-gray-900">{hotel.rating}/5</span>
-                      </div>
-                    )}
                     {hotel.total_rooms && (
                       <div className="text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-full">
                         {hotel.total_rooms} phòng

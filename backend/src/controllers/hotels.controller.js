@@ -17,6 +17,48 @@ const parseJsonFields = (payload) => {
   return hotelData;
 };
 
+// Hàm chuyển đổi dữ liệu khách sạn từ database sang format frontend
+const formatHotelData = (hotel) => {
+  const formatted = hotel.toJSON();
+  
+  return {
+    id: formatted.id,
+    name: formatted.name,
+    location: formatted.location,
+    address: formatted.address,
+    price: Number(formatted.price),
+    star_rating: formatted.star_rating || null,
+    image_url: formatted.image_url,
+    images: formatted.images || [],
+    description: formatted.description,
+    amenities: Array.isArray(formatted.amenities) ? formatted.amenities : [],
+    rooms: formatted.total_rooms || 0,
+    checkIn: formatted.check_in_time || '14:00',
+    checkOut: formatted.check_out_time || '12:00',
+    policies: formatted.policies || {
+      cancel: 'Miễn phí hủy trước 48 giờ',
+      children: 'Trẻ em ở miễn phí',
+      pets: 'Không cho phép thú cưng',
+      smoking: 'Không hút thuốc'
+    },
+    nearby_attractions: formatted.nearby_attractions || [],
+    public_transport: formatted.public_transport || [],
+    has_breakfast: formatted.has_breakfast || false,
+    has_parking: formatted.has_parking || false,
+    has_wifi: formatted.has_wifi !== false,
+    has_pool: formatted.has_pool || false,
+    has_restaurant: formatted.has_restaurant || false,
+    has_gym: formatted.has_gym || false,
+    has_spa: formatted.has_spa || false,
+    allows_pets: formatted.allows_pets || false,
+    is_smoking_allowed: formatted.is_smoking_allowed || false,
+    status: formatted.status,
+    approved_by: formatted.approved_by,
+    approved_at: formatted.approved_at,
+    approval_note: formatted.approval_note
+  };
+};
+
 export const listHotels = async (req, res, next) => {
   try {
     const { q, minPrice, maxPrice, sort } = req.query;
@@ -26,7 +68,7 @@ export const listHotels = async (req, res, next) => {
     if (maxPrice) where.price = { ...(where.price || {}), [db.Sequelize.Op.lte]: Number(maxPrice) };
     const order = sort === 'price_asc' ? [['price', 'ASC']] : sort === 'price_desc' ? [['price', 'DESC']] : [['id', 'DESC']];
     const hotels = await db.Hotel.findAll({ where, order });
-    res.json(hotels);
+    res.json(hotels.map(formatHotelData));
   } catch (e) { next(e); }
 };
 
@@ -40,15 +82,15 @@ export const listAllHotels = async (req, res, next) => {
     if (maxPrice) where.price = { ...(where.price || {}), [db.Sequelize.Op.lte]: Number(maxPrice) };
     const order = sort === 'price_asc' ? [['price', 'ASC']] : sort === 'price_desc' ? [['price', 'DESC']] : [['id', 'DESC']];
     const hotels = await db.Hotel.findAll({ where, order });
-    res.json(hotels);
+    res.json(hotels.map(formatHotelData));
   } catch (e) { next(e); }
 };
 
 export const getHotel = async (req, res, next) => {
   try {
-    const hotel = await db.Hotel.findByPk(req.params.id, { include: [{ model: db.Room, as: 'rooms' }] });
+    const hotel = await db.Hotel.findByPk(req.params.id);
     if (!hotel) return res.status(404).json({ error: 'Not found' });
-    res.json(hotel);
+    res.json(formatHotelData(hotel));
   } catch (e) { next(e); }
 };
 

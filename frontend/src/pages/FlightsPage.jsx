@@ -131,7 +131,12 @@ export default function FlightsPage() {
   };
 
   const handleBook = (flight) => {
-    navigate(`/flights/${flight.id}`);
+    navigate('/checkout', { 
+      state: { 
+        type: 'flight',
+        item: flight 
+      } 
+    });
   };
 
   // Thông tin các hãng hàng không

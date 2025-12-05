@@ -6,7 +6,6 @@ import HomePage from '../pages/HomePage.jsx';
 import HotelsPage from '../pages/HotelsPage.jsx';
 import HotelDetail from '../pages/HotelDetail.jsx';
 import FlightsPage from '../pages/FlightsPage.jsx';
-import FlightDetail from '../pages/FlightDetail.jsx';
 import CarsPage from '../pages/CarsPage.jsx';
 import ActivitiesPage from '../pages/ActivitiesPage.jsx';
 import VouchersPage from '../pages/VouchersPage.jsx';
@@ -222,7 +221,6 @@ export default function App({ clerkEnabled }) {
           <Route path="/hotels" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelsPage /></div>} />
           <Route path="/hotels/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelDetail /></div>} />
           <Route path="/flights" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightsPage /></div>} />
-          <Route path="/flights/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightDetail /></div>} />
           <Route path="/cars" element={<div className="max-w-7xl mx-auto px-4 py-6"><CarsPage /></div>} />
           <Route path="/activities" element={<div className="max-w-7xl mx-auto px-4 py-6"><ActivitiesPage /></div>} />
           <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />

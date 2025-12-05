@@ -3,10 +3,9 @@ export default (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
     location: { type: DataTypes.STRING, allowNull: false },
-    address: { type: DataTypes.TEXT, allowNull: true }, // Địa chỉ đầy đủ
+    address: { type: DataTypes.TEXT, allowNull: true },
     price: { type: DataTypes.DECIMAL(10,2), allowNull: false },
-    rating: { type: DataTypes.FLOAT, allowNull: true },
-    star_rating: { type: DataTypes.DECIMAL(2,1), allowNull: true }, // 3.5 sao
+    star_rating: { type: DataTypes.DECIMAL(2,1), allowNull: true },
     description: { type: DataTypes.TEXT, allowNull: true },
     image_url: { type: DataTypes.STRING, allowNull: true },
     images: { type: DataTypes.JSON, allowNull: true }, // Mảng các hình ảnh
@@ -14,19 +13,19 @@ export default (sequelize, DataTypes) => {
     check_out_time: { type: DataTypes.STRING, allowNull: true, defaultValue: '12:00' }, // Giờ check-out
     total_rooms: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true }, // Tổng số phòng
     total_floors: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true }, // Số tầng
-    amenities: { type: DataTypes.JSON, allowNull: true }, // Mảng tiện nghi
-    policies: { type: DataTypes.JSON, allowNull: true }, // Chính sách (cancel, children, pets, smoking)
-    nearby_attractions: { type: DataTypes.JSON, allowNull: true }, // Điểm tham quan gần đó
-    public_transport: { type: DataTypes.JSON, allowNull: true }, // Phương tiện công cộng
-    has_breakfast: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Có bữa sáng
-    has_parking: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Có chỗ đậu xe
-    has_wifi: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true }, // Có WiFi
-    has_pool: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Có bể bơi
-    has_restaurant: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Có nhà hàng
-    has_gym: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Có phòng gym
-    has_spa: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Có spa
-    allows_pets: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Cho phép thú cưng
-    is_smoking_allowed: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false }, // Cho phép hút thuốc
+    amenities: { type: DataTypes.JSON, allowNull: true },
+    policies: { type: DataTypes.JSON, allowNull: true },
+    nearby_attractions: { type: DataTypes.JSON, allowNull: true },
+    public_transport: { type: DataTypes.JSON, allowNull: true },
+    has_breakfast: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    has_parking: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    has_wifi: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: true },
+    has_pool: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    has_restaurant: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    has_gym: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    has_spa: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    allows_pets: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
+    is_smoking_allowed: { type: DataTypes.BOOLEAN, allowNull: true, defaultValue: false },
     status: {
       type: DataTypes.ENUM('pending', 'approved', 'rejected'),
       allowNull: false,

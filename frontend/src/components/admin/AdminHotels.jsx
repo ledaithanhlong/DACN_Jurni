@@ -23,7 +23,6 @@ const emptyForm = {
   location: '',
   address: '',
   price: '',
-  rating: '',
   star_rating: '',
   description: '',
   image_url: '',
@@ -135,7 +134,6 @@ export default function AdminHotels() {
     location: hotel.location || '',
     address: hotel.address || '',
     price: hotel.price || '',
-    rating: hotel.rating || '',
     star_rating: hotel.star_rating || '',
     description: hotel.description || '',
     image_url: hotel.image_url || '',
@@ -201,7 +199,6 @@ export default function AdminHotels() {
       const data = {
         ...form,
         price: Number(form.price),
-        rating: form.rating ? Number(form.rating) : null,
         star_rating: form.star_rating ? Number(form.star_rating) : null,
         total_rooms: form.total_rooms ? Number(form.total_rooms) : null,
         total_floors: form.total_floors ? Number(form.total_floors) : null,
@@ -426,18 +423,6 @@ export default function AdminHotels() {
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
                     className="w-full border rounded px-3 py-2"
                     required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Đánh giá (1-5)</label>
-                  <input
-                    type="number"
-                    value={form.rating}
-                    onChange={(e) => setForm({ ...form, rating: e.target.value })}
-                    className="w-full border rounded px-3 py-2"
-                    min="1"
-                    max="5"
-                    step="0.1"
                   />
                 </div>
                 <div>
@@ -856,12 +841,6 @@ export default function AdminHotels() {
                     <span className="text-gray-500">Giá mỗi đêm</span>
                     <span className="font-semibold text-gray-900">
                       {Number(selectedHotel.price).toLocaleString('vi-VN')} VND
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Đánh giá</span>
-                    <span className="font-semibold text-gray-900">
-                      {selectedHotel.rating ? `${selectedHotel.rating}/5` : 'Chưa có'}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">

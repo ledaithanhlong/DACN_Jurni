@@ -361,14 +361,14 @@ export default function HotelsPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {statistics.map((stat, idx) => (
-              <div key={idx} className="group relative text-center p-8 bg-white rounded-3xl border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+              <div key={idx} className="group relative text-center p-8 bg-white rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
                 
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {stat.icon}
                   </div>
-                  <div className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                  <div className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
                     {stat.number}
                   </div>
                   <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{stat.label}</div>
@@ -392,14 +392,14 @@ export default function HotelsPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, idx) => (
-              <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+              <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
                 
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {value.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">
                     {value.title}
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
@@ -496,11 +496,11 @@ export default function HotelsPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {hotelTypes.map((type, idx) => (
-              <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 overflow-hidden text-center">
+              <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden text-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
                 <div className="relative z-10">
                   <div className="text-6xl mb-6 transform group-hover:scale-110 transition-transform duration-300">{type.icon}</div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">{type.name}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-orange-600 transition-colors">{type.name}</h3>
                   <div className="text-blue-600 font-bold text-lg">{type.count} khách sạn</div>
                 </div>
                 <div className="absolute top-0 right-0 w-0 h-0 border-t-[50px] border-r-[50px] border-t-blue-500/10 border-r-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -553,7 +553,7 @@ export default function HotelsPage() {
               {hotels.map((hotel) => (
                 <div
                   key={hotel.id}
-                  className="group bg-white rounded-3xl shadow-lg border-2 border-gray-100 hover:border-blue-500 hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer flex flex-col h-full"
+                  className="group bg-white rounded-3xl shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer flex flex-col h-full"
                   onClick={() => setSelectedHotel(hotel)}
                 >
                   {hotel.image_url && (
@@ -571,7 +571,7 @@ export default function HotelsPage() {
                   )}
                   <div className="p-6 flex flex-col flex-1">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
                         {hotel.name}
                       </h3>
                       <div className="flex items-center gap-2 text-gray-600 mb-4">
@@ -580,7 +580,7 @@ export default function HotelsPage() {
                       </div>
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <div className="text-2xl font-extrabold text-blue-600">
+                          <div className="text-2xl font-extrabold" style={{ color: '#FF6B35' }}>
                             {formatPrice(hotel.price)} VND
                           </div>
                           <div className="text-xs text-gray-500">/ đêm</div>
@@ -595,7 +595,8 @@ export default function HotelsPage() {
                           {hotel.amenities.slice(0, 3).map((amenity, idx) => (
                             <span
                               key={idx}
-                              className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium"
+                              className="text-xs px-3 py-1 rounded-full font-medium"
+                              style={{ backgroundColor: '#FFE8E0', color: '#FF6B35' }}
                             >
                               {amenity}
                             </span>
@@ -608,7 +609,7 @@ export default function HotelsPage() {
                         </div>
                       )}
                     </div>
-                    <button className="w-full bg-gradient-to-r from-blue-600 to-sky-600 text-white py-3 rounded-full font-semibold hover:scale-105 transition-all duration-300 shadow-lg mt-auto">
+                    <button className="w-full text-white py-3 rounded-full font-semibold hover:scale-105 transition-all duration-300 shadow-lg mt-auto" style={{ background: 'linear-gradient(to right, #FF6B35, #FF8C42)' }}>
                       Xem chi tiết
                     </button>
                   </div>
@@ -633,7 +634,7 @@ export default function HotelsPage() {
               <h2 className="text-2xl font-bold">Chi tiết khách sạn</h2>
               <button
                 onClick={() => setSelectedHotel(null)}
-                className="text-white hover:text-blue-100 text-3xl font-bold w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition"
+                className="text-white hover:text-orange-100 text-3xl font-bold w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition"
               >
                 ×
               </button>
@@ -749,7 +750,8 @@ export default function HotelsPage() {
                 </button>
                 <a
                   href={`/hotels/${selectedHotel.id}`}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-sky-600 text-white py-3 rounded-full font-semibold hover:scale-105 transition-all duration-300 shadow-lg text-center"
+                  className="flex-1 text-white py-3 rounded-full font-semibold hover:scale-105 transition-all duration-300 shadow-lg text-center"
+                  style={{ background: 'linear-gradient(to right, #FF6B35, #FF8C42)' }}
                 >
                   Đặt phòng ngay
                 </a>

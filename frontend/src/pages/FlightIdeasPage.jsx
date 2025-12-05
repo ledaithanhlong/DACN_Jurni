@@ -236,9 +236,10 @@ export default function FlightIdeasPage() {
                 onClick={() => toggleInterest(value)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                   interests.includes(value)
-                    ? 'bg-blue-600 text-white'
+                    ? 'text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
+                style={interests.includes(value) ? { backgroundColor: '#FF6B35' } : {}}
               >
                 {label}
               </button>
@@ -261,7 +262,7 @@ export default function FlightIdeasPage() {
                 setDuration('all');
                 setInterests([]);
               }}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-orange-600 hover:text-orange-700 font-medium"
             >
               Xóa bộ lọc
             </button>
@@ -291,7 +292,7 @@ export default function FlightIdeasPage() {
                     className="w-full h-full object-cover hover:scale-110 transition duration-300"
                   />
                   <div className="absolute top-3 right-3">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    <span className="text-white px-3 py-1 rounded-full text-sm font-semibold" style={{ backgroundColor: '#FF6B35' }}>
                       {formatPrice(idea.price)} VND
                     </span>
                   </div>
@@ -330,7 +331,10 @@ export default function FlightIdeasPage() {
                         } 
                       });
                     }}
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition mt-auto"
+                    className="w-full text-white py-2 rounded-lg font-semibold transition mt-auto"
+                    style={{ backgroundColor: '#FF6B35' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF8C42'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
                   >
                     Xem chuyến bay
                   </button>

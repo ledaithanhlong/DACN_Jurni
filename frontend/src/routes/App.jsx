@@ -6,6 +6,7 @@ import HomePage from '../pages/HomePage.jsx';
 import HotelsPage from '../pages/HotelsPage.jsx';
 import HotelDetail from '../pages/HotelDetail.jsx';
 import FlightsPage from '../pages/FlightsPage.jsx';
+import FlightDetail from '../pages/FlightDetail.jsx';
 import CarsPage from '../pages/CarsPage.jsx';
 import ActivitiesPage from '../pages/ActivitiesPage.jsx';
 import VouchersPage from '../pages/VouchersPage.jsx';
@@ -33,11 +34,15 @@ const NavUserSection = () => {
 
   return (
     <>
-      <Link to="/checkout" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thanh toán</Link> 
-      <Link to="/favorites" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Yêu thích</Link>
-      <Link to="/notifications" className="text-sm text-white/90 hover:text-white transition drop-shadow-sm">Thông báo</Link>
+      <Link to="/checkout" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Thanh toán</Link> 
+      <Link to="/favorites" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Yêu thích</Link>
+      <Link to="/notifications" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Thông báo</Link>
       {isAdmin && (
-        <Link to="/admin" className="text-sm bg-white text-blue-600 px-3 py-1 rounded hover:bg-blue-50 transition shadow-md font-medium">
+        <Link 
+          to="/admin" 
+          className="text-sm text-white px-3 py-1 rounded-lg transition shadow-md font-medium hover:opacity-90"
+          style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
+        >
           Quản trị
         </Link>
       )}
@@ -68,19 +73,20 @@ const Nav = ({ clerkEnabled }) => {
   return (
     <div
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        isSolid ? 'bg-blue-900/95 backdrop-blur shadow-lg' : 'bg-transparent'
+        isSolid ? 'bg-blue-dark backdrop-blur shadow-lg' : 'bg-transparent'
       }`}
+      style={isSolid ? { backgroundColor: '#0D47A1' } : {}}
     >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-6">
             <Link to="/" className="text-2xl font-bold text-white drop-shadow-md">Jurni</Link>
             <div className="hidden md:flex items-center gap-5 text-sm">
-              <Link to="/hotels" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Khách sạn</Link>
-              <Link to="/flights" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Vé máy bay</Link>
-              <Link to="/cars" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Cho thuê xe</Link>
-              <Link to="/activities" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Hoạt động & Vui chơi</Link>
-              <Link to="/vouchers" className="text-white/90 hover:text-white font-medium transition drop-shadow-sm">Voucher</Link>
+              <Link to="/hotels" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Khách sạn</Link>
+              <Link to="/flights" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Vé máy bay</Link>
+              <Link to="/cars" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Cho thuê xe</Link>
+              <Link to="/activities" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Hoạt động & Vui chơi</Link>
+              <Link to="/vouchers" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Voucher</Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -90,10 +96,14 @@ const Nav = ({ clerkEnabled }) => {
                   <NavUserSection />
                 </SignedIn>
                 <SignedOut>
-                  <Link to="/sign-in" className="text-white/90 hover:text-white px-4 py-2 font-medium transition drop-shadow-sm">
+                  <Link to="/sign-in" className="text-white/90 hover:text-orange-accent px-4 py-2 font-medium transition drop-shadow-sm">
                     Đăng Nhập
                   </Link>
-                  <Link to="/sign-up" className="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 font-medium transition shadow-md">
+                  <Link 
+                    to="/sign-up" 
+                    className="text-white px-4 py-2 rounded-lg font-medium transition shadow-md hover:opacity-90"
+                    style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
+                  >
                     Đăng ký
                   </Link>
                 </SignedOut>
@@ -194,7 +204,7 @@ function SyncUser() {
 
 export default function App({ clerkEnabled }) {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-white">
       <Nav clerkEnabled={clerkEnabled} />
       <main className="flex-1 pt-16">
         {/* Sync user when signed in */}
@@ -212,6 +222,7 @@ export default function App({ clerkEnabled }) {
           <Route path="/hotels" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelsPage /></div>} />
           <Route path="/hotels/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelDetail /></div>} />
           <Route path="/flights" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightsPage /></div>} />
+          <Route path="/flights/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightDetail /></div>} />
           <Route path="/cars" element={<div className="max-w-7xl mx-auto px-4 py-6"><CarsPage /></div>} />
           <Route path="/activities" element={<div className="max-w-7xl mx-auto px-4 py-6"><ActivitiesPage /></div>} />
           <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />
@@ -229,7 +240,7 @@ export default function App({ clerkEnabled }) {
         
       </main>
       <ChatWidget />
-      <footer className="bg-blue-900 text-white">
+      <footer className="text-white" style={{ backgroundColor: '#0D47A1' }}>
         <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
           <div>
             <div className="text-xl font-semibold tracking-wide">Jurni</div>
@@ -259,7 +270,7 @@ export default function App({ clerkEnabled }) {
             </li>
             <li>
               Source code:{" "}
-              <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold">
+              <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold hover:text-orange-accent transition">
                 Nước Code Dừa's GitHub repository
               </a>
             </li>
@@ -272,12 +283,12 @@ export default function App({ clerkEnabled }) {
               Liên kết nhanh
             </h3>
             <nav className="flex flex-col space-y-2 text-sm">
-              <Link to="/" className="text-white/80 hover:text-white">Trang chủ</Link>
-              <Link to="/about" className="text-white/80 hover:text-white">Giới thiệu</Link>
-              <Link to="/services" className="text-white/80 hover:text-white">Dịch vụ</Link>
-              <Link to="/activities" className="text-white/80 hover:text-white">Tour trong nước</Link>
-              <Link to="/support" className="text-white/80 hover:text-white">Liên hệ / Hỗ trợ</Link>
-              <Link to="/terms" className="text-white/80 hover:text-white">Điều khoản &amp; Chính sách</Link>
+              <Link to="/" className="text-white/80 hover:text-orange-accent transition">Trang chủ</Link>
+              <Link to="/about" className="text-white/80 hover:text-orange-accent transition">Giới thiệu</Link>
+              <Link to="/services" className="text-white/80 hover:text-orange-accent transition">Dịch vụ</Link>
+              <Link to="/activities" className="text-white/80 hover:text-orange-accent transition">Tour trong nước</Link>
+              <Link to="/support" className="text-white/80 hover:text-orange-accent transition">Liên hệ / Hỗ trợ</Link>
+              <Link to="/terms" className="text-white/80 hover:text-orange-accent transition">Điều khoản &amp; Chính sách</Link>
             </nav>
           </div>
         </div>

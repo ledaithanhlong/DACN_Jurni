@@ -131,12 +131,7 @@ export default function FlightsPage() {
   };
 
   const handleBook = (flight) => {
-    navigate('/checkout', { 
-      state: { 
-        type: 'flight',
-        item: flight 
-      } 
-    });
+    navigate(`/flights/${flight.id}`);
   };
 
   // Thông tin các hãng hàng không
@@ -223,7 +218,7 @@ export default function FlightsPage() {
         <div className="mt-4">
           <button
             onClick={() => navigate('/')}
-            className="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2"
+            className="text-orange-600 hover:text-orange-700 font-medium inline-flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -248,14 +243,14 @@ export default function FlightsPage() {
             </h2>
               {flights.length > 0 && (
                 <span className="text-sm text-gray-600">
-                  Tìm thấy <span className="font-semibold text-blue-600">{flights.length}</span> chuyến bay
+                  Tìm thấy <span className="font-semibold" style={{ color: '#FF6B35' }}>{flights.length}</span> chuyến bay
                 </span>
               )}
             </div>
 
             {loading ? (
               <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#FF6B35' }}></div>
                 <p className="mt-4 text-gray-600">Đang tìm kiếm chuyến bay...</p>
               </div>
             ) : flights.length === 0 ? (
@@ -269,7 +264,7 @@ export default function FlightsPage() {
                 </p>
                 <button
                   onClick={() => navigate('/')}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-orange-600 hover:text-orange-700 font-medium"
                 >
                   Tìm kiếm chuyến bay khác
                 </button>
@@ -292,8 +287,8 @@ export default function FlightsPage() {
                               className="w-24 h-24 object-contain rounded-lg"
                             />
                           ) : (
-                            <div className="w-24 h-24 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="w-24 h-24 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#FFE8E0' }}>
+                              <svg className="w-12 h-12" style={{ color: '#FF6B35' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                               </svg>
                             </div>
@@ -325,7 +320,7 @@ export default function FlightsPage() {
                             </p>
                             <div className="flex items-center w-full">
                               <div className="flex-1 border-t-2 border-dashed border-gray-300"></div>
-                              <svg className="w-6 h-6 text-blue-600 mx-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-6 h-6 mx-2" style={{ color: '#FF6B35' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                               </svg>
                               <div className="flex-1 border-t-2 border-dashed border-gray-300"></div>
@@ -350,13 +345,16 @@ export default function FlightsPage() {
                         {/* Price and Book Button */}
                         <div className="flex-shrink-0 border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
                           <div className="text-center md:text-right">
-                            <p className="text-3xl font-bold text-blue-600 mb-2">
+                            <p className="text-3xl font-bold mb-2" style={{ color: '#FF6B35' }}>
                               {formatPrice(flight.price)} VND
                             </p>
                             <p className="text-xs text-gray-500 mb-4">Giá cho 1 người</p>
                             <button
                               onClick={() => handleBook(flight)}
-                              className="w-full md:w-auto bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+                              className="w-full md:w-auto text-white px-6 py-2 rounded-lg font-semibold transition"
+                              style={{ backgroundColor: '#FF6B35' }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF8C42'}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
                             >
                               Chọn chuyến bay
                             </button>

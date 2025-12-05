@@ -78,9 +78,9 @@ export default function JurniHero() {
   const toSuggestionsRef = useRef(null);
   const locationSuggestionsRef = useRef(null);
 
-  const inputBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 placeholder-blue-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition";
-  const selectBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 transition appearance-none";
-  const ghostButtonClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 text-left hover:bg-white transition";
+  const inputBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-dark placeholder-gray-400 focus:border-orange-accent focus:outline-none focus:ring-2 focus:ring-orange-accent/20 transition";
+  const selectBaseClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-dark focus:border-orange-accent focus:outline-none focus:ring-2 focus:ring-orange-accent/20 transition appearance-none";
+  const ghostButtonClass = "w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-dark text-left hover:bg-white transition";
 
   // Popular destinations with estimated prices
   const popularDestinations = {
@@ -251,7 +251,7 @@ export default function JurniHero() {
     <div className="relative w-full -mt-16 mb-20">
       <div className="relative h-[750px] overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920')] bg-cover bg-center" />
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/45 via-blue-900/15 to-blue-900/55" />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(13, 71, 161, 0.45), rgba(13, 71, 161, 0.15), rgba(13, 71, 161, 0.55))' }} />
         
         <div className="relative z-10 h-full flex flex-col pt-16">
           <div className="flex-1 flex items-center justify-center px-4 pt-6">
@@ -279,8 +279,8 @@ export default function JurniHero() {
                         onClick={() => setService(s.id)}
                         className={`px-5 py-2.5 rounded-lg flex items-center gap-2 transition font-medium ${
                           service === s.id
-                            ? 'bg-white/20 text-white font-semibold border border-white/60 shadow'
-                            : 'text-white/70 hover:text-white hover:bg-white/10 border border-transparent'
+                            ? 'bg-white/20 text-white font-semibold border border-white/60 shadow-md'
+                            : 'text-white/70 hover:text-orange-accent hover:bg-white/10 border border-transparent'
                         }`}
                       >
                         <IconComponent className="w-5 h-5" />
@@ -298,9 +298,10 @@ export default function JurniHero() {
                         onClick={() => setSearch({ ...search, flightType: 'one-way' })}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                           search.flightType === 'one-way'
-                            ? 'bg-blue-500 text-white border border-blue-500 shadow'
-                            : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400 hover:text-blue-600'
+                            ? 'text-white border shadow-md'
+                            : 'bg-white border border-gray-200 hover:border-orange-accent hover:text-orange-accent'
                         }`}
+                        style={search.flightType === 'one-way' ? { backgroundColor: '#0D47A1', borderColor: '#0D47A1', borderRadius: '8px' } : { borderRadius: '8px', color: '#212121' }}
                       >
                         Một chiều / Khứ hồi
                       </button>
@@ -308,9 +309,10 @@ export default function JurniHero() {
                         onClick={() => setSearch({ ...search, flightType: 'multi-city' })}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                           search.flightType === 'multi-city'
-                            ? 'bg-blue-500 text-white border border-blue-500 shadow'
-                            : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400 hover:text-blue-600'
+                            ? 'text-white border shadow-md'
+                            : 'bg-white border border-gray-200 hover:border-orange-accent hover:text-orange-accent'
                         }`}
+                        style={search.flightType === 'multi-city' ? { backgroundColor: '#0D47A1', borderColor: '#0D47A1', borderRadius: '8px' } : { borderRadius: '8px', color: '#212121' }}
                       >
                         Nhiều thành phố
                       </button>
@@ -338,7 +340,7 @@ export default function JurniHero() {
                                   setSearch({ ...search, from: dest.from, to: dest.to });
                                   setShowSuggestions({ ...showSuggestions, from: false, to: false });
                                 }}
-                                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b last:border-b-0"
+                                className="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b last:border-b-0"
                               >
                                 <div className="flex items-center justify-between">
                                   <div>
@@ -346,8 +348,8 @@ export default function JurniHero() {
                                     <div className="text-xs text-gray-500">{dest.from} → {dest.to}</div>
                                   </div>
                                   <div className="text-right">
-                                    <div className="text-blue-600 font-semibold">{formatPrice(dest.price)} VND</div>
-                                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">{dest.badge}</span>
+                                    <div className="text-orange-accent font-semibold">{formatPrice(dest.price)} VND</div>
+                                    <span className="text-xs bg-orange-accent text-white px-2 py-0.5 rounded">{dest.badge}</span>
                                   </div>
                                 </div>
                               </button>
@@ -377,7 +379,7 @@ export default function JurniHero() {
                                   setSearch({ ...search, to: dest.to });
                                   setShowSuggestions({ ...showSuggestions, to: false });
                                 }}
-                                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b last:border-b-0"
+                                className="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b last:border-b-0"
                               >
                                 <div className="flex items-center justify-between">
                                   <div>
@@ -385,8 +387,8 @@ export default function JurniHero() {
                                     <div className="text-xs text-gray-500">Từ {dest.from}</div>
                                   </div>
                                   <div className="text-right">
-                                    <div className="text-blue-600 font-semibold">{formatPrice(dest.price)} VND</div>
-                                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">{dest.badge}</span>
+                                    <div className="text-orange-accent font-semibold">{formatPrice(dest.price)} VND</div>
+                                    <span className="text-xs bg-orange-accent text-white px-2 py-0.5 rounded">{dest.badge}</span>
                                   </div>
                                 </div>
                               </button>
@@ -414,27 +416,27 @@ export default function JurniHero() {
                         {showPassengerMenu && (
                           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-blue-900">Người lớn</span>
+                              <span className="text-sm font-semibold text-blue-dark">Người lớn</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updatePassengers('adults', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.passengers.adults}</span>
-                                <button onClick={() => updatePassengers('adults', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updatePassengers('adults', -1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.passengers.adults}</span>
+                                <button onClick={() => updatePassengers('adults', 1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-blue-900">Trẻ em</span>
+                              <span className="text-sm font-semibold text-blue-dark">Trẻ em</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updatePassengers('children', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.passengers.children}</span>
-                                <button onClick={() => updatePassengers('children', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updatePassengers('children', -1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.passengers.children}</span>
+                                <button onClick={() => updatePassengers('children', 1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-blue-900">Em bé</span>
+                              <span className="text-sm font-semibold text-blue-dark">Em bé</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updatePassengers('infants', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.passengers.infants}</span>
-                                <button onClick={() => updatePassengers('infants', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updatePassengers('infants', -1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.passengers.infants}</span>
+                                <button onClick={() => updatePassengers('infants', 1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                           </div>
@@ -464,8 +466,8 @@ export default function JurniHero() {
                                   setSearch({ ...search, class: c.value });
                                   setShowClassMenu(false);
                                 }}
-                                className={`w-full text-left px-4 py-2 rounded hover:bg-blue-50 transition ${
-                                  search.class === c.value ? 'bg-blue-100 text-blue-600 font-semibold' : 'text-gray-700'
+                                className={`w-full text-left px-4 py-2 rounded-lg hover:bg-orange-50 transition ${
+                                  search.class === c.value ? 'bg-orange-accent/10 text-orange-accent font-semibold' : 'text-gray-700'
                                 }`}
                               >
                                 {c.label}
@@ -492,19 +494,38 @@ export default function JurniHero() {
                       <div className="md:col-span-5 flex gap-3">
                         <button
                           onClick={handleSearch}
-                          className="flex-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 transition text-lg shadow-xl"
+                          className="flex-1 rounded-lg text-white font-semibold py-4 px-6 transition text-lg shadow-xl hover:opacity-90"
+                          style={{ backgroundColor: '#0D47A1', borderRadius: '8px' }}
                         >
                           Tìm kiếm
                         </button>
                         <button 
                           onClick={() => navigate('/flight-ideas')}
-                          className="px-6 py-4 border border-white/50 text-white rounded-lg hover:bg-white/10 transition"
+                          className="px-6 py-4 border border-white/50 text-white rounded-lg transition shadow-md hover:opacity-90"
+                          style={{ borderRadius: '8px' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#FF6B35';
+                            e.currentTarget.style.borderColor = '#FF6B35';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                          }}
                         >
                           Khám phá ý tưởng chuyến bay
                         </button>
                         <button 
                           onClick={() => navigate('/price-alerts')}
-                          className="px-6 py-4 border border-white/50 text-white rounded-lg hover:bg-white/10 transition"
+                          className="px-6 py-4 border border-white/50 text-white rounded-lg transition shadow-md hover:opacity-90"
+                          style={{ borderRadius: '8px' }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#FF6B35';
+                            e.currentTarget.style.borderColor = '#FF6B35';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'transparent';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                          }}
                         >
                           Cảnh báo giá
                         </button>
@@ -536,7 +557,7 @@ export default function JurniHero() {
                                   setSearch({ ...search, from: dest.location });
                                   setShowSuggestions({ ...showSuggestions, location: false });
                                 }}
-                                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b last:border-b-0"
+                                className="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b last:border-b-0"
                               >
                                 <div className="flex items-center justify-between">
                                   <div>
@@ -544,8 +565,8 @@ export default function JurniHero() {
                                     <div className="text-xs text-gray-500">{dest.location}</div>
                                   </div>
                                   <div className="text-right">
-                                    <div className="text-blue-600 font-semibold">Từ {formatPrice(dest.price)}/đêm</div>
-                                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">{dest.badge}</span>
+                                    <div className="text-orange-accent font-semibold">Từ {formatPrice(dest.price)}/đêm</div>
+                                    <span className="text-xs bg-orange-accent text-white px-2 py-0.5 rounded">{dest.badge}</span>
                                   </div>
                                 </div>
                               </button>
@@ -557,7 +578,7 @@ export default function JurniHero() {
                         <label className="block text-sm font-medium text-white/85 mb-1">Nhận phòng</label>
                         <input
                           type="date"
-                          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 transition"
+                          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-orange-accent focus:outline-none focus:ring-2 focus:ring-orange-accent/20 transition"
                           value={search.date}
                           onChange={e => setSearch({ ...search, date: e.target.value })}
                         />
@@ -566,7 +587,7 @@ export default function JurniHero() {
                         <label className="block text-sm font-medium text-white/85 mb-1">Trả phòng</label>
                         <input
                           type="date"
-                          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 transition"
+                          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-orange-accent focus:outline-none focus:ring-2 focus:ring-orange-accent/20 transition"
                           value={search.time}
                           onChange={e => setSearch({ ...search, time: e.target.value })}
                         />
@@ -582,19 +603,19 @@ export default function JurniHero() {
                         {showGuestMenu && (
                           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-blue-900">Người lớn</span>
+                              <span className="text-sm font-semibold text-blue-dark">Người lớn</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateGuests('adults', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.guests.adults}</span>
-                                <button onClick={() => updateGuests('adults', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updateGuests('adults', -1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.guests.adults}</span>
+                                <button onClick={() => updateGuests('adults', 1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-blue-900">Trẻ em</span>
+                              <span className="text-sm font-semibold text-blue-dark">Trẻ em</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateGuests('children', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.guests.children}</span>
-                                <button onClick={() => updateGuests('children', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updateGuests('children', -1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.guests.children}</span>
+                                <button onClick={() => updateGuests('children', 1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                           </div>
@@ -613,11 +634,11 @@ export default function JurniHero() {
                         {showRoomMenu && (
                           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-blue-900">Số phòng</span>
+                              <span className="text-sm font-semibold text-blue-dark">Số phòng</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateRooms(-1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.rooms}</span>
-                                <button onClick={() => updateRooms(1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updateRooms(-1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.rooms}</span>
+                                <button onClick={() => updateRooms(1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                           </div>
@@ -666,7 +687,7 @@ export default function JurniHero() {
                       <div className="md:col-span-1 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-dark hover:bg-blue-dark/90 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>
@@ -700,7 +721,7 @@ export default function JurniHero() {
                         <input
                           type="text"
                           placeholder="Thành phố, địa điểm"
-                          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-0 transition"
+                          className="w-full rounded-lg px-4 py-3 border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-orange-accent focus:outline-none focus:ring-2 focus:ring-orange-accent/20 transition"
                           value={search.pickupLocation}
                           onChange={e => {
                             setSearch({ ...search, pickupLocation: e.target.value });
@@ -717,7 +738,7 @@ export default function JurniHero() {
                                   setSearch({ ...search, pickupLocation: dest.location, returnLocation: dest.location });
                                   setShowSuggestions({ ...showSuggestions, location: false });
                                 }}
-                                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b last:border-b-0"
+                                className="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b last:border-b-0"
                               >
                                 <div className="flex items-center justify-between">
                                   <div>
@@ -725,8 +746,8 @@ export default function JurniHero() {
                                     <div className="text-xs text-gray-500">{dest.location}</div>
                                   </div>
                                   <div className="text-right">
-                                    <div className="text-blue-600 font-semibold">Từ {formatPrice(dest.price)}/ngày</div>
-                                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">{dest.badge}</span>
+                                    <div className="text-orange-accent font-semibold">Từ {formatPrice(dest.price)}/ngày</div>
+                                    <span className="text-xs bg-orange-accent text-white px-2 py-0.5 rounded">{dest.badge}</span>
                                   </div>
                                 </div>
                               </button>
@@ -770,8 +791,8 @@ export default function JurniHero() {
                                   setSearch({ ...search, carType: c.value });
                                   setShowCarTypeMenu(false);
                                 }}
-                                className={`w-full text-left px-4 py-2 rounded hover:bg-blue-50 transition ${
-                                  search.carType === c.value ? 'bg-blue-100 text-blue-600 font-semibold' : ''
+                                className={`w-full text-left px-4 py-2 rounded-lg hover:bg-orange-50 transition ${
+                                  search.carType === c.value ? 'bg-orange-accent/10 text-orange-accent font-semibold' : ''
                                 }`}
                               >
                                 {c.label}
@@ -834,7 +855,7 @@ export default function JurniHero() {
                       <div className="md:col-span-3 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-dark hover:bg-blue-dark/90 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>
@@ -885,7 +906,7 @@ export default function JurniHero() {
                                   setSearch({ ...search, from: dest.location });
                                   setShowSuggestions({ ...showSuggestions, location: false });
                                 }}
-                                className="w-full text-left px-4 py-3 hover:bg-blue-50 transition border-b last:border-b-0"
+                                className="w-full text-left px-4 py-3 hover:bg-orange-50 transition border-b last:border-b-0"
                               >
                                 <div className="flex items-center justify-between">
                                   <div>
@@ -893,8 +914,8 @@ export default function JurniHero() {
                                     <div className="text-xs text-gray-500">{dest.location}</div>
                                   </div>
                                   <div className="text-right">
-                                    <div className="text-blue-600 font-bold">Từ {formatPrice(dest.price)}</div>
-                                    <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">{dest.badge}</span>
+                                    <div className="text-orange-accent font-bold">Từ {formatPrice(dest.price)}</div>
+                                    <span className="text-xs bg-orange-accent text-white px-2 py-0.5 rounded">{dest.badge}</span>
                                   </div>
                                 </div>
                               </button>
@@ -930,26 +951,26 @@ export default function JurniHero() {
                         <label className="block text-sm font-medium text-white/85 mb-1">Số người</label>
                         <button
                           onClick={() => setShowActivityMenu(!showActivityMenu)}
-                          className="w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-900 text-left hover:bg-white transition"
+                                className="w-full rounded-lg px-4 py-3 border border-white/30 bg-white/90 text-blue-dark text-left hover:bg-white transition"
                         >
                           {search.participants.adults} Người lớn, {search.participants.children} Trẻ em
                         </button>
                         {showActivityMenu && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-blue-100 rounded-xl shadow-2xl p-4 z-40">
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-blue-200 rounded-xl shadow-2xl p-4 z-40">
                             <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-semibold text-blue-900">Người lớn</span>
+                              <span className="text-sm font-semibold text-blue-dark">Người lớn</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateParticipants('adults', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.participants.adults}</span>
-                                <button onClick={() => updateParticipants('adults', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updateParticipants('adults', -1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.participants.adults}</span>
+                                <button onClick={() => updateParticipants('adults', 1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-blue-900">Trẻ em</span>
+                              <span className="text-sm font-semibold text-blue-dark">Trẻ em</span>
                               <div className="flex items-center gap-3">
-                                <button onClick={() => updateParticipants('children', -1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">-</button>
-                                <span className="w-8 text-center text-blue-900 font-semibold">{search.participants.children}</span>
-                                <button onClick={() => updateParticipants('children', 1)} className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center">+</button>
+                                <button onClick={() => updateParticipants('children', -1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">-</button>
+                                <span className="w-8 text-center text-blue-dark font-semibold">{search.participants.children}</span>
+                                <button onClick={() => updateParticipants('children', 1)} className="w-8 h-8 rounded-full border border-orange-accent bg-orange-accent/10 text-orange-accent hover:bg-orange-accent/20 flex items-center justify-center transition">+</button>
                               </div>
                             </div>
                           </div>
@@ -1000,7 +1021,7 @@ export default function JurniHero() {
                       <div className="md:col-span-2 flex items-end">
                         <button
                           onClick={handleSearch}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
+                          className="w-full bg-blue-dark hover:bg-blue-dark/90 text-white font-semibold py-3 px-4 rounded-lg transition shadow-lg"
                         >
                           Tìm kiếm
                         </button>

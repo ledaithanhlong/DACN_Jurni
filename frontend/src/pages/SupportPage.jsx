@@ -66,7 +66,7 @@ export default function SupportPage() {
             <h1 className="text-3xl md:text-4xl font-semibold leading-tight">
               Chúng tôi luôn sẵn sàng đồng hành trên mọi hành trình của bạn
             </h1>
-            <p className="text-sm md:text-base text-white/80 leading-relaxed">
+            <p className="text-sm md:text-base text-white leading-relaxed">
               Jurni cung cấp nhiều kênh hỗ trợ 24/7 để bạn nhận trợ giúp kịp thời, từ khâu đặt dịch vụ đến khi kết thúc
               chuyến đi. Hãy chọn cách thức phù hợp nhất với bạn.
             </p>
@@ -93,7 +93,7 @@ export default function SupportPage() {
             {supportChannels.map((channel) => (
               <div
                 key={channel.title}
-                className="rounded-3xl border border-blue-100 bg-white/90 p-6 shadow shadow-blue-100/40 transition hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg"
+                className="rounded-3xl border border-blue-100 bg-white/90 p-6 shadow shadow-blue-100/40 transition hover:-translate-y-1 hover:border-orange-400 hover:shadow-lg"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">{channel.icon}</span>
@@ -105,7 +105,7 @@ export default function SupportPage() {
                     <a
                       key={action.label}
                       href={action.href}
-                      className="block rounded-full border border-blue-100 bg-blue-50/60 px-4 py-2 font-semibold text-blue-700 hover:border-blue-300 hover:bg-blue-100 transition"
+                      className="block rounded-full border border-blue-100 bg-blue-50/60 px-4 py-2 font-semibold text-blue-700 hover:border-orange-300 hover:bg-orange-100 transition"
                     >
                       {action.label}
                     </a>

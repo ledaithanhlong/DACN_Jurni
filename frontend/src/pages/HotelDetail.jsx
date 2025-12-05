@@ -195,7 +195,7 @@ export default function HotelDetail() {
         {/* Back Button */}
         <button
           onClick={() => navigate('/hotels')}
-          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-blue-600 transition"
+          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-orange-600 transition"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -455,7 +455,7 @@ export default function HotelDetail() {
                     <button
                       type="button"
                       onClick={() => setBooking({ ...booking, guests: Math.max(1, booking.guests - 1) })}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-blue-500 flex items-center justify-center font-bold text-gray-600"
+                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-orange-500 flex items-center justify-center font-bold text-gray-600"
                     >
                       −
                     </button>
@@ -469,7 +469,7 @@ export default function HotelDetail() {
                     <button
                       type="button"
                       onClick={() => setBooking({ ...booking, guests: booking.guests + 1 })}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-blue-500 flex items-center justify-center font-bold text-gray-600"
+                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-orange-500 flex items-center justify-center font-bold text-gray-600"
                     >
                       +
                     </button>
@@ -484,7 +484,7 @@ export default function HotelDetail() {
                     <button
                       type="button"
                       onClick={() => setBooking({ ...booking, rooms: Math.max(1, booking.rooms - 1) })}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-blue-500 flex items-center justify-center font-bold text-gray-600"
+                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-orange-500 flex items-center justify-center font-bold text-gray-600"
                     >
                       −
                     </button>
@@ -498,7 +498,7 @@ export default function HotelDetail() {
                     <button
                       type="button"
                       onClick={() => setBooking({ ...booking, rooms: booking.rooms + 1 })}
-                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-blue-500 flex items-center justify-center font-bold text-gray-600"
+                      className="w-10 h-10 rounded-lg border-2 border-gray-200 hover:border-orange-500 flex items-center justify-center font-bold text-gray-600"
                     >
                       +
                     </button>

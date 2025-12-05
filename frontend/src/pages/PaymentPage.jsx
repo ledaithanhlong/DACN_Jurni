@@ -500,9 +500,10 @@ export default function PaymentPage() {
                   onClick={() => handleCategoryChange('vietnamese')}
                   className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
                     form.paymentCategory === 'vietnamese'
-                      ? 'bg-blue-600 text-white shadow'
-                      : 'text-blue-700 hover:bg-blue-50'
+                      ? 'text-white shadow'
+                      : 'hover:bg-orange-50'
                   }`}
+                  style={form.paymentCategory === 'vietnamese' ? { backgroundColor: '#FF6B35' } : { color: '#FF6B35' }}
                 >
                   Phương thức Việt Nam
                 </button>
@@ -511,9 +512,10 @@ export default function PaymentPage() {
                   onClick={() => handleCategoryChange('international')}
                   className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
                     form.paymentCategory === 'international'
-                      ? 'bg-blue-600 text-white shadow'
-                      : 'text-blue-700 hover:bg-blue-50'
+                      ? 'text-white shadow'
+                      : 'hover:bg-orange-50'
                   }`}
+                  style={form.paymentCategory === 'international' ? { backgroundColor: '#FF6B35' } : { color: '#FF6B35' }}
                 >
                   Phương thức Quốc tế
                 </button>
@@ -526,7 +528,7 @@ export default function PaymentPage() {
                     className={`flex flex-col gap-2 rounded-2xl border px-4 py-3 transition ${
                       form.paymentMethod === method.id
                         ? 'border-blue-500 bg-blue-50/80 shadow-lg'
-                        : 'border-blue-100 hover:border-blue-300 hover:bg-blue-50/40'
+                        : 'border-blue-100 hover:border-orange-300 hover:bg-orange-50/40'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -562,7 +564,7 @@ export default function PaymentPage() {
             <div className="flex flex-col gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-500 px-6 py-5 text-white shadow-lg">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <p className="text-sm text-white/80">Tổng thanh toán</p>
+                  <p className="text-sm text-white">Tổng thanh toán</p>
                   <p className="text-2xl font-semibold">{formatCurrency(total, order?.currency || 'VND')}</p>
                 </div>
                 <button
@@ -573,7 +575,7 @@ export default function PaymentPage() {
                   {submitting ? 'Đang xử lý...' : 'Thanh toán & hoàn tất đặt chỗ'}
                 </button>
               </div>
-              <p className="text-xs text-white/80">
+              <p className="text-xs text-white">
                 Khi bấm “Thanh toán”, bạn đồng ý với điều khoản sử dụng và chính sách hủy của Jurni.
               </p>
             </div>

@@ -49,6 +49,7 @@ export default function HotelDetail() {
   const [hotel, setHotel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [booking, setBooking] = useState({
     checkIn: '',
     checkOut: '',
@@ -83,7 +84,9 @@ export default function HotelDetail() {
     const checkIn = new Date(booking.checkIn);
     const checkOut = new Date(booking.checkOut);
     const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
-    return (hotel.price || 0) * nights * booking.rooms;
+    // Sử dụng giá của loại phòng được chọn nếu có, nếu không sử dụng giá khách sạn
+    const pricePerNight = selectedRoomType ? selectedRoomType.price : (hotel.price || 0);
+    return pricePerNight * nights * booking.rooms;
   };
 
   const handleBook = async () => {
@@ -103,6 +106,12 @@ export default function HotelDetail() {
       return;
     }
 
+    // Kiểm tra nếu có loại phòng khác nhau, yêu cầu chọn loại phòng
+    if (Array.isArray(hotel.room_types) && hotel.room_types.length > 1 && !selectedRoomType) {
+      alert('Vui lòng chọn loại phòng');
+      return;
+    }
+
     try {
       const token = await getToken();
       const totalPrice = calculateTotal();
@@ -116,7 +125,8 @@ export default function HotelDetail() {
           check_in: booking.checkIn,
           check_out: booking.checkOut,
           guests: booking.guests,
-          rooms: booking.rooms
+          rooms: booking.rooms,
+          room_type: selectedRoomType ? selectedRoomType.type : undefined
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -401,7 +411,7 @@ export default function HotelDetail() {
             <div className="bg-white rounded-3xl shadow-2xl border-2 border-blue-100 p-6 sticky top-8">
               <div className="text-right mb-4">
                 <div className="text-3xl font-extrabold text-blue-600">
-                  {formatPrice(hotel.price)} VND
+                  {selectedRoomType ? formatPrice(selectedRoomType.price) : formatPrice(hotel.price)} VND
                 </div>
                 <div className="text-sm text-gray-500">/ đêm</div>
               </div>
@@ -440,6 +450,39 @@ export default function HotelDetail() {
                     <p className="text-xs text-gray-500 mt-1">Check-out trước {hotel.check_out_time}</p>
                   )}
                 </div>
+
+                {/* Room Type Selection */}
+                {Array.isArray(hotel.room_types) && hotel.room_types.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Chọn loại phòng
+                    </label>
+                    <div className="space-y-2">
+                      {hotel.room_types.map((roomType, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedRoomType(roomType)}
+                          className={`w-full p-3 rounded-lg border-2 transition text-left ${
+                            selectedRoomType === roomType
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 bg-white hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <div className="font-semibold text-gray-900">{roomType.type}</div>
+                              <div className="text-sm text-gray-600">Sức chứa: {roomType.capacity} người</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-blue-600">{formatPrice(roomType.price)} VND</div>
+                              <div className="text-xs text-gray-500">/ đêm</div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -504,8 +547,8 @@ export default function HotelDetail() {
               {nights > 0 && (
                 <div className="bg-blue-50 rounded-xl p-4 mb-6">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-gray-700">
-                      <span>{formatPrice(hotel.price)} VND × {nights} đêm × {booking.rooms} phòng</span>
+                    <div className="flex justify-between text-gray-700 text-sm">
+                      <span>{selectedRoomType ? formatPrice(selectedRoomType.price) : formatPrice(hotel.price)} VND × {nights} đêm × {booking.rooms} phòng</span>
                     </div>
                     <div className="border-t border-blue-200 pt-2 mt-2">
                       <div className="flex justify-between items-center">

@@ -9,7 +9,8 @@ export default (sequelize, DataTypes) => {
     check_in: { type: DataTypes.DATE, allowNull: true },
     check_out: { type: DataTypes.DATE, allowNull: true },
     guests: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
-    rooms: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true }
+    rooms: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true },
+    room_type: { type: DataTypes.STRING, allowNull: true }
   }, {
     tableName: 'bookings',
     underscored: true

@@ -18,6 +18,13 @@ const defaultPolicies = {
   smoking: ''
 };
 
+const ROOM_TYPES = {
+  standard: { label: 'Phòng tiêu chuẩn', icon: '🛏️' },
+  deluxe: { label: 'Phòng deluxe', icon: '✨' },
+  suite: { label: 'Suite', icon: '🏨' },
+  family: { label: 'Phòng gia đình', icon: '👨‍👩‍👧‍👦' }
+};
+
 const emptyForm = {
   name: '',
   location: '',
@@ -31,6 +38,7 @@ const emptyForm = {
   check_out_time: '12:00',
   total_rooms: '',
   total_floors: '',
+  room_types: [], // [{ type: 'standard', quantity: 10, price: 1000000, capacity: 2 }]
   amenities: [],
   policies: defaultPolicies,
   nearby_attractions: [],
@@ -67,6 +75,7 @@ export default function AdminHotels() {
   const [newAmenity, setNewAmenity] = useState('');
   const [newAttraction, setNewAttraction] = useState('');
   const [newTransport, setNewTransport] = useState('');
+  const [newRoomType, setNewRoomType] = useState({ type: 'standard', quantity: 1, price: '', capacity: 2 });
 
   useEffect(() => {
     loadHotels();
@@ -142,6 +151,7 @@ export default function AdminHotels() {
     check_out_time: hotel.check_out_time || '12:00',
     total_rooms: hotel.total_rooms || '',
     total_floors: hotel.total_floors || '',
+    room_types: Array.isArray(hotel.room_types) ? hotel.room_types : [],
     amenities: Array.isArray(hotel.amenities) ? hotel.amenities : [],
     policies: hotel.policies || defaultPolicies,
     nearby_attractions: Array.isArray(hotel.nearby_attractions) ? hotel.nearby_attractions : [],
@@ -192,16 +202,61 @@ export default function AdminHotels() {
     setForm((prev) => ({ ...prev, public_transport: prev.public_transport.filter((_, i) => i !== index) }));
   };
 
+  const addRoomType = () => {
+    if (newRoomType.type && newRoomType.quantity > 0 && newRoomType.price > 0) {
+      const roomType = {
+        type: newRoomType.type,
+        quantity: Number(newRoomType.quantity),
+        price: Number(newRoomType.price),
+        capacity: Number(newRoomType.capacity) || 2
+      };
+      setForm((prev) => {
+        const updated = { ...prev, room_types: [...prev.room_types, roomType] };
+        // Tự động tính total_rooms
+        updated.total_rooms = updated.room_types.reduce((sum, rt) => sum + rt.quantity, 0);
+        return updated;
+      });
+      setNewRoomType({ type: 'standard', quantity: 1, price: '', capacity: 2 });
+    } else {
+      alert('Vui lòng điền đầy đủ thông tin loại phòng!');
+    }
+  };
+
+  const removeRoomType = (index) => {
+    setForm((prev) => {
+      const updated = { ...prev, room_types: prev.room_types.filter((_, i) => i !== index) };
+      // Tự động tính lại total_rooms
+      updated.total_rooms = updated.room_types.reduce((sum, rt) => sum + rt.quantity, 0);
+      return updated;
+    });
+  };
+
+  const updateRoomType = (index, field, value) => {
+    setForm((prev) => {
+      const updated = { ...prev };
+      updated.room_types[index] = { ...updated.room_types[index], [field]: value };
+      // Tự động tính lại total_rooms
+      updated.total_rooms = updated.room_types.reduce((sum, rt) => sum + rt.quantity, 0);
+      return updated;
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = await getToken();
+      // Tự động tính total_rooms từ room_types
+      const calculatedTotalRooms = form.room_types.length > 0 
+        ? form.room_types.reduce((sum, rt) => sum + rt.quantity, 0)
+        : (form.total_rooms ? Number(form.total_rooms) : null);
+
       const data = {
         ...form,
-        price: Number(form.price),
+        price: form.price ? Number(form.price) : (form.room_types.length > 0 ? '' : 0), // Để trống nếu có room_types để backend tính tự động
         star_rating: form.star_rating ? Number(form.star_rating) : null,
-        total_rooms: form.total_rooms ? Number(form.total_rooms) : null,
+        total_rooms: calculatedTotalRooms,
         total_floors: form.total_floors ? Number(form.total_floors) : null,
+        room_types: form.room_types.length > 0 ? form.room_types : null,
         amenities: form.amenities.length > 0 ? form.amenities : null,
         policies: Object.values(form.policies).some((v) => v) ? form.policies : null,
         nearby_attractions: form.nearby_attractions.length > 0 ? form.nearby_attractions : null,
@@ -439,13 +494,26 @@ export default function AdminHotels() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tổng số phòng</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tổng số phòng {form.room_types.length > 0 && (
+                      <span className="text-xs text-gray-500">
+                        (Tự động: {form.room_types.reduce((sum, rt) => sum + rt.quantity, 0)})
+                      </span>
+                    )}
+                  </label>
                   <input
                     type="number"
                     value={form.total_rooms}
                     onChange={(e) => setForm({ ...form, total_rooms: e.target.value })}
                     className="w-full border rounded px-3 py-2"
+                    disabled={form.room_types.length > 0}
+                    placeholder={form.room_types.length > 0 ? 'Tự động tính từ loại phòng' : 'Nhập số phòng'}
                   />
+                  {form.room_types.length > 0 && (
+                    <p className="text-xs text-blue-600 mt-1">
+                      ✓ Tổng số phòng được tính tự động từ các loại phòng
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Số tầng</label>
@@ -539,6 +607,139 @@ export default function AdminHotels() {
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Loại phòng */}
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-3">Loại phòng</h4>
+                <div className="space-y-3 mb-4">
+                  {form.room_types.map((roomType, idx) => (
+                    <div key={idx} className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{ROOM_TYPES[roomType.type]?.icon || '🛏️'}</span>
+                          <span className="font-semibold text-gray-800">
+                            {ROOM_TYPES[roomType.type]?.label || roomType.type}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeRoomType(idx)}
+                          className="text-red-500 hover:text-red-700 text-sm font-medium"
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Số lượng</label>
+                          <input
+                            type="number"
+                            value={roomType.quantity}
+                            onChange={(e) => updateRoomType(idx, 'quantity', Number(e.target.value))}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                            min="1"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Giá/đêm (VNĐ)</label>
+                          <input
+                            type="number"
+                            value={roomType.price}
+                            onChange={(e) => updateRoomType(idx, 'price', Number(e.target.value))}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                            min="0"
+                            step="1000"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Sức chứa (người)</label>
+                          <input
+                            type="number"
+                            value={roomType.capacity}
+                            onChange={(e) => updateRoomType(idx, 'capacity', Number(e.target.value))}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                            min="1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h5 className="font-medium text-sm mb-3">Thêm loại phòng mới</h5>
+                  <div className="grid grid-cols-4 gap-3 mb-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Loại phòng</label>
+                      <select
+                        value={newRoomType.type}
+                        onChange={(e) => setNewRoomType({ ...newRoomType, type: e.target.value })}
+                        className="w-full border rounded px-2 py-1 text-sm"
+                      >
+                        {Object.entries(ROOM_TYPES).map(([key, config]) => (
+                          <option key={key} value={key}>
+                            {config.icon} {config.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Số lượng</label>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setNewRoomType({ ...newRoomType, quantity: Math.max(1, newRoomType.quantity - 1) })}
+                          className="flex-1 border rounded px-1 py-1 text-sm hover:bg-gray-200 font-bold"
+                        >
+                          −
+                        </button>
+                        <input
+                          type="number"
+                          value={newRoomType.quantity}
+                          onChange={(e) => setNewRoomType({ ...newRoomType, quantity: Math.max(1, Number(e.target.value) || 1) })}
+                          className="flex-1 border rounded px-2 py-1 text-sm text-center"
+                          min="1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setNewRoomType({ ...newRoomType, quantity: newRoomType.quantity + 1 })}
+                          className="flex-1 border rounded px-1 py-1 text-sm hover:bg-gray-200 font-bold"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Giá/đêm (VNĐ)</label>
+                      <input
+                        type="number"
+                        value={newRoomType.price}
+                        onChange={(e) => setNewRoomType({ ...newRoomType, price: e.target.value })}
+                        className="w-full border rounded px-2 py-1 text-sm"
+                        min="0"
+                        step="1000"
+                        placeholder="Ví dụ: 1000000"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Sức chứa</label>
+                      <input
+                        type="number"
+                        value={newRoomType.capacity}
+                        onChange={(e) => setNewRoomType({ ...newRoomType, capacity: Math.max(1, Number(e.target.value) || 2) })}
+                        className="w-full border rounded px-2 py-1 text-sm"
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addRoomType}
+                    className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-600"
+                  >
+                    + Thêm loại phòng
+                  </button>
                 </div>
               </div>
 

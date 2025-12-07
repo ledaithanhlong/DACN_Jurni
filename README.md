@@ -69,3 +69,4 @@ Các chức năng quản trị:
 | *3* | Nguyễn Huy Sơn | 2280602756 | Database & Tester | Thiết kế ERD + MySQL schema, tạo dữ liệu mẫu, kiểm thử API bằng Postman, viết test case tính năng đặt tour & phân quyền |
 
 ---
+

@@ -89,7 +89,7 @@ export default function HotelDetail() {
     return pricePerNight * nights * booking.rooms;
   };
 
-  const handleBook = async () => {
+  const handleBook = () => {
     if (!isSignedIn) {
       alert('Vui lòng đăng nhập để đặt phòng');
       navigate('/sign-in');
@@ -106,37 +106,47 @@ export default function HotelDetail() {
       return;
     }
 
-    // Kiểm tra nếu có loại phòng khác nhau, yêu cầu chọn loại phòng
     if (Array.isArray(hotel.room_types) && hotel.room_types.length > 1 && !selectedRoomType) {
       alert('Vui lòng chọn loại phòng');
       return;
     }
 
+    const totalPrice = calculateTotal();
+    const nights = Math.ceil((new Date(booking.checkOut) - new Date(booking.checkIn)) / (1000 * 60 * 60 * 24));
+
+    const orderItem = {
+      id: `hotel-${hotel.id}-${Date.now()}`,
+      name: `Đặt phòng ${hotel.name}`,
+      type: 'Khách sạn',
+      price: totalPrice,
+      quantity: 1,
+      image: hotel.image_url || ((hotel.images && hotel.images[0]) ? hotel.images[0] : ''),
+      details: {
+        address: hotel.address || hotel.location,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut,
+        nights: nights,
+        guests: booking.guests,
+        rooms: booking.rooms,
+        roomType: selectedRoomType ? selectedRoomType.type : 'Standard',
+        roomPrice: selectedRoomType ? selectedRoomType.price : hotel.price
+      }
+    };
+
+    // Save to persistence (Cart style)
     try {
-      const token = await getToken();
-      const totalPrice = calculateTotal();
-      
-      await axios.post(
-        `${API}/bookings`,
-        {
-          service_type: 'hotel',
-          service_id: Number(id),
-          total_price: totalPrice,
-          check_in: booking.checkIn,
-          check_out: booking.checkOut,
-          guests: booking.guests,
-          rooms: booking.rooms,
-          room_type: selectedRoomType ? selectedRoomType.type : undefined
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      alert('Đặt phòng thành công! Vui lòng kiểm tra voucher của bạn.');
-      navigate('/vouchers');
-    } catch (error) {
-      console.error('Error booking:', error);
-      alert('Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại.');
+      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      // Avoid duplicates if needed, or allow multiple same items? - User wants "Cart", so allow multiple.
+      // But maybe check unique ID to prevent double-click duplicates.
+      if (!existingCart.some(i => i.id === orderItem.id)) {
+        existingCart.push(orderItem);
+        localStorage.setItem('pendingCart', JSON.stringify(existingCart));
+      }
+    } catch (e) {
+      console.error('Failed to save order to storage', e);
     }
+
+    navigate('/checkout'); // No state needed, load from storage
   };
 
   if (loading) {
@@ -417,7 +427,7 @@ export default function HotelDetail() {
               </div>
 
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Đặt phòng</h2>
-              
+
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -462,11 +472,10 @@ export default function HotelDetail() {
                         <button
                           key={idx}
                           onClick={() => setSelectedRoomType(roomType)}
-                          className={`w-full p-3 rounded-lg border-2 transition text-left ${
-                            selectedRoomType === roomType
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 bg-white hover:border-blue-300'
-                          }`}
+                          className={`w-full p-3 rounded-lg border-2 transition text-left ${selectedRoomType === roomType
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 bg-white hover:border-blue-300'
+                            }`}
                         >
                           <div className="flex items-start justify-between">
                             <div>

@@ -7,9 +7,11 @@ export default (sequelize, DataTypes) => {
     arrival_city: { type: DataTypes.STRING, allowNull: false },
     departure_time: { type: DataTypes.DATE, allowNull: false },
     arrival_time: { type: DataTypes.DATE, allowNull: false },
-    price: { type: DataTypes.DECIMAL(10,2), allowNull: false },
+    price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     image_url: { type: DataTypes.STRING, allowNull: true },
-    flight_type: { 
+    aircraft: { type: DataTypes.STRING, allowNull: true },
+    ticket_options: { type: DataTypes.JSON, allowNull: true },
+    flight_type: {
       type: DataTypes.ENUM('economy', 'premium_economy', 'business', 'first_class'),
       allowNull: true,
       defaultValue: 'economy'
@@ -22,7 +24,7 @@ export default (sequelize, DataTypes) => {
     underscored: true
   });
 
-  Flight.associate = () => {};
+  Flight.associate = () => { };
   return Flight;
 };
 

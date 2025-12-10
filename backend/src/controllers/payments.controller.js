@@ -85,14 +85,48 @@ export const processPayment = async (req, res, next) => {
     const transactionReference = `PAY-${Date.now()}`;
 
     let bookingRecord = null;
-    if (booking?.service_type && booking?.service_id) {
+    const createdBookings = [];
+
+    // Prioritize looping through items if provided and requested
+    if (items && Array.isArray(items) && items.length > 0) {
+      const userId = req.user?.id || booking?.user_id || req.body.user_id;
+
+      for (const item of items) {
+        let subServiceType = null;
+        let subServiceId = null;
+
+        // Detect service type from item
+        if (item.type === 'Khách sạn' || item.id.includes('hotel')) {
+          subServiceType = 'hotel';
+          subServiceId = item.id.split('-')[1]; // Assuming format hotel-ID-timestamp
+        } else if (item.type === 'Chuyến bay' || item.id.includes('flight')) {
+          subServiceType = 'flight';
+          subServiceId = item.id.split('-')[1];
+        }
+
+        if (subServiceType && subServiceId && userId) {
+          const newBooking = await db.Booking.create({
+            user_id: userId,
+            service_type: subServiceType,
+            service_id: subServiceId,
+            total_price: item.price * item.quantity,
+            status: 'confirmed', // Paid immediately
+          });
+          createdBookings.push(newBooking);
+        }
+      }
+      // If we created multiple, maybe return the list
+      bookingRecord = createdBookings;
+    }
+    // Fallback to single booking object (legacy support or single item)
+    else if (booking?.service_type && booking?.service_id) {
       const userId = req.user?.id || booking.user_id;
       if (userId) {
         bookingRecord = await db.Booking.create({
           user_id: userId,
           service_type: booking.service_type,
           service_id: booking.service_id,
-          total_price: amountNumber,
+          total_price: amountNumber, // Total amount
           status: 'confirmed',
         });
       }

@@ -163,6 +163,36 @@ const getServiceName = (type) => {
   }
 };
 
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'pending':
+      return {
+        text: '🟡 Đang chờ xác nhận',
+        className: 'bg-yellow-50 text-yellow-700 border-yellow-200'
+      };
+    case 'confirmed':
+      return {
+        text: '🟢 Đã xác nhận',
+        className: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      };
+    case 'cancelled':
+      return {
+        text: '🔴 Đã hủy',
+        className: 'bg-red-50 text-red-700 border-red-200'
+      };
+    case 'completed':
+      return {
+        text: '🔵 Đã hoàn thành',
+        className: 'bg-blue-50 text-blue-700 border-blue-200'
+      };
+    default:
+      return {
+        text: status,
+        className: 'bg-gray-50 text-gray-700 border-gray-200'
+      };
+  }
+};
+
 export default function VouchersPage() {
   const [vouchers, setVouchers] = useState([mockVoucherData]);
   const [loading, setLoading] = useState(false);
@@ -185,8 +215,8 @@ export default function VouchersPage() {
         // Transform bookings to vouchers format
         const transformedVouchers = res.data.map(booking => ({
           booking_code: booking.booking_code || `JRN-${booking.id}`,
-          booking_date: booking.created_at,
-          status: booking.status || 'Đã thanh toán',
+          booking_date: booking.created_at || booking.createdAt,
+          status: booking.status || 'pending',
           payment_method: booking.payment_method || 'VNPay',
           customer: {
             name: booking.customer_name || 'Khách hàng',
@@ -746,17 +776,17 @@ export default function VouchersPage() {
       </html>
     `);
     printWindow.document.close();
-    
+
     setTimeout(() => {
       // Đảm bảo title được set để browser tự động đề xuất tên file khi in PDF
       printWindow.document.title = fileName;
-      
+
       // Thêm meta tag để hỗ trợ một số browser
       const metaTitle = printWindow.document.createElement('meta');
       metaTitle.setAttribute('name', 'title');
       metaTitle.setAttribute('content', fileName);
       printWindow.document.head.appendChild(metaTitle);
-      
+
       printWindow.print();
     }, 500);
   };
@@ -773,9 +803,9 @@ export default function VouchersPage() {
       iframe.style.opacity = '0';
       iframe.style.pointerEvents = 'none';
       document.body.appendChild(iframe);
-      
+
       const qrCodeUrl = generateQRCode(voucher.booking_code);
-      
+
       iframe.contentDocument.open();
       iframe.contentDocument.write(`
         <!DOCTYPE html>
@@ -1310,18 +1340,18 @@ export default function VouchersPage() {
       });
 
       const element = iframe.contentDocument.getElementById('voucher-content');
-      
+
       // Đợi tất cả hình ảnh load xong
       await new Promise((resolve) => {
         const images = element.querySelectorAll('img');
         let loadedCount = 0;
         const totalImages = images.length;
-        
+
         if (totalImages === 0) {
           resolve();
           return;
         }
-        
+
         images.forEach((img) => {
           if (img.complete) {
             loadedCount++;
@@ -1337,11 +1367,11 @@ export default function VouchersPage() {
             };
           }
         });
-        
+
         // Timeout sau 5 giây
         setTimeout(() => resolve(), 5000);
       });
-      
+
       const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
@@ -1378,7 +1408,7 @@ export default function VouchersPage() {
           }
           return;
         }
-        
+
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -1386,7 +1416,7 @@ export default function VouchersPage() {
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
-        
+
         setTimeout(() => {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
@@ -1452,8 +1482,8 @@ export default function VouchersPage() {
           <div className="space-y-8">
             {vouchers.map((voucher, index) => {
               const qrCodeUrl = generateQRCode(voucher.booking_code);
-              
-  return (
+
+              return (
                 <div
                   key={index}
                   className="bg-white rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden relative backdrop-blur-sm"
@@ -1463,7 +1493,7 @@ export default function VouchersPage() {
                   }}
                 >
                   {/* Seal Background Watermark */}
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
                     style={{
                       backgroundImage: 'url(/JurniLogo/jurni-seal.png)',
@@ -1472,15 +1502,15 @@ export default function VouchersPage() {
                       backgroundSize: '400px 400px'
                     }}
                   />
-                  
+
                   {/* Voucher Content */}
                   <div className="p-8 relative z-10">
                     {/* Header */}
                     <div className="text-center mb-8 pb-6 border-b border-gray-200/60">
                       <div className="mb-4">
-                        <img 
-                          src="/JurniLogo/apple-touch-icon.png" 
-                          alt="Jurni Logo" 
+                        <img
+                          src="/JurniLogo/apple-touch-icon.png"
+                          alt="Jurni Logo"
                           className="w-20 h-20 mx-auto object-contain drop-shadow-sm"
                         />
                       </div>
@@ -1511,9 +1541,8 @@ export default function VouchersPage() {
                           </div>
                           <div>
                             <div className="text-xs text-gray-500 mb-1.5 font-medium">Trạng thái</div>
-                            <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-200">
-                              <IconCheck className="w-3 h-3" />
-                              {voucher.status}
+                            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${getStatusBadge(voucher.status).className}`}>
+                              {getStatusBadge(voucher.status).text}
                             </div>
                           </div>
                         </div>
@@ -1583,7 +1612,7 @@ export default function VouchersPage() {
                           </thead>
                           <tbody>
                             {voucher.services?.map((service, idx) => (
-                              <tr 
+                              <tr
                                 key={idx}
                                 className={`border-b-2 border-gray-200 transition-all duration-150 ${idx % 2 === 0 ? 'bg-white' : 'bg-orange-50/30'} hover:bg-orange-100/50 hover:shadow-sm`}
                               >
@@ -1662,13 +1691,13 @@ export default function VouchersPage() {
                           </li>
                         </ul>
                       </div>
-                      
+
                       {/* Dấu mộc */}
                       <div className="flex flex-col items-center justify-center">
                         <div className="w-36 h-36 flex items-center justify-center">
-                          <img 
-                            src="/JurniLogo/jurni-seal.png" 
-                            alt="Jurni Seal" 
+                          <img
+                            src="/JurniLogo/jurni-seal.png"
+                            alt="Jurni Seal"
                             className="w-full h-full object-contain"
                             onError={(e) => {
                               e.target.style.display = 'none';

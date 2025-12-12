@@ -303,7 +303,7 @@ export default function PaymentPage() {
       const res = await axios.post(`${API}/payments/checkout`, payload);
 
       if (res.data.success) {
-        setStatus({ type: 'success', message: 'Thanh toán thành công! Vui lòng kiểm tra email.', reference: res.data.payment?.reference });
+        setStatus({ type: 'success', message: 'Thanh toán thành công! Đang chuyển đến trang voucher...', reference: res.data.payment?.reference });
         setShowQRModal(false);
 
         // Remove paid items from cart
@@ -313,8 +313,8 @@ export default function PaymentPage() {
         localStorage.setItem('pendingCart', JSON.stringify(remainingCart));
 
         setTimeout(() => {
-          navigate('/notifications');
-        }, 3000);
+          navigate('/vouchers');
+        }, 2000);
       } else {
         throw new Error(res.data.error || 'Thanh toán thất bại');
       }

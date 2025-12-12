@@ -20,21 +20,21 @@ export const getBooking = async (req, res, next) => {
 
 export const getAllBookings = async (req, res, next) => {
   try {
+    const userId = req.user?.id;
+    const userRole = req.user?.role;
+
+    // Admin sees all bookings, regular users only see their own
+    const whereClause = userRole === 'admin' ? {} : { user_id: userId };
+
+    // Temporarily disabled User association due to configuration issue
     const rows = await db.Booking.findAll({
-      order: [['createdAt', 'DESC']],
-      include: [
-        { model: db.User, attributes: ['id', 'name', 'email'] } // Ensure User association exists or handle gracefully
-      ]
+      where: whereClause,
+      order: [['createdAt', 'DESC']]
     });
     res.json(rows);
   } catch (e) {
-    // Fallback if association fails or generic error
-    try {
-      const rows = await db.Booking.findAll({ order: [['createdAt', 'DESC']] });
-      res.json(rows);
-    } catch (err) {
-      next(err);
-    }
+    console.error('Error getting bookings:', e);
+    next(e);
   }
 };
 

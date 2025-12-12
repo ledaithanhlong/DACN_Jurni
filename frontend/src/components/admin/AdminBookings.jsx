@@ -101,8 +101,8 @@ export default function AdminBookings() {
                                     #{booking.id}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-900">
-                                    <div>{booking.User?.name || 'Vãng lai'}</div>
-                                    <div className="text-xs text-gray-500">{booking.User?.email}</div>
+                                    <div>{booking.user?.name || `User #${booking.user_id}`}</div>
+                                    <div className="text-xs text-gray-500">{booking.user?.email || 'N/A'}</div>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-900">
                                     <div className="capitalize">{booking.service_type}</div>

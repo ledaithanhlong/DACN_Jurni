@@ -20,7 +20,7 @@ const parseJsonFields = (payload) => {
 // Hàm chuyển đổi dữ liệu khách sạn từ database sang format frontend
 const formatHotelData = (hotel) => {
   const formatted = hotel.toJSON();
-  
+
   // Chuyển đổi rooms thành room_types format
   const rooms = formatted.rooms || [];
   const roomTypesMap = {};
@@ -30,14 +30,17 @@ const formatHotelData = (hotel) => {
       roomTypesMap[type] = {
         type: type,
         quantity: 0,
-        price: Number(room.price_per_night),
+        price: Number(room.price), // Was price_per_night, model uses price
         capacity: room.capacity
       };
     }
     roomTypesMap[type].quantity += (room.quantity || 1);
   });
+  const totalRooms = (formatted.rooms || []).reduce((sum, r) => sum + (r.quantity || 0), 0);
+
+  // Filter out room_types locally if needed, but the logic above remains valid
   const roomTypes = Object.values(roomTypesMap);
-  
+
   return {
     id: formatted.id,
     name: formatted.name,
@@ -49,8 +52,8 @@ const formatHotelData = (hotel) => {
     images: formatted.images || [],
     description: formatted.description,
     amenities: Array.isArray(formatted.amenities) ? formatted.amenities : [],
-    rooms: formatted.total_rooms || 0,
-    total_rooms: formatted.total_rooms || 0,
+    rooms: totalRooms,
+    total_rooms: totalRooms,
     room_types: roomTypes,
     checkIn: formatted.check_in_time || '14:00',
     check_out_time: formatted.check_in_time || '14:00',
@@ -88,8 +91,8 @@ export const listHotels = async (req, res, next) => {
     if (minPrice) where.price = { ...(where.price || {}), [db.Sequelize.Op.gte]: Number(minPrice) };
     if (maxPrice) where.price = { ...(where.price || {}), [db.Sequelize.Op.lte]: Number(maxPrice) };
     const order = sort === 'price_asc' ? [['price', 'ASC']] : sort === 'price_desc' ? [['price', 'DESC']] : [['id', 'DESC']];
-    const hotels = await db.Hotel.findAll({ 
-      where, 
+    const hotels = await db.Hotel.findAll({
+      where,
       order,
       include: [{ model: db.Room, as: 'rooms', required: false }]
     });
@@ -106,8 +109,8 @@ export const listAllHotels = async (req, res, next) => {
     if (minPrice) where.price = { ...(where.price || {}), [db.Sequelize.Op.gte]: Number(minPrice) };
     if (maxPrice) where.price = { ...(where.price || {}), [db.Sequelize.Op.lte]: Number(maxPrice) };
     const order = sort === 'price_asc' ? [['price', 'ASC']] : sort === 'price_desc' ? [['price', 'DESC']] : [['id', 'DESC']];
-    const hotels = await db.Hotel.findAll({ 
-      where, 
+    const hotels = await db.Hotel.findAll({
+      where,
       order,
       include: [{ model: db.Room, as: 'rooms', required: false }]
     });
@@ -130,33 +133,35 @@ export const createHotel = async (req, res, next) => {
     const hotelData = parseJsonFields(req.body);
     const roomTypes = hotelData.room_types;
     delete hotelData.room_types; // Xóa room_types khỏi hotelData vì không phải field của Hotel
-    
-    // Tính giá trung bình từ room_types nếu không có giá được cung cấp
-    if (Array.isArray(roomTypes) && roomTypes.length > 0 && (!hotelData.price || hotelData.price === '')) {
-      const totalPrice = roomTypes.reduce((sum, rt) => sum + (rt.price || 0), 0);
-      hotelData.price = Math.round(totalPrice / roomTypes.length);
+    delete hotelData.total_rooms; // Remove total_rooms if sent from frontend
+
+    // Tính giá thấp nhất từ room_types (giá khách sạn start from)
+    if (Array.isArray(roomTypes) && roomTypes.length > 0) {
+      // Find min price
+      const minPrice = Math.min(...roomTypes.map(rt => Number(rt.price) || 0).filter(p => p > 0));
+      hotelData.price = minPrice !== Infinity ? minPrice : 0;
     }
-    
+
     hotelData.status = 'pending';
     hotelData.approved_by = null;
     hotelData.approved_at = null;
     hotelData.approval_note = null;
-    
+
     const created = await db.Hotel.create(hotelData);
-    
+
     // Tạo rooms từ room_types
     if (Array.isArray(roomTypes) && roomTypes.length > 0) {
       const rooms = roomTypes.map(rt => ({
         hotel_id: created.id,
         name: `${ROOM_TYPES[rt.type]?.label || rt.type} - ${rt.capacity} người`,
         room_type: rt.type,
-        price_per_night: rt.price,
+        price: rt.price,
         capacity: rt.capacity,
         quantity: rt.quantity
       }));
       await db.Room.bulkCreate(rooms);
     }
-    
+
     res.status(201).json(created);
   } catch (e) { next(e); }
 };
@@ -176,13 +181,14 @@ export const updateHotel = async (req, res, next) => {
     const hotelData = parseJsonFields(req.body);
     const roomTypes = hotelData.room_types;
     delete hotelData.room_types; // Xóa room_types khỏi hotelData
-    
-    // Tính giá trung bình từ room_types nếu không có giá được cung cấp
-    if (Array.isArray(roomTypes) && roomTypes.length > 0 && (!hotelData.price || hotelData.price === '')) {
-      const totalPrice = roomTypes.reduce((sum, rt) => sum + (rt.price || 0), 0);
-      hotelData.price = Math.round(totalPrice / roomTypes.length);
+    delete hotelData.total_rooms; // Remove total_rooms if sent from frontend
+
+    // Tính giá thấp nhất từ room_types (giá khách sạn start from)
+    if (Array.isArray(roomTypes) && roomTypes.length > 0) {
+      const minPrice = Math.min(...roomTypes.map(rt => Number(rt.price) || 0).filter(p => p > 0));
+      hotelData.price = minPrice !== Infinity ? minPrice : hotelData.price || 0;
     }
-    
+
     const statusChangedToApproved = hotelData.status === 'approved' && hotel.status !== 'approved';
     const statusChangedToPending = hotelData.status === 'pending';
     const statusChangedToRejected = hotelData.status === 'rejected';
@@ -199,26 +205,26 @@ export const updateHotel = async (req, res, next) => {
     }
 
     await hotel.update(hotelData);
-    
+
     // Cập nhật rooms từ room_types
     if (Array.isArray(roomTypes)) {
       // Xóa tất cả rooms cũ
       await db.Room.destroy({ where: { hotel_id: hotel.id } });
-      
+
       // Tạo rooms mới
       if (roomTypes.length > 0) {
         const rooms = roomTypes.map(rt => ({
           hotel_id: hotel.id,
           name: `${ROOM_TYPES[rt.type]?.label || rt.type} - ${rt.capacity} người`,
           room_type: rt.type,
-          price_per_night: rt.price,
+          price: rt.price,
           capacity: rt.capacity,
           quantity: rt.quantity
         }));
         await db.Room.bulkCreate(rooms);
       }
     }
-    
+
     res.json(hotel);
   } catch (e) { next(e); }
 };

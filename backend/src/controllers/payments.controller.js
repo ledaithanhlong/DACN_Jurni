@@ -128,17 +128,36 @@ export const processPayment = async (req, res, next) => {
         }
 
         if (subServiceType) {
-          const newBooking = await db.Booking.create({
-            user_id: systemUserId, // Use system user to avoid FK constraint
-            service_type: subServiceType,
-            service_id: subServiceId || 1, // Fallback to 1 if no ID
+          // Extract details
+          const details = item.details || {};
+          const startDate = details.checkIn || details.startDate || details.pickupDate || details.departureTime || details.date;
+          const endDate = details.checkOut || details.endDate || details.dropoffDate || details.arrivalTime;
+
+          const bookingData = {
+            user_id: systemUserId,
+            // service_type: subServiceType, // Removed
+            // service_id: subServiceId || 1, // Removed
             total_price: item.price * item.quantity,
-            status: 'pending', // Pending for admin approval
+            status: 'pending',
             customer_name: customer.name,
             customer_email: customer.email,
             customer_phone: customer.phone,
             payment_method: method.name,
-          });
+            transaction_id: transactionReference,
+
+            start_date: startDate ? new Date(startDate) : null,
+            end_date: endDate ? new Date(endDate) : null,
+            quantity: item.quantity || 1,
+            item_variant: details.roomType || details.ticketType || details.ticketClass || details.carType || details.activityType || null
+          };
+
+          // Set Explicit FK
+          if (subServiceType === 'hotel') bookingData.hotel_id = subServiceId;
+          else if (subServiceType === 'flight') bookingData.flight_id = subServiceId;
+          else if (subServiceType === 'car') bookingData.car_id = subServiceId;
+          else if (subServiceType === 'activity') bookingData.activity_id = subServiceId;
+
+          const newBooking = await db.Booking.create(bookingData);
           createdBookings.push(newBooking);
         }
       }
@@ -147,18 +166,38 @@ export const processPayment = async (req, res, next) => {
     }
     // Fallback to single booking object (legacy support or single item)
     else if (booking?.service_type && booking?.service_id) {
+      // Legacy handling of single item booking from simplified payload
+      // Map to explicit FK based on incoming service_type
+      // Note: Frontend should ideally send 'items' array. This is fallback.
       if (systemUserId) {
-        bookingRecord = await db.Booking.create({
+        // Handle single booking legacy
+        const details = booking.details || {};
+        const startDate = details.checkIn || details.startDate || booking.checkIn;
+        const endDate = details.checkOut || details.endDate || booking.checkOut;
+
+        const bookingData = {
           user_id: systemUserId,
-          service_type: booking.service_type,
-          service_id: booking.service_id,
           total_price: amountNumber, // Total amount
           status: 'pending',
           customer_name: customer.name,
           customer_email: customer.email,
           customer_phone: customer.phone,
           payment_method: method.name,
-        });
+          transaction_id: transactionReference,
+
+          start_date: startDate ? new Date(startDate) : null,
+          end_date: endDate ? new Date(endDate) : null,
+          quantity: booking.quantity || 1,
+          item_variant: details.roomType || details.ticketType || details.ticketClass || details.carType || details.activityType || null
+        };
+
+        // Set Explicit FK
+        if (booking.service_type === 'hotel') bookingData.hotel_id = booking.service_id;
+        else if (booking.service_type === 'flight') bookingData.flight_id = booking.service_id;
+        else if (booking.service_type === 'car') bookingData.car_id = booking.service_id;
+        else if (booking.service_type === 'activity') bookingData.activity_id = booking.service_id;
+
+        bookingRecord = await db.Booking.create(bookingData);
       }
     }
 

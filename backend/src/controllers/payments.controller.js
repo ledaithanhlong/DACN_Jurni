@@ -87,30 +87,57 @@ export const processPayment = async (req, res, next) => {
     let bookingRecord = null;
     const createdBookings = [];
 
+    // Use a default system user ID to avoid foreign key constraint issues
+    // Customer info is stored in customer_name, customer_email, customer_phone fields
+    // We'll use user_id = 1 as a system/guest user
+    const systemUserId = 1;
+
+    // Ensure system user exists in database
+    try {
+      await db.User.findOrCreate({
+        where: { id: systemUserId },
+        defaults: {
+          name: 'System User',
+          email: 'system@jurni.com',
+          role: 'user',
+        }
+      });
+    } catch (userErr) {
+      console.log('System user setup error:', userErr.message);
+    }
+
     // Prioritize looping through items if provided and requested
     if (items && Array.isArray(items) && items.length > 0) {
-      const userId = req.user?.id || booking?.user_id || req.body.user_id;
-
       for (const item of items) {
         let subServiceType = null;
         let subServiceId = null;
 
         // Detect service type from item
-        if (item.type === 'Khách sạn' || item.id.includes('hotel')) {
+        if (item.type === 'hotel' || item.type === 'Khách sạn' || item.id?.includes('hotel')) {
           subServiceType = 'hotel';
-          subServiceId = item.id.split('-')[1]; // Assuming format hotel-ID-timestamp
-        } else if (item.type === 'Chuyến bay' || item.id.includes('flight')) {
+          subServiceId = item.id?.split('-')[1] || item.id;
+        } else if (item.type === 'flight' || item.type === 'Chuyến bay' || item.id?.includes('flight')) {
           subServiceType = 'flight';
-          subServiceId = item.id.split('-')[1];
+          subServiceId = item.id?.split('-')[1] || item.id;
+        } else if (item.type === 'car' || item.type === 'Thuê xe' || item.id?.includes('car')) {
+          subServiceType = 'car';
+          subServiceId = item.id?.split('-')[1] || item.id;
+        } else if (item.type === 'activity' || item.type === 'Hoạt động' || item.id?.includes('activity')) {
+          subServiceType = 'activity';
+          subServiceId = item.id?.split('-')[1] || item.id;
         }
 
-        if (subServiceType && subServiceId && userId) {
+        if (subServiceType) {
           const newBooking = await db.Booking.create({
-            user_id: userId,
+            user_id: systemUserId, // Use system user to avoid FK constraint
             service_type: subServiceType,
-            service_id: subServiceId,
+            service_id: subServiceId || 1, // Fallback to 1 if no ID
             total_price: item.price * item.quantity,
-            status: 'confirmed', // Paid immediately
+            status: 'pending', // Pending for admin approval
+            customer_name: customer.name,
+            customer_email: customer.email,
+            customer_phone: customer.phone,
+            payment_method: method.name,
           });
           createdBookings.push(newBooking);
         }
@@ -120,14 +147,17 @@ export const processPayment = async (req, res, next) => {
     }
     // Fallback to single booking object (legacy support or single item)
     else if (booking?.service_type && booking?.service_id) {
-      const userId = req.user?.id || booking.user_id;
-      if (userId) {
+      if (systemUserId) {
         bookingRecord = await db.Booking.create({
-          user_id: userId,
+          user_id: systemUserId,
           service_type: booking.service_type,
           service_id: booking.service_id,
           total_price: amountNumber, // Total amount
-          status: 'confirmed',
+          status: 'pending',
+          customer_name: customer.name,
+          customer_email: customer.email,
+          customer_phone: customer.phone,
+          payment_method: method.name,
         });
       }
     }

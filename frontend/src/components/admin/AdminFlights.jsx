@@ -314,7 +314,6 @@ export default function AdminFlights() {
                 const bulkPayload = {
                     ...payload,
                     count: bulkCount,
-                    count: bulkCount,
                     interval_hours: 2,
                     interval_minutes: 30, // User requested 2h 30m interval
                     flight_duration_hours: 2,

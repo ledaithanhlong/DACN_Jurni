@@ -8,7 +8,7 @@ export default (sequelize, DataTypes) => {
     capacity: { type: DataTypes.INTEGER },
     quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
     available: { type: DataTypes.BOOLEAN, defaultValue: true },
-    image_url: { type: DataTypes.STRING }
+    images: { type: DataTypes.JSON, defaultValue: [] }
   }, {
     tableName: 'Rooms',
     timestamps: true

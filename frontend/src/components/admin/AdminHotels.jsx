@@ -25,6 +25,43 @@ const ROOM_TYPES = {
   family: { label: 'Phòng gia đình', icon: '👨‍👩‍👧‍👦' }
 };
 
+const VIETNAM_PROVINCES = [
+  'Thành phố Hà Nội',
+  'Thành phố Huế',
+  'Tỉnh Lai Châu',
+  'Tỉnh Điện Biên',
+  'Tỉnh Sơn La',
+  'Tỉnh Lạng Sơn',
+  'Tỉnh Quảng Ninh',
+  'Tỉnh Thanh Hoá',
+  'Tỉnh Nghệ An',
+  'Tỉnh Hà Tĩnh',
+  'Tỉnh Cao Bằng',
+  'Tỉnh Tuyên Quang',
+  'Tỉnh Lào Cai',
+  'Tỉnh Thái Nguyên',
+  'Tỉnh Phú Thọ',
+  'Tỉnh Bắc Ninh',
+  'Tỉnh Hưng Yên',
+  'Thành phố Hải Phòng',
+  'Tỉnh Ninh Bình',
+  'Tỉnh Quảng Trị',
+  'Thành phố Đà Nẵng',
+  'Tỉnh Quảng Ngãi',
+  'Tỉnh Gia Lai',
+  'Tỉnh Khánh Hoà',
+  'Tỉnh Lâm Đồng',
+  'Tỉnh Đắk Lắk',
+  'Thành phố Hồ Chí Minh',
+  'Tỉnh Đồng Nai',
+  'Tỉnh Tây Ninh',
+  'Thành phố Cần Thơ',
+  'Tỉnh Vĩnh Long',
+  'Tỉnh Đồng Tháp',
+  'Tỉnh Cà Mau',
+  'Tỉnh An Giang'
+];
+
 const emptyForm = {
   name: '',
   location: '',
@@ -75,7 +112,7 @@ export default function AdminHotels() {
   const [newAmenity, setNewAmenity] = useState('');
   const [newAttraction, setNewAttraction] = useState('');
   const [newTransport, setNewTransport] = useState('');
-  const [newRoomType, setNewRoomType] = useState({ type: 'standard', quantity: 1, price: '', capacity: 2 });
+  const [newRoomType, setNewRoomType] = useState({ type: 'standard', quantity: 1, price: '', capacity: 2, images: [] });
 
   useEffect(() => {
     loadHotels();
@@ -131,6 +168,50 @@ export default function AdminHotels() {
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Lỗi khi upload hình ảnh');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRoomImageUpload = async (e, roomIndex = null) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const token = await getToken();
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await axios.post(UPLOAD_API, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (res.data.url) {
+        if (roomIndex !== null) {
+          // Update existing room type
+          setForm((prev) => {
+            const updated = { ...prev };
+            updated.room_types[roomIndex] = {
+              ...updated.room_types[roomIndex],
+              images: [...(updated.room_types[roomIndex].images || []), res.data.url]
+            };
+            return updated;
+          });
+        } else {
+          // Add to new room type being created
+          setNewRoomType((prev) => ({
+            ...prev,
+            images: [...prev.images, res.data.url]
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading room image:', error);
+      alert('Lỗi khi upload hình ảnh phòng');
     } finally {
       setUploading(false);
     }
@@ -208,7 +289,8 @@ export default function AdminHotels() {
         type: newRoomType.type,
         quantity: Number(newRoomType.quantity),
         price: Number(newRoomType.price),
-        capacity: Number(newRoomType.capacity) || 2
+        capacity: Number(newRoomType.capacity) || 2,
+        images: newRoomType.images || []
       };
       setForm((prev) => {
         const updated = { ...prev, room_types: [...prev.room_types, roomType] };
@@ -216,7 +298,7 @@ export default function AdminHotels() {
         updated.total_rooms = updated.room_types.reduce((sum, rt) => sum + rt.quantity, 0);
         return updated;
       });
-      setNewRoomType({ type: 'standard', quantity: 1, price: '', capacity: 2 });
+      setNewRoomType({ type: 'standard', quantity: 1, price: '', capacity: 2, images: [] });
     } else {
       alert('Vui lòng điền đầy đủ thông tin loại phòng!');
     }
@@ -246,7 +328,7 @@ export default function AdminHotels() {
     try {
       const token = await getToken();
       // Tự động tính total_rooms từ room_types
-      const calculatedTotalRooms = form.room_types.length > 0 
+      const calculatedTotalRooms = form.room_types.length > 0
         ? form.room_types.reduce((sum, rt) => sum + rt.quantity, 0)
         : (form.total_rooms ? Number(form.total_rooms) : null);
 
@@ -357,11 +439,10 @@ export default function AdminHotels() {
               <button
                 key={tab.value}
                 onClick={() => setFilterStatus(tab.value)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
-                  filterStatus === tab.value
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition ${filterStatus === tab.value
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
               >
                 {tab.label}
               </button>
@@ -452,13 +533,19 @@ export default function AdminHotels() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực *</label>
-                  <input
-                    type="text"
+                  <select
                     value={form.location}
                     onChange={(e) => setForm({ ...form, location: e.target.value })}
                     className="w-full border rounded px-3 py-2"
                     required
-                  />
+                  >
+                    <option value="">Chọn tỉnh/thành phố</option>
+                    {VIETNAM_PROVINCES.map((province) => (
+                      <option key={province} value={province}>
+                        {province}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ đầy đủ</label>
@@ -470,16 +557,7 @@ export default function AdminHotels() {
                     placeholder="Ví dụ: 57-59 Do Bi, Mỹ An, Ngũ Hành Sơn, Đà Nẵng"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Giá mỗi đêm (VNĐ) *</label>
-                  <input
-                    type="number"
-                    value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
-                    className="w-full border rounded px-3 py-2"
-                    required
-                  />
-                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Hạng sao (1-5)</label>
                   <input
@@ -493,28 +571,7 @@ export default function AdminHotels() {
                     placeholder="Ví dụ: 3.5"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tổng số phòng {form.room_types.length > 0 && (
-                      <span className="text-xs text-gray-500">
-                        (Tự động: {form.room_types.reduce((sum, rt) => sum + rt.quantity, 0)})
-                      </span>
-                    )}
-                  </label>
-                  <input
-                    type="number"
-                    value={form.total_rooms}
-                    onChange={(e) => setForm({ ...form, total_rooms: e.target.value })}
-                    className="w-full border rounded px-3 py-2"
-                    disabled={form.room_types.length > 0}
-                    placeholder={form.room_types.length > 0 ? 'Tự động tính từ loại phòng' : 'Nhập số phòng'}
-                  />
-                  {form.room_types.length > 0 && (
-                    <p className="text-xs text-blue-600 mt-1">
-                      ✓ Tổng số phòng được tính tự động từ các loại phòng
-                    </p>
-                  )}
-                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Số tầng</label>
                   <input
@@ -664,6 +721,40 @@ export default function AdminHotels() {
                           />
                         </div>
                       </div>
+                      {/* Room Images */}
+                      <div className="mt-3">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Hình ảnh phòng</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleRoomImageUpload(e, idx)}
+                          className="w-full border rounded px-2 py-1 text-sm"
+                          disabled={uploading}
+                        />
+                        {roomType.images && roomType.images.length > 0 && (
+                          <div className="grid grid-cols-4 gap-2 mt-2">
+                            {roomType.images.map((img, imgIdx) => (
+                              <div key={imgIdx} className="relative">
+                                <img src={img} alt={`Room ${imgIdx + 1}`} className="w-full h-16 object-cover rounded" />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...form.room_types];
+                                    updated[idx] = {
+                                      ...updated[idx],
+                                      images: updated[idx].images.filter((_, i) => i !== imgIdx)
+                                    };
+                                    setForm({ ...form, room_types: updated });
+                                  }}
+                                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -732,6 +823,34 @@ export default function AdminHotels() {
                         min="1"
                       />
                     </div>
+                  </div>
+                  {/* Room Images */}
+                  <div className="mt-3">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Hình ảnh phòng</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleRoomImageUpload(e)}
+                      className="w-full border rounded px-2 py-1 text-sm"
+                      disabled={uploading}
+                    />
+                    {uploading && <p className="text-xs text-gray-500 mt-1">Đang upload...</p>}
+                    {newRoomType.images && newRoomType.images.length > 0 && (
+                      <div className="grid grid-cols-4 gap-2 mt-2">
+                        {newRoomType.images.map((img, idx) => (
+                          <div key={idx} className="relative">
+                            <img src={img} alt={`Room ${idx + 1}`} className="w-full h-16 object-cover rounded" />
+                            <button
+                              type="button"
+                              onClick={() => setNewRoomType({ ...newRoomType, images: newRoomType.images.filter((_, i) => i !== idx) })}
+                              className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 text-xs"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"

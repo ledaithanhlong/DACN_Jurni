@@ -33,13 +33,13 @@ const NavUserSection = () => {
 
   return (
     <>
-      <Link to="/checkout" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Thanh toán</Link> 
-      <Link to="/favorites" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Yêu thích</Link>
-      <Link to="/notifications" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Thông báo</Link>
+      <Link to="/checkout" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm whitespace-nowrap">Thanh toán</Link>
+      <Link to="/favorites" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm whitespace-nowrap">Yêu thích</Link>
+      <Link to="/notifications" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm whitespace-nowrap">Thông báo</Link>
       {isAdmin && (
-        <Link 
-          to="/admin" 
-          className="text-sm text-white px-3 py-1 rounded-lg transition shadow-md font-medium hover:opacity-90"
+        <Link
+          to="/admin"
+          className="text-sm text-white px-3 py-1 rounded-lg transition shadow-md font-medium hover:opacity-90 whitespace-nowrap"
           style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
         >
           Quản trị
@@ -71,9 +71,8 @@ const Nav = ({ clerkEnabled }) => {
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        isSolid ? 'bg-blue-dark backdrop-blur shadow-lg' : 'bg-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${isSolid ? 'bg-blue-dark backdrop-blur shadow-lg' : 'bg-transparent'
+        }`}
       style={isSolid ? { backgroundColor: '#0D47A1' } : {}}
     >
       <div className="max-w-7xl mx-auto px-4">
@@ -88,19 +87,19 @@ const Nav = ({ clerkEnabled }) => {
               <Link to="/vouchers" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Voucher</Link>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-nowrap">
             {clerkEnabled ? (
               <>
                 <SignedIn>
                   <NavUserSection />
                 </SignedIn>
                 <SignedOut>
-                  <Link to="/sign-in" className="text-white/90 hover:text-orange-accent px-4 py-2 font-medium transition drop-shadow-sm">
+                  <Link to="/sign-in" className="text-white/90 hover:text-orange-accent px-4 py-2 font-medium transition drop-shadow-sm whitespace-nowrap">
                     Đăng Nhập
                   </Link>
-                  <Link 
-                    to="/sign-up" 
-                    className="text-white px-4 py-2 rounded-lg font-medium transition shadow-md hover:opacity-90"
+                  <Link
+                    to="/sign-up"
+                    className="text-white px-4 py-2 rounded-lg font-medium transition shadow-md hover:opacity-90 whitespace-nowrap"
                     style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
                   >
                     Đăng ký
@@ -122,7 +121,7 @@ const AdminOnly = ({ children, clerkEnabled }) => {
   const { user, isLoaded } = useUser();
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map(e => e.trim());
   const isAdmin = user?.primaryEmailAddress?.emailAddress && adminEmails.includes(user.primaryEmailAddress.emailAddress);
-  
+
   if (!isLoaded) return <div>Loading...</div>;
   if (!isAdmin) return <Navigate to="/" replace />;
   return children;
@@ -136,14 +135,14 @@ function SyncUser() {
 
   React.useEffect(() => {
     if (!isLoaded || !isSignedIn || !userId) return;
-    
+
     // Reset synced state when user changes
     setSynced(false);
-    
+
     let mounted = true;
     let retryCount = 0;
     const maxRetries = 5;
-    
+
     const syncUser = async () => {
       try {
         // Wait a bit for user data to be available
@@ -162,13 +161,13 @@ function SyncUser() {
           }
           return;
         }
-        
+
         console.log('Attempting to sync user:', { userId, email: user?.primaryEmailAddress?.emailAddress });
-        
+
         const response = await axios.post(`${API}/auth/sync-user`, {}, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         if (mounted) {
           console.log('sync-user: success', response.data);
           setSynced(true);
@@ -179,7 +178,7 @@ function SyncUser() {
           data: err?.response?.data,
           message: err.message
         });
-        
+
         // Retry logic
         if (retryCount < maxRetries && mounted) {
           retryCount++;
@@ -188,11 +187,11 @@ function SyncUser() {
         }
       }
     };
-    
+
     // Delay to ensure Clerk session is fully established
     const timeoutId = setTimeout(syncUser, 1000);
-    
-    return () => { 
+
+    return () => {
       mounted = false;
       clearTimeout(timeoutId);
     };
@@ -235,7 +234,7 @@ export default function App({ clerkEnabled }) {
           <Route path="/price-alerts" element={<div className="max-w-7xl mx-auto px-4 py-6"><PriceAlertPage /></div>} />
           <Route path="/flight-ideas" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightIdeasPage /></div>} />
         </Routes>
-        
+
       </main>
       <ChatWidget />
       <footer className="text-white" style={{ backgroundColor: '#0D47A1' }}>
@@ -256,24 +255,24 @@ export default function App({ clerkEnabled }) {
           </div>
 
           <div>
-          <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
-            Thông tin liên hệ
-          </h3>
-          <ul className="space-y-2 text-sm text-white/80">
-            <li>
-              Giảng viên hướng dẫn: <span className="font-semibold">Trần Đăng Khoa</span>
-            </li>
-            <li>
-              Lớp học: <span className="font-semibold">22DTHD4</span>
-            </li>
-            <li>
-              Source code:{" "}
-              <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold hover:text-orange-accent transition">
-                Nước Code Dừa's GitHub repository
-              </a>
-            </li>
-            <li>Địa chỉ: Trường Đại học Công nghệ TP.HCM (HUTECH)</li>
-          </ul>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
+              Thông tin liên hệ
+            </h3>
+            <ul className="space-y-2 text-sm text-white/80">
+              <li>
+                Giảng viên hướng dẫn: <span className="font-semibold">Trần Đăng Khoa</span>
+              </li>
+              <li>
+                Lớp học: <span className="font-semibold">22DTHD4</span>
+              </li>
+              <li>
+                Source code:{" "}
+                <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold hover:text-orange-accent transition">
+                  Nước Code Dừa's GitHub repository
+                </a>
+              </li>
+              <li>Địa chỉ: Trường Đại học Công nghệ TP.HCM (HUTECH)</li>
+            </ul>
           </div>
 
           <div>

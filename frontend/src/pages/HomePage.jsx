@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { sampleHotels, sampleActivities, sampleFlights } from '../data/mockData';
 import JurniHero from '../components/JurniHero.jsx';
 import ServiceLink from '../components/ServiceLink.jsx';
-import { SectionHeader, Card } from '../components/Section.jsx';
+import { SectionHeader } from '../components/Section.jsx';
+import { HotelCard, ActivityCard, FlightCard } from '../components/ServiceCards';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -19,11 +21,18 @@ export default function HomePage() {
           axios.get(`${API}/flights`),
           axios.get(`${API}/activities`)
         ]);
-        setHotels(h.data.slice(0, 6));
-        setFlights(f.data.slice(0, 6));
-        setActivities(a.data.slice(0, 6));
+        const hotelsData = h.data && h.data.length > 0 ? h.data : sampleHotels;
+        const flightsData = f.data && f.data.length > 0 ? f.data : sampleFlights;
+        const activitiesData = a.data && a.data.length > 0 ? a.data : sampleActivities;
+
+        setHotels(hotelsData.slice(0, 6));
+        setFlights(flightsData.slice(0, 6));
+        setActivities(activitiesData.slice(0, 6));
       } catch (e) {
-        // ignore for homepage best-effort
+        console.error('Homepage data fetch error, using samples:', e);
+        setHotels(sampleHotels.slice(0, 6));
+        setFlights(sampleFlights.slice(0, 6));
+        setActivities(sampleActivities.slice(0, 6));
       }
     })();
   }, []);
@@ -260,17 +269,18 @@ export default function HomePage() {
           {/* Xanh nhạt #4 */}
           <section className="py-8 rounded-lg" style={{ backgroundColor: '#E8F4FD', borderRadius: '8px' }}>
             <SectionHeader title="Nhiều lựa chọn khách sạn" href="/hotels" />
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {hotels.map(h => (
-                <a key={h.id} href={`/hotels/${h.id}`} className="block">
-                  <Card
-                    image={h.image_url}
-                    title={h.name}
-                    subtitle={h.location}
-                    price={h.price}
-                  />
-                </a>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {hotels.slice(0, 4).map(h => (
+                <HotelCard key={h.id} hotel={h} />
               ))}
+            </div>
+            <div className="mt-6 text-center">
+              <a
+                href="/hotels"
+                className="inline-block px-6 py-2 border border-blue-600 text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition"
+              >
+                Xem thêm khách sạn
+              </a>
             </div>
           </section>
 
@@ -278,17 +288,18 @@ export default function HomePage() {
           {/* Xanh rất nhạt #6 */}
           <section className="py-8" style={{ backgroundColor: '#F5FAFF' }}>
             <SectionHeader title="Vé máy bay phổ biến" href="/flights" />
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
               {flights.map(f => (
-                <a key={f.id} href="/flights" className="block">
-                  <Card
-                    image={f.image_url}
-                    title={f.airline}
-                    subtitle={`${f.departure_city} → ${f.arrival_city}`}
-                    price={f.price}
-                  />
-                </a>
+                <FlightCard key={f.id} flight={f} />
               ))}
+            </div>
+            <div className="mt-6 text-center">
+              <a
+                href="/flights"
+                className="inline-block px-6 py-2 border border-blue-600 text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition"
+              >
+                Xem thêm chuyến bay
+              </a>
             </div>
           </section>
 
@@ -305,17 +316,18 @@ export default function HomePage() {
                 Xem tất cả →
               </a>
             </div>
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {activities.map(a => (
-                <a key={a.id} href={`/activities/${a.id}`} className="block">
-                  <Card
-                    image={a.image_url}
-                    title={a.name}
-                    subtitle={a.city}
-                    price={a.price}
-                  />
-                </a>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {activities.slice(0, 4).map(a => (
+                <ActivityCard key={a.id} activity={a} />
               ))}
+            </div>
+            <div className="mt-6 text-center">
+              <a
+                href="/activities"
+                className="inline-block px-6 py-2 border border-blue-600 text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition"
+              >
+                Xem thêm hoạt động
+              </a>
             </div>
           </section>
 

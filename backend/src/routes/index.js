@@ -10,6 +10,7 @@ import favoritesRouter from './favorites.routes.js';
 import vouchersRouter from './vouchers.routes.js';
 import notificationsRouter from './notifications.routes.js';
 import uploadRouter from './upload.routes.js';
+import paymentsRouter from './payments.routes.js';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ router.use('/favorites', favoritesRouter);
 router.use('/vouchers', vouchersRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/upload', uploadRouter);
+router.use('/payments', paymentsRouter);
 
 export default router;
 

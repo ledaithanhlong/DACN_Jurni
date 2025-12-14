@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { SignedIn, SignedOut, UserButton, useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import HomePage from '../pages/HomePage.jsx';
@@ -15,6 +15,14 @@ import AdminDashboard from '../pages/AdminDashboard.jsx';
 import SignInPage from '../pages/SignInPage.jsx';
 import SignUpPage from '../pages/SignUpPage.jsx';
 import VerifyEmailPage from '../pages/VerifyEmailPage.jsx';
+import PaymentPage from '../pages/PaymentPage.jsx';
+import AboutPage from '../pages/AboutPage.jsx';
+import SupportPage from '../pages/SupportPage.jsx';
+import TermsPage from '../pages/TermsPage.jsx';
+import ServicesPage from '../pages/ServicesPage.jsx';
+import PriceAlertPage from '../pages/PriceAlertPage.jsx';
+import FlightIdeasPage from '../pages/FlightIdeasPage.jsx';
+import ChatWidget from '../components/ChatWidget.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -25,10 +33,15 @@ const NavUserSection = () => {
 
   return (
     <>
-      <Link to="/favorites" className="text-sm hover:text-sky-200">Yêu thích</Link>
-      <Link to="/notifications" className="text-sm hover:text-sky-200">Thông báo</Link>
+      <Link to="/checkout" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Thanh toán</Link> 
+      <Link to="/favorites" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Yêu thích</Link>
+      <Link to="/notifications" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm">Thông báo</Link>
       {isAdmin && (
-        <Link to="/admin" className="text-sm bg-blue-600 px-3 py-1 rounded hover:bg-blue-700">
+        <Link 
+          to="/admin" 
+          className="text-sm text-white px-3 py-1 rounded-lg transition shadow-md font-medium hover:opacity-90"
+          style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
+        >
           Quản trị
         </Link>
       )}
@@ -38,18 +51,41 @@ const NavUserSection = () => {
 };
 
 const Nav = ({ clerkEnabled }) => {
+  const location = useLocation();
+  const [isSolid, setIsSolid] = useState(location.pathname !== '/');
+
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      setIsSolid(true);
+      return undefined;
+    }
+
+    const handleScroll = () => {
+      setIsSolid(window.scrollY > 120);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [location.pathname]);
+
   return (
-    <div className="bg-sky-700 text-white shadow-lg">
+    <div
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
+        isSolid ? 'bg-blue-dark backdrop-blur shadow-lg' : 'bg-transparent'
+      }`}
+      style={isSolid ? { backgroundColor: '#0D47A1' } : {}}
+    >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-xl font-bold">Traveloka</Link>
-            <div className="hidden md:flex items-center gap-4 text-sm">
-              <Link to="/hotels" className="hover:text-sky-200">Khách sạn</Link>
-              <Link to="/flights" className="hover:text-sky-200">Vé máy bay</Link>
-              <Link to="/cars" className="hover:text-sky-200">Cho thuê xe</Link>
-              <Link to="/activities" className="hover:text-sky-200">Hoạt động & Vui chơi</Link>
-              <Link to="/vouchers" className="hover:text-sky-200">Voucher</Link>
+            <Link to="/" className="text-2xl font-bold text-white drop-shadow-md">Jurni</Link>
+            <div className="hidden md:flex items-center gap-5 text-sm">
+              <Link to="/hotels" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Khách sạn</Link>
+              <Link to="/flights" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Vé máy bay</Link>
+              <Link to="/cars" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Cho thuê xe</Link>
+              <Link to="/activities" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Hoạt động & Vui chơi</Link>
+              <Link to="/vouchers" className="text-white/90 hover:text-orange-accent font-medium transition drop-shadow-sm">Voucher</Link>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -59,16 +95,20 @@ const Nav = ({ clerkEnabled }) => {
                   <NavUserSection />
                 </SignedIn>
                 <SignedOut>
-                  <Link to="/sign-in" className="bg-white text-sky-700 px-4 py-2 rounded-lg hover:bg-gray-100 font-medium">
+                  <Link to="/sign-in" className="text-white/90 hover:text-orange-accent px-4 py-2 font-medium transition drop-shadow-sm">
                     Đăng Nhập
                   </Link>
-                  <Link to="/sign-up" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 font-medium">
+                  <Link 
+                    to="/sign-up" 
+                    className="text-white px-4 py-2 rounded-lg font-medium transition shadow-md hover:opacity-90"
+                    style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
+                  >
                     Đăng ký
                   </Link>
                 </SignedOut>
               </>
             ) : (
-              <span className="text-sm text-gray-300">Auth disabled</span>
+              <span className="text-sm text-white/70">Auth disabled</span>
             )}
           </div>
         </div>
@@ -163,31 +203,94 @@ function SyncUser() {
 
 export default function App({ clerkEnabled }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col min-h-screen bg-white">
       <Nav clerkEnabled={clerkEnabled} />
+      <main className="flex-1 pt-16">
+        {/* Sync user when signed in */}
+        {clerkEnabled && (
+          <SignedIn>
+            <SyncUser />
+          </SignedIn>
+        )}
 
-      {/* Sync user when signed in */}
-      {clerkEnabled && (
-        <SignedIn>
-          <SyncUser />
-        </SignedIn>
-      )}
+        <Routes>
+          <Route path="/sign-in" element={<SignInPage />} />
+          <Route path="/sign-up" element={<SignUpPage />} />
+          <Route path="/sign-up/verify-email-address" element={<VerifyEmailPage />} />
+          <Route path="/" element={<div className="pt-0"><HomePage /></div>} />
+          <Route path="/hotels" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelsPage /></div>} />
+          <Route path="/hotels/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelDetail /></div>} />
+          <Route path="/flights" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightsPage /></div>} />
+          <Route path="/cars" element={<div className="max-w-7xl mx-auto px-4 py-6"><CarsPage /></div>} />
+          <Route path="/activities" element={<div className="max-w-7xl mx-auto px-4 py-6"><ActivitiesPage /></div>} />
+          <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />
+          <Route path="/favorites" element={<div className="max-w-7xl mx-auto px-4 py-6"><FavoritesPage /></div>} />
+          <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
+          <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
+          <Route path="/checkout" element={<PaymentPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/price-alerts" element={<div className="max-w-7xl mx-auto px-4 py-6"><PriceAlertPage /></div>} />
+          <Route path="/flight-ideas" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightIdeasPage /></div>} />
+        </Routes>
+        
+      </main>
+      <ChatWidget />
+      <footer className="text-white" style={{ backgroundColor: '#0D47A1' }}>
+        <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
+          <div>
+            <div className="text-xl font-semibold tracking-wide">Jurni</div>
+            <p className="mt-3 text-sm text-white/80">
+              © 2025 Jurni – Khám phá Việt Nam theo cách của bạn.
+            </p>
+            <p className="mt-2 text-sm text-white/80">
+              Nhóm thực hiện: <span className="font-semibold">Nước Code Dừa</span>
+            </p>
+            <ul className="mt-1 text-sm text-white/80 list-disc list-inside">
+              <li>Nguyễn Huy Sơn</li>
+              <li>Lê Đại Thanh Long</li>
+              <li>Nguyễn Khắc Minh Hiếu</li>
+            </ul>
+          </div>
 
-      <Routes>
-        <Route path="/sign-in" element={<SignInPage />} />
-        <Route path="/sign-up" element={<SignUpPage />} />
-        <Route path="/sign-up/verify-email-address" element={<VerifyEmailPage />} />
-        <Route path="/" element={<div className="max-w-7xl mx-auto px-4 py-6"><HomePage /></div>} />
-        <Route path="/hotels" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelsPage /></div>} />
-        <Route path="/hotels/:id" element={<div className="max-w-7xl mx-auto px-4 py-6"><HotelDetail /></div>} />
-        <Route path="/flights" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightsPage /></div>} />
-        <Route path="/cars" element={<div className="max-w-7xl mx-auto px-4 py-6"><CarsPage /></div>} />
-        <Route path="/activities" element={<div className="max-w-7xl mx-auto px-4 py-6"><ActivitiesPage /></div>} />
-        <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />
-        <Route path="/favorites" element={<div className="max-w-7xl mx-auto px-4 py-6"><FavoritesPage /></div>} />
-        <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
-        <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
-      </Routes>
+          <div>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
+            Thông tin liên hệ
+          </h3>
+          <ul className="space-y-2 text-sm text-white/80">
+            <li>
+              Giảng viên hướng dẫn: <span className="font-semibold">Trần Đăng Khoa</span>
+            </li>
+            <li>
+              Lớp học: <span className="font-semibold">22DTHD4</span>
+            </li>
+            <li>
+              Source code:{" "}
+              <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold hover:text-orange-accent transition">
+                Nước Code Dừa's GitHub repository
+              </a>
+            </li>
+            <li>Địa chỉ: Trường Đại học Công nghệ TP.HCM (HUTECH)</li>
+          </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
+              Liên kết nhanh
+            </h3>
+            <nav className="flex flex-col space-y-2 text-sm">
+              <Link to="/" className="text-white/80 hover:text-orange-accent transition">Trang chủ</Link>
+              <Link to="/about" className="text-white/80 hover:text-orange-accent transition">Giới thiệu</Link>
+              <Link to="/services" className="text-white/80 hover:text-orange-accent transition">Dịch vụ</Link>
+              <Link to="/activities" className="text-white/80 hover:text-orange-accent transition">Tour trong nước</Link>
+              <Link to="/support" className="text-white/80 hover:text-orange-accent transition">Liên hệ / Hỗ trợ</Link>
+              <Link to="/terms" className="text-white/80 hover:text-orange-accent transition">Điều khoản &amp; Chính sách</Link>
+            </nav>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

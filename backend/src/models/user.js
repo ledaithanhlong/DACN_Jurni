@@ -3,11 +3,13 @@ export default (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
-    role: { type: DataTypes.ENUM('user', 'admin'), allowNull: false, defaultValue: 'user' },
-    clerkId: { type: DataTypes.STRING, allowNull: true }
+    password: { type: DataTypes.STRING, allowNull: true },
+    role: { type: DataTypes.ENUM('user', 'admin'), defaultValue: 'user' },
+    clerkId: { type: DataTypes.STRING, unique: true },
+    phone: { type: DataTypes.STRING, allowNull: true }
   }, {
-    tableName: 'users',
-    underscored: true
+    tableName: 'Users',
+    timestamps: true
   });
 
   User.associate = (models) => {
@@ -18,5 +20,3 @@ export default (sequelize, DataTypes) => {
 
   return User;
 };
-
-

@@ -4,7 +4,7 @@ module.exports = {
   development: {
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || null,
-    database: process.env.DB_NAME || 'traveloka_db',
+    database: process.env.DB_NAME || 'Jurni_db',
     host: process.env.DB_HOST || '127.0.0.1',
     dialect: process.env.DB_DIALECT || 'mysql',
     logging: false
@@ -12,7 +12,7 @@ module.exports = {
   test: {
     username: 'root',
     password: null,
-    database: 'traveloka_db_test',
+    database: 'Jurni_db_test',
     host: '127.0.0.1',
     dialect: 'mysql',
     logging: false

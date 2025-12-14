@@ -34,7 +34,12 @@ export default function AdminUsers() {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log('Users loaded:', res.data);
-      setUsers(Array.isArray(res.data) ? res.data : []);
+      setUsers(
+        Array.isArray(res.data)
+          ? res.data.sort((a, b) => a.id - b.id)   // sort tăng dần
+          : []
+      );
+      
     } catch (error) {
       console.error('Error loading users:', error);
       console.error('Error response:', error.response);

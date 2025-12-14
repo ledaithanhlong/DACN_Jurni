@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { sampleFlights } from '../data/mockData';
+import { FlightCard } from '../components/ServiceCards';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Professional SVG Icons
 const AirplaneIcon = ({ className = "w-8 h-8" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
   </svg>
 );
 
@@ -37,19 +37,19 @@ const LuggageIcon = ({ className = "w-8 h-8" }) => (
 
 const AirlineIcon = ({ className = "w-12 h-12" }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
   </svg>
 );
 
 // Component để hiển thị logo với fallback
 const AirlineLogo = ({ logo, name, bgColor }) => {
   const [logoError, setLogoError] = useState(false);
-  
+
   return (
     <div className={`mb-3 ${bgColor} rounded-lg p-3 flex items-center justify-center h-20`}>
       {!logoError ? (
-        <img 
-          src={logo} 
+        <img
+          src={logo}
           alt={`${name} logo`}
           className="max-h-14 max-w-full object-contain"
           onError={() => setLogoError(true)}
@@ -67,7 +67,7 @@ export default function FlightsPage() {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  
+
   // Tự động lấy thông tin từ FlightIdeasPage hoặc JurniHero nếu có
   const searchFromState = location.state?.from || '';
   const searchToState = location.state?.to || '';
@@ -90,13 +90,13 @@ export default function FlightsPage() {
       const params = {};
       if (from) params.from = from;
       if (to) params.to = to;
-      
+
       const res = await axios.get(`${API}/flights`, { params });
       setFlights(res.data || []);
       setHasSearched(true);
     } catch (error) {
       console.error('Error loading flights:', error);
-      setFlights([]);
+      setFlights(sampleFlights);
       setHasSearched(true);
     } finally {
       setLoading(false);
@@ -114,10 +114,10 @@ export default function FlightsPage() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
     });
   };
 
@@ -131,35 +131,35 @@ export default function FlightsPage() {
   };
 
   const handleBook = (flight) => {
-    navigate('/checkout', { 
-      state: { 
+    navigate('/checkout', {
+      state: {
         type: 'flight',
-        item: flight 
-      } 
+        item: flight
+      }
     });
   };
 
   // Thông tin các hãng hàng không
   const airlines = [
-    { 
-      name: 'Vietnam Airlines', 
+    {
+      name: 'Vietnam Airlines',
       logo: '/AirlineLogo/vietnam-airlines.png',
-      description: 'Hãng hàng không quốc gia, dịch vụ 5 sao', 
+      description: 'Hãng hàng không quốc gia, dịch vụ 5 sao',
     },
-    { 
-      name: 'VietJet Air', 
+    {
+      name: 'VietJet Air',
       logo: '/AirlineLogo/vietjet.png',
-      description: 'Hãng hàng không giá rẻ, nhiều chuyến bay', 
+      description: 'Hãng hàng không giá rẻ, nhiều chuyến bay',
     },
-    { 
-      name: 'Bamboo Airways', 
+    {
+      name: 'Bamboo Airways',
       logo: '/AirlineLogo/bamboo.png',
-      description: 'Hãng hàng không mới, hiện đại', 
+      description: 'Hãng hàng không mới, hiện đại',
     },
-    { 
-      name: 'Jetstar Pacific', 
+    {
+      name: 'Jetstar Pacific',
       logo: '/AirlineLogo/jetstar.png',
-      description: 'Giá rẻ, phù hợp du lịch', 
+      description: 'Giá rẻ, phù hợp du lịch',
     },
   ];
 
@@ -217,7 +217,7 @@ export default function FlightsPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-blue-900 mb-3">Vé máy bay</h1>
         <p className="text-gray-600 text-lg">
-          So sánh và đặt vé máy bay từ các hãng hàng không uy tín tại Việt Nam. 
+          So sánh và đặt vé máy bay từ các hãng hàng không uy tín tại Việt Nam.
           Tìm kiếm chuyến bay phù hợp với ngân sách và lịch trình của bạn.
         </p>
         <div className="mt-4">
@@ -238,141 +238,54 @@ export default function FlightsPage() {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-800">
-              {searchFromState && searchToState 
+              {searchFromState && searchToState
                 ? `Chuyến bay từ ${searchFromState} đến ${searchToState}`
-                : searchFromState 
+                : searchFromState
                   ? `Chuyến bay từ ${searchFromState}`
                   : searchToState
                     ? `Chuyến bay đến ${searchToState}`
                     : 'Tất cả chuyến bay'}
             </h2>
-              {flights.length > 0 && (
-                <span className="text-sm text-gray-600">
-                  Tìm thấy <span className="font-semibold" style={{ color: '#FF6B35' }}>{flights.length}</span> chuyến bay
-                </span>
-              )}
-            </div>
-
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#FF6B35' }}></div>
-                <p className="mt-4 text-gray-600">Đang tìm kiếm chuyến bay...</p>
-              </div>
-            ) : flights.length === 0 ? (
-              <div className="text-center py-12">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Không tìm thấy chuyến bay</h3>
-                <p className="text-gray-600 mb-4">
-                  Hiện tại không có chuyến bay phù hợp. Vui lòng thử tìm kiếm với điểm đi/đến khác.
-                </p>
-                <button
-                  onClick={() => navigate('/')}
-                  className="text-orange-600 hover:text-orange-700 font-medium"
-                >
-                  Tìm kiếm chuyến bay khác
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {flights.map((flight) => (
-                  <div
-                    key={flight.id}
-                    className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition"
-                  >
-                    <div className="p-6">
-                      <div className="flex flex-col md:flex-row md:items-center gap-6">
-                        {/* Airline Info */}
-                        <div className="flex-shrink-0">
-                          {flight.image_url ? (
-                            <img
-                              src={flight.image_url}
-                              alt={flight.airline}
-                              className="w-24 h-24 object-contain rounded-lg"
-                            />
-                          ) : (
-                            <div className="w-24 h-24 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#FFE8E0' }}>
-                              <svg className="w-12 h-12" style={{ color: '#FF6B35' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                              </svg>
-                            </div>
-                          )}
-                          <p className="text-center mt-2 text-sm font-semibold text-gray-700">
-                            {flight.airline}
-                          </p>
-                        </div>
-
-                        {/* Flight Details */}
-                        <div className="flex-1 grid md:grid-cols-3 gap-4">
-                          {/* Departure */}
-                          <div>
-                            <p className="text-2xl font-bold text-gray-800 mb-1">
-                              {formatTime(flight.departure_time)}
-                            </p>
-                            <p className="text-sm text-gray-600 mb-1">
-                              {formatDate(flight.departure_time)}
-                            </p>
-                            <p className="text-lg font-semibold text-gray-800">
-                              {flight.departure_city}
-                            </p>
-                          </div>
-
-                          {/* Duration */}
-                          <div className="flex flex-col items-center justify-center">
-                            <p className="text-sm text-gray-500 mb-2">
-                              {calculateDuration(flight.departure_time, flight.arrival_time)}
-                            </p>
-                            <div className="flex items-center w-full">
-                              <div className="flex-1 border-t-2 border-dashed border-gray-300"></div>
-                              <svg className="w-6 h-6 mx-2" style={{ color: '#FF6B35' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                              </svg>
-                              <div className="flex-1 border-t-2 border-dashed border-gray-300"></div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2">Bay thẳng</p>
-                          </div>
-
-                          {/* Arrival */}
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-800 mb-1">
-                              {formatTime(flight.arrival_time)}
-                            </p>
-                            <p className="text-sm text-gray-600 mb-1">
-                              {formatDate(flight.arrival_time)}
-                            </p>
-                            <p className="text-lg font-semibold text-gray-800">
-                              {flight.arrival_city}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Price and Book Button */}
-                        <div className="flex-shrink-0 border-t md:border-t-0 md:border-l border-gray-200 pt-4 md:pt-0 md:pl-6">
-                          <div className="text-center md:text-right">
-                            <p className="text-3xl font-bold mb-2" style={{ color: '#FF6B35' }}>
-                              {formatPrice(flight.price)} VND
-                            </p>
-                            <p className="text-xs text-gray-500 mb-4">Giá cho 1 người</p>
-                            <button
-                              onClick={() => handleBook(flight)}
-                              className="w-full md:w-auto text-white px-6 py-2 rounded-lg font-semibold transition"
-                              style={{ backgroundColor: '#FF6B35' }}
-                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FF8C42'}
-                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
-                            >
-                              Chọn chuyến bay
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {flights.length > 0 && (
+              <span className="text-sm text-gray-600">
+                Tìm thấy <span className="font-semibold" style={{ color: '#FF6B35' }}>{flights.length}</span> chuyến bay
+              </span>
             )}
           </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#FF6B35' }}></div>
+              <p className="mt-4 text-gray-600">Đang tìm kiếm chuyến bay...</p>
+            </div>
+          ) : flights.length === 0 ? (
+            <div className="text-center py-12">
+              <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Không tìm thấy chuyến bay</h3>
+              <p className="text-gray-600 mb-4">
+                Hiện tại không có chuyến bay phù hợp. Vui lòng thử tìm kiếm với điểm đi/đến khác.
+              </p>
+              <button
+                onClick={() => navigate('/')}
+                className="text-orange-600 hover:text-orange-700 font-medium"
+              >
+                Tìm kiếm chuyến bay khác
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold mb-6">Kết quả tìm kiếm</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {flights.map((flight) => (
+                  <FlightCard key={flight.id} flight={flight} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+      </div>
 
       {/* Thông tin các hãng hàng không */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
@@ -410,7 +323,7 @@ export default function FlightsPage() {
       </div>
 
       {/* FAQ */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Câu hỏi thường gặp</h2>
         <div className="space-y-4">
           {faqs.map((faq, idx) => (
@@ -446,3 +359,4 @@ export default function FlightsPage() {
     </div>
   );
 }
+

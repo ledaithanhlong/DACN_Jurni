@@ -11,12 +11,12 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('users');
 
   const tabs = [
-    { id: 'users', label: 'Quản lý Người dùng', icon: '👥' },
-    { id: 'hotels', label: 'Quản lý Khách sạn', icon: '🏨' },
-    { id: 'flights', label: 'Quản lý Chuyến bay', icon: '✈️' },
-    { id: 'cars', label: 'Quản lý Xe cho thuê', icon: '🚗' },
-    { id: 'activities', label: 'Quản lý Hoạt động', icon: '🎯' },
-    { id: 'vouchers', label: 'Quản lý Voucher', icon: '🎫' },
+    { id: 'users', label: 'Quản lý Người dùng'},
+    { id: 'hotels', label: 'Quản lý Khách sạn'},
+    { id: 'flights', label: 'Quản lý Chuyến bay'},
+    { id: 'cars', label: 'Quản lý Xe cho thuê'},
+    { id: 'activities', label: 'Quản lý Hoạt động'},
+    { id: 'vouchers', label: 'Quản lý Voucher' },
   ];
 
   return (

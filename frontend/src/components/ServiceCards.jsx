@@ -71,10 +71,13 @@ export function HotelCard({ hotel }) {
     );
 }
 
-export function ActivityCard({ activity }) {
+export function ActivityCard({ activity, onClick }) {
     if (!activity) return null;
     return (
-        <a href={`/activities/${activity.id}`} className="group bg-white rounded-3xl overflow-hidden shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 flex flex-col h-full">
+        <div
+            onClick={() => onClick && onClick(activity)}
+            className="group bg-white rounded-3xl overflow-hidden shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 flex flex-col h-full cursor-pointer"
+        >
             <div className="relative overflow-hidden h-56 flex-shrink-0">
                 {activity.image_url ? (
                     <img
@@ -97,7 +100,7 @@ export function ActivityCard({ activity }) {
                 <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{activity.name}</h3>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                     <IconLocation className="w-4 h-4 flex-shrink-0" />
-                    <span className="line-clamp-1">{activity.city}</span>
+                    <span className="line-clamp-1">{activity.location || activity.city}</span>
                 </div>
                 {activity.duration && (
                     <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
@@ -123,7 +126,7 @@ export function ActivityCard({ activity }) {
                     </button>
                 </div>
             </div>
-        </a>
+        </div>
     );
 }
 

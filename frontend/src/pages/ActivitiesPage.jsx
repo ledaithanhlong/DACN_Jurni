@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { sampleActivities } from '../data/mockData';
 import { ActivityCard } from '../components/ServiceCards';
@@ -11,23 +12,89 @@ import {
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function ActivitiesPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [selectedActivity, setSelectedActivity] = useState(null);
+
+  // Booking details
+  const [tourDate, setTourDate] = useState('');
+  const [participants, setParticipants] = useState(1);
 
   const load = async () => {
     try {
       const res = await axios.get(`${API}/activities`);
       setRows(res.data || []);
+
+      // If ID in URL, auto-select that activity
+      if (id && res.data) {
+        const activity = res.data.find(a => a.id === parseInt(id));
+        if (activity) {
+          setSelectedActivity(activity);
+        }
+      }
     } catch (error) {
       console.error('Error loading activities:', error);
       setRows([]);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [id]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price || 0);
+  };
+
+  const handleBookActivity = (activity) => {
+    // Validate booking details
+    if (!tourDate) {
+      alert('Vui lòng chọn ngày khởi hành!');
+      return;
+    }
+
+    if (participants < 1) {
+      alert('Số lượng người tham gia phải ít nhất là 1!');
+      return;
+    }
+
+    // Create cart item for the activity
+    const cartItem = {
+      id: `activity-${activity.id}-${Date.now()}`,
+      name: activity.name,
+      type: activity.category || 'Tour',
+      price: parseFloat(activity.price),
+      quantity: participants,
+      image: activity.image_url,
+      details: {
+        activity_id: activity.id,
+        location: activity.location,
+        duration: activity.duration,
+        category: activity.category,
+        includes: activity.includes,
+        tour_date: tourDate,
+        participants: participants
+      }
+    };
+
+    // Save to localStorage
+    try {
+      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const updatedCart = [...existingCart, cartItem];
+      localStorage.setItem('pendingCart', JSON.stringify(updatedCart));
+
+      // Navigate to checkout
+      navigate('/checkout');
+    } catch (e) {
+      console.error('Failed to save to cart', e);
+      alert('Có lỗi xảy ra. Vui lòng thử lại!');
+    }
+  };
+
+  // Reset booking details when modal closes
+  const handleCloseModal = () => {
+    setSelectedActivity(null);
+    setTourDate('');
+    setParticipants(1);
   };
 
   const activities = rows.length > 0 ? rows : sampleActivities;
@@ -290,7 +357,7 @@ export default function ActivitiesPage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {activities.map((activity) => (
-              <ActivityCard key={activity.id} activity={activity} />
+              <ActivityCard key={activity.id} activity={activity} onClick={setSelectedActivity} />
             ))}
           </div>
         </div >
@@ -299,12 +366,12 @@ export default function ActivitiesPage() {
       {/* Detail Modal */}
       {
         selectedActivity && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedActivity(null)}>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleCloseModal}>
             <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">{selectedActivity.name}</h2>
                 <button
-                  onClick={() => setSelectedActivity(null)}
+                  onClick={handleCloseModal}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
                   ×
@@ -349,20 +416,99 @@ export default function ActivitiesPage() {
                   )}
                 </div>
 
-                {/* Includes */}
-                {selectedActivity.includes && (
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Bao gồm</h3>
-                    <div className="grid md:grid-cols-2 gap-3">
-                      {selectedActivity.includes.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
-                          <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
-                          <span className="text-gray-700">{item}</span>
-                        </div>
-                      ))}
+                {/* Booking Form */}
+                <div className="mb-6 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border-2 border-orange-200">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">📅 Thông tin đặt tour</h3>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ngày khởi hành *
+                      </label>
+                      <input
+                        type="date"
+                        value={tourDate}
+                        onChange={(e) => setTourDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full border-2 border-orange-300 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Số người tham gia *
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setParticipants(Math.max(1, participants - 1))}
+                          className="w-10 h-10 rounded-lg bg-orange-500 text-white font-bold hover:bg-orange-600 transition"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          value={participants}
+                          onChange={(e) => setParticipants(Math.max(1, parseInt(e.target.value) || 1))}
+                          min="1"
+                          className="w-20 border-2 border-orange-300 rounded-lg px-3 py-2 text-center font-bold focus:outline-none focus:border-orange-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setParticipants(participants + 1)}
+                          className="w-10 h-10 rounded-lg bg-orange-500 text-white font-bold hover:bg-orange-600 transition"
+                        >
+                          +
+                        </button>
+                        <span className="text-sm text-gray-600">người</span>
+                      </div>
                     </div>
                   </div>
-                )}
+                  <div className="mt-4 pt-4 border-t border-orange-300">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-gray-700">Tổng tiền:</span>
+                      <div className="text-right">
+                        <div className="text-3xl font-extrabold" style={{ color: '#FF6B35' }}>
+                          {formatPrice(selectedActivity.price * participants)} VND
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {formatPrice(selectedActivity.price)} × {participants} người
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Includes */}
+                {selectedActivity.includes && (() => {
+                  let includes = selectedActivity.includes;
+
+                  // Parse if string
+                  if (typeof includes === 'string') {
+                    try {
+                      includes = JSON.parse(includes);
+                      if (typeof includes === 'string') includes = JSON.parse(includes);
+                    } catch (e) {
+                      console.error('Error parsing includes:', e);
+                      return null;
+                    }
+                  }
+
+                  if (!Array.isArray(includes) || includes.length === 0) return null;
+
+                  return (
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Bao gồm</h3>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {includes.map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
+                            <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
+                            <span className="text-gray-700">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Meeting Point */}
                 {selectedActivity.meetingPoint && (
@@ -381,29 +527,54 @@ export default function ActivitiesPage() {
                 )}
 
                 {/* Policies */}
-                {selectedActivity.policies && (
-                  <div className="mb-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4">Chính Sách</h3>
-                    <div className="space-y-4">
-                      <div className="border-l-4 border-blue-500 pl-4">
-                        <div className="font-semibold text-gray-900 mb-1">Hủy đặt tour</div>
-                        <div className="text-sm text-gray-600">{selectedActivity.policies.cancel}</div>
-                      </div>
-                      <div className="border-l-4 border-green-500 pl-4">
-                        <div className="font-semibold text-gray-900 mb-1">Đổi ngày</div>
-                        <div className="text-sm text-gray-600">{selectedActivity.policies.change}</div>
-                      </div>
-                      <div className="border-l-4 border-yellow-500 pl-4">
-                        <div className="font-semibold text-gray-900 mb-1">Thời tiết</div>
-                        <div className="text-sm text-gray-600">{selectedActivity.policies.weather}</div>
-                      </div>
-                      <div className="border-l-4 border-purple-500 pl-4">
-                        <div className="font-semibold text-gray-900 mb-1">Trẻ em</div>
-                        <div className="text-sm text-gray-600">{selectedActivity.policies.children}</div>
+                {selectedActivity.policies && (() => {
+                  let policies = selectedActivity.policies;
+
+                  // Parse if string
+                  if (typeof policies === 'string') {
+                    try {
+                      policies = JSON.parse(policies);
+                      if (typeof policies === 'string') policies = JSON.parse(policies);
+                    } catch (e) {
+                      console.error('Error parsing policies:', e);
+                      return null;
+                    }
+                  }
+
+                  if (!policies || typeof policies !== 'object' || Array.isArray(policies)) return null;
+
+                  return (
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Chính Sách</h3>
+                      <div className="space-y-4">
+                        {policies.cancel && (
+                          <div className="border-l-4 border-blue-500 pl-4">
+                            <div className="font-semibold text-gray-900 mb-1">Hủy đặt tour</div>
+                            <div className="text-sm text-gray-600">{policies.cancel}</div>
+                          </div>
+                        )}
+                        {policies.change && (
+                          <div className="border-l-4 border-green-500 pl-4">
+                            <div className="font-semibold text-gray-900 mb-1">Đổi ngày</div>
+                            <div className="text-sm text-gray-600">{policies.change}</div>
+                          </div>
+                        )}
+                        {policies.weather && (
+                          <div className="border-l-4 border-yellow-500 pl-4">
+                            <div className="font-semibold text-gray-900 mb-1">Thời tiết</div>
+                            <div className="text-sm text-gray-600">{policies.weather}</div>
+                          </div>
+                        )}
+                        {policies.children && (
+                          <div className="border-l-4 border-purple-500 pl-4">
+                            <div className="font-semibold text-gray-900 mb-1">Trẻ em</div>
+                            <div className="text-sm text-gray-600">{policies.children}</div>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Contact */}
                 <div id="lien-he" className="bg-gradient-to-r from-blue-600 to-sky-600 rounded-xl p-6 text-white">
@@ -438,7 +609,7 @@ export default function ActivitiesPage() {
                       </div>
                     </div>
                   </div>
-                  <button className="mt-4 w-full bg-white px-6 py-3 rounded-full font-semibold transition" style={{ color: '#FF6B35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}>
+                  <button className="mt-4 w-full bg-white px-6 py-3 rounded-full font-semibold transition" style={{ color: '#FF6B35' }} onClick={() => handleBookActivity(selectedActivity)} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}>
                     Đặt tour ngay
                   </button>
                 </div>

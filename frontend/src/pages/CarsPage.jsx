@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -60,6 +61,7 @@ const IconLocation = () => (
 );
 
 export default function CarsPage() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
 
@@ -77,6 +79,39 @@ export default function CarsPage() {
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price || 0);
+  };
+
+  const handleBookCar = (car) => {
+    // Create cart item for the car rental
+    const cartItem = {
+      id: `car-${car.id}-${Date.now()}`,
+      name: `Thuê xe ${car.company} ${car.type}`,
+      type: `${car.seats} chỗ`,
+      price: parseFloat(car.price_per_day),
+      quantity: 1, // Default 1 day rental
+      image: car.image_url,
+      details: {
+        car_id: car.id,
+        company: car.company,
+        model: car.type,
+        seats: car.seats,
+        specifications: car.specifications,
+        amenities: car.amenities
+      }
+    };
+
+    // Save to localStorage
+    try {
+      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const updatedCart = [...existingCart, cartItem];
+      localStorage.setItem('pendingCart', JSON.stringify(updatedCart));
+
+      // Navigate to checkout
+      navigate('/checkout');
+    } catch (e) {
+      console.error('Failed to save to cart', e);
+      alert('Có lỗi xảy ra. Vui lòng thử lại!');
+    }
   };
 
   // Sample cars data
@@ -285,22 +320,22 @@ export default function CarsPage() {
             backgroundSize: '50px 50px'
           }}></div>
         </div>
-        
+
         <div className="absolute top-20 right-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-10 w-96 h-96 bg-sky-500/20 rounded-full blur-3xl"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-8 shadow-lg">
               <IconShield className="w-4 h-4" />
               <span className="text-sm font-medium">Cho thuê xe chuyên nghiệp</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
               Cho Thuê <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-cyan-200">Xe</span>
             </h1>
             <p className="text-xl md:text-2xl text-blue-100/90 mb-10 leading-relaxed max-w-3xl mx-auto">
-              Đa dạng loại xe từ xe 5 chỗ cho gia đình đến xe khách 16 chỗ và xe 50 chỗ. 
+              Đa dạng loại xe từ xe 5 chỗ cho gia đình đến xe khách 16 chỗ và xe 50 chỗ.
               Jurni mang đến dịch vụ cho thuê xe chất lượng cao với giá cả hợp lý.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
@@ -337,7 +372,7 @@ export default function CarsPage() {
             {statistics.map((stat, idx) => (
               <div key={idx} className="group relative text-center p-8 bg-white rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {stat.icon}
@@ -347,7 +382,7 @@ export default function CarsPage() {
                   </div>
                   <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{stat.label}</div>
                 </div>
-                
+
                 <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             ))}
@@ -360,7 +395,7 @@ export default function CarsPage() {
         <div className="absolute inset-0 opacity-5" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }}></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
@@ -374,7 +409,7 @@ export default function CarsPage() {
             {values.map((value, idx) => (
               <div key={idx} className="group relative bg-white p-8 rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
                     {value.icon}
@@ -384,7 +419,7 @@ export default function CarsPage() {
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
                 </div>
-                
+
                 <div className="absolute top-0 right-0 w-0 h-0 border-t-[40px] border-r-[40px] border-t-blue-500/10 border-r-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             ))}
@@ -400,10 +435,10 @@ export default function CarsPage() {
               <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
               <div className="absolute bottom-0 left-0 w-96 h-96 bg-sky-400 rounded-full blur-3xl"></div>
             </div>
-            
+
             <div className="absolute top-0 left-0 w-32 h-32 border-t-[3px] border-l-[3px] border-white/20 rounded-tl-[2.5rem]"></div>
             <div className="absolute bottom-0 right-0 w-32 h-32 border-b-[3px] border-r-[3px] border-white/20 rounded-br-[2.5rem]"></div>
-            
+
             <div className="grid md:grid-cols-2 gap-12 relative z-10">
               <div>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-6">
@@ -444,7 +479,7 @@ export default function CarsPage() {
                       Tất cả xe đều được kiểm tra và bảo dưỡng trước khi cho thuê
                     </div>
                   </div>
-                  
+
                   <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-2xl rotate-12"></div>
                   <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-sky-400/20 rounded-2xl -rotate-12"></div>
                 </div>
@@ -469,13 +504,13 @@ export default function CarsPage() {
             {carTypes.map((type, idx) => (
               <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden text-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="text-6xl mb-6 transform group-hover:scale-110 transition-transform duration-300">{type.icon}</div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">{type.name}</h3>
                   <div className="text-blue-600 font-semibold">{type.count} xe</div>
                 </div>
-                
+
                 <div className="absolute top-0 right-0 w-0 h-0 border-t-[50px] border-r-[50px] border-t-blue-500/10 border-r-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             ))}
@@ -597,12 +632,48 @@ export default function CarsPage() {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Thông số kỹ thuật</h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {Object.entries(selectedCar.specifications).map(([key, value]) => (
-                      <div key={key} className="bg-blue-50 rounded-lg p-4">
-                        <div className="text-sm text-gray-600 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</div>
-                        <div className="font-semibold text-gray-900">{value}</div>
-                      </div>
-                    ))}
+                    {(() => {
+                      let specs = selectedCar.specifications;
+
+                      // Handle if specifications is a string (JSON) - may be double stringified
+                      if (typeof specs === 'string') {
+                        try {
+                          specs = JSON.parse(specs);
+                          // Check if still a string after first parse (double stringified)
+                          if (typeof specs === 'string') {
+                            specs = JSON.parse(specs);
+                          }
+                        } catch (e) {
+                          console.error('Error parsing specifications:', e, specs);
+                          return <p className="text-gray-500 text-sm">Không có thông tin kỹ thuật</p>;
+                        }
+                      }
+
+                      // Handle if specs is not an object or is empty
+                      if (!specs || typeof specs !== 'object' || Array.isArray(specs)) {
+                        console.warn('Invalid specifications format:', specs);
+                        return <p className="text-gray-500 text-sm">Không có thông tin kỹ thuật</p>;
+                      }
+
+                      const labelMap = {
+                        engine: 'Động cơ',
+                        fuel: 'Nhiên liệu',
+                        transmission: 'Hộp số',
+                        luggageSpace: 'Khoang hành lý'
+                      };
+
+                      const entries = Object.entries(specs);
+                      if (entries.length === 0) {
+                        return <p className="text-gray-500 text-sm">Chưa có thông tin kỹ thuật</p>;
+                      }
+
+                      return entries.map(([key, value]) => (
+                        <div key={key} className="bg-blue-50 rounded-lg p-4">
+                          <div className="text-sm text-gray-600 mb-1">{labelMap[key] || key}</div>
+                          <div className="font-semibold text-gray-900">{value || 'N/A'}</div>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               )}
@@ -612,12 +683,40 @@ export default function CarsPage() {
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Tiện nghi</h3>
                   <div className="grid md:grid-cols-2 gap-3">
-                    {selectedCar.amenities.map((amenity, idx) => (
-                      <div key={idx} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
-                        <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
-                        <span className="text-gray-700">{amenity}</span>
-                      </div>
-                    ))}
+                    {(() => {
+                      let amenities = selectedCar.amenities;
+
+                      // Handle if amenities is a string (JSON)
+                      if (typeof amenities === 'string') {
+                        try {
+                          amenities = JSON.parse(amenities);
+                          // Check if still a string (double stringified)
+                          if (typeof amenities === 'string') {
+                            amenities = JSON.parse(amenities);
+                          }
+                        } catch (e) {
+                          console.error('Error parsing amenities:', e, amenities);
+                          return <p className="text-gray-500 text-sm col-span-2">Không có thông tin tiện nghi</p>;
+                        }
+                      }
+
+                      // Handle if not an array
+                      if (!Array.isArray(amenities)) {
+                        console.warn('Invalid amenities format:', amenities);
+                        return <p className="text-gray-500 text-sm col-span-2">Không có thông tin tiện nghi</p>;
+                      }
+
+                      if (amenities.length === 0) {
+                        return <p className="text-gray-500 text-sm col-span-2">Chưa có tiện nghi</p>;
+                      }
+
+                      return amenities.map((amenity, idx) => (
+                        <div key={idx} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
+                          <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
+                          <span className="text-gray-700">{amenity}</span>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               )}
@@ -686,7 +785,7 @@ export default function CarsPage() {
                     </div>
                   </div>
                 </div>
-                <button className="mt-4 w-full bg-white px-6 py-3 rounded-full font-semibold transition" style={{ color: '#FF6B35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}>
+                <button className="mt-4 w-full bg-white px-6 py-3 rounded-full font-semibold transition" style={{ color: '#FF6B35' }} onClick={() => handleBookCar(selectedCar)} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}>
                   Đặt thuê xe ngay
                 </button>
               </div>

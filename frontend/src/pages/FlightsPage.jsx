@@ -168,14 +168,16 @@ export default function FlightsPage() {
       }
     };
 
-    navigate('/payment', {
-      state: {
-        order: {
-          items: [orderItem],
-          currency: 'VND'
-        }
-      }
-    });
+    // Save to localStorage so PaymentPage can read it
+    try {
+      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const updatedCart = [...existingCart, orderItem];
+      localStorage.setItem('pendingCart', JSON.stringify(updatedCart));
+    } catch (e) {
+      console.error('Failed to save to cart', e);
+    }
+
+    navigate('/checkout');
     setBookingModal(null);
   };
 

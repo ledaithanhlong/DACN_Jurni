@@ -4,6 +4,7 @@ export default (sequelize, DataTypes) => {
     hotel_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     name: { type: DataTypes.STRING, allowNull: false },
     type: { type: DataTypes.STRING },
+    room_type: { type: DataTypes.STRING },
     price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
     capacity: { type: DataTypes.INTEGER },
     quantity: { type: DataTypes.INTEGER, defaultValue: 1 },

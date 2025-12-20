@@ -11,6 +11,7 @@ import vouchersRouter from './vouchers.routes.js';
 import notificationsRouter from './notifications.routes.js';
 import uploadRouter from './upload.routes.js';
 import paymentsRouter from './payments.routes.js';
+import teamRouter from './team.routes.js';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.use('/vouchers', vouchersRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/upload', uploadRouter);
 router.use('/payments', paymentsRouter);
+router.use('/team', teamRouter);
 
 export default router;
 

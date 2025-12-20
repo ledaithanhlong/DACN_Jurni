@@ -24,6 +24,10 @@ import PriceAlertPage from '../pages/PriceAlertPage.jsx';
 import FlightIdeasPage from '../pages/FlightIdeasPage.jsx';
 import ChatWidget from '../components/ChatWidget.jsx';
 
+import TeamPage from '../pages/TeamPage.jsx';
+import BookingsPage from '../pages/BookingsPage.jsx';
+import CareersPage from '../pages/CareersPage.jsx';
+
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const NavUserSection = () => {
@@ -33,6 +37,7 @@ const NavUserSection = () => {
 
   return (
     <>
+      <Link to="/bookings" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm whitespace-nowrap">Đặt chỗ của tôi</Link>
       <Link to="/checkout" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm whitespace-nowrap">Thanh toán</Link>
       <Link to="/favorites" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm whitespace-nowrap">Yêu thích</Link>
       <Link to="/notifications" className="text-sm text-white/90 hover:text-orange-accent transition drop-shadow-sm whitespace-nowrap">Thông báo</Link>
@@ -227,11 +232,14 @@ export default function App({ clerkEnabled }) {
           <Route path="/favorites" element={<div className="max-w-7xl mx-auto px-4 py-6"><FavoritesPage /></div>} />
           <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
           <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
+          <Route path="/bookings" element={<div className="max-w-7xl mx-auto px-4 py-6"><BookingsPage /></div>} />
           <Route path="/checkout" element={<PaymentPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/team" element={<TeamPage />} />
           <Route path="/support" element={<SupportPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/careers" element={<CareersPage />} />
           <Route path="/price-alerts" element={<div className="max-w-7xl mx-auto px-4 py-6"><PriceAlertPage /></div>} />
           <Route path="/flight-ideas" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightIdeasPage /></div>} />
         </Routes>
@@ -245,13 +253,13 @@ export default function App({ clerkEnabled }) {
             <p className="mt-3 text-sm text-white/80">
               © 2025 Jurni – Khám phá Việt Nam theo cách của bạn.
             </p>
-            <p className="mt-2 text-sm text-white/80">
-              Nhóm thực hiện: <span className="font-semibold">Nước Code Dừa</span>
-            </p>
-            <ul className="mt-1 text-sm text-white/80 list-disc list-inside">
-              <li>Nguyễn Huy Sơn</li>
-              <li>Lê Đại Thanh Long</li>
-              <li>Nguyễn Khắc Minh Hiếu</li>
+            <div className="mt-3 text-sm text-white/80">
+              Nhóm thực hiện: <Link to="/team" className="font-semibold hover:text-orange-accent transition">Nước Code Dừa</Link>
+            </div>
+            <ul className="mt-1 text-sm text-white/80 space-y-1">
+              <li><Link to="/team" className="hover:text-orange-accent transition">Nguyễn Huy Sơn</Link></li>
+              <li><Link to="/team" className="hover:text-orange-accent transition">Lê Đại Thanh Long</Link></li>
+              <li><Link to="/team" className="hover:text-orange-accent transition">Nguyễn Khắc Minh Hiếu</Link></li>
             </ul>
           </div>
 
@@ -286,6 +294,7 @@ export default function App({ clerkEnabled }) {
               <Link to="/services" className="text-white/80 hover:text-orange-accent transition">Dịch vụ</Link>
               <Link to="/activities" className="text-white/80 hover:text-orange-accent transition">Tour trong nước</Link>
               <Link to="/support" className="text-white/80 hover:text-orange-accent transition">Liên hệ / Hỗ trợ</Link>
+              <Link to="/careers" className="text-white/80 hover:text-orange-accent transition">Tuyển dụng</Link>
               <Link to="/terms" className="text-white/80 hover:text-orange-accent transition">Điều khoản &amp; Chính sách</Link>
             </nav>
           </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { IconStar, IconLocation, IconBed, IconClock } from './Icons';
 
 // Format price utility
@@ -140,7 +141,7 @@ export function FlightCard({ flight }) {
     };
 
     return (
-        <a href={`/flights/${flight.id}`} className="group block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-orange-500 transition-all duration-300 h-full">
+        <Link to="/flights" className="group block bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-orange-500 transition-all duration-300 h-full">
             <div className="p-4 flex flex-col h-full">
                 {/* Airline & Logo */}
                 <div className="flex items-center gap-3 mb-3">
@@ -185,6 +186,6 @@ export function FlightCard({ flight }) {
                     </span>
                 </div>
             </div>
-        </a>
+        </Link>
     );
 }

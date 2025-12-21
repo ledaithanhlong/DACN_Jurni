@@ -284,10 +284,10 @@ export default function TeamPage() {
                 ) : (
                     <div className="space-y-12">
                         <TeamSection title="Ban Lãnh Đạo (Founders)" members={cofounders} isAdmin={isAdmin} onEdit={handleEdit} onDelete={handleDelete} accentColor="gold" />
-                        <TeamSection title="Cấp Điều Hành" members={executives} isAdmin={isAdmin} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" />
+                        {/* <TeamSection title="Cấp Điều Hành" members={executives} isAdmin={isAdmin} onEdit={handleEdit} onDelete={handleDelete} accentColor="blue" />
                         <TeamSection title="Cấp Quản Lý Cấp Cao" members={seniorManagers} isAdmin={isAdmin} onEdit={handleEdit} onDelete={handleDelete} accentColor="purple" />
                         <TeamSection title="Cấp Quản Lý Trung" members={middleManagers} isAdmin={isAdmin} onEdit={handleEdit} onDelete={handleDelete} accentColor="emerald" />
-                        <TeamSection title="Cấp Quản Lý Thấp" members={juniorManagers} isAdmin={isAdmin} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" />
+                        <TeamSection title="Cấp Quản Lý Thấp" members={juniorManagers} isAdmin={isAdmin} onEdit={handleEdit} onDelete={handleDelete} accentColor="slate" /> */}
                     </div>
                 )}
 

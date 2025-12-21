@@ -51,6 +51,24 @@ export default function AdminBookings() {
         }
     };
 
+    const handleDelete = async (id) => {
+        if (!confirm(`Bạn có chắc chắn muốn XÓA booking #${id}?\n\nHành động này không thể hoàn tác!`)) {
+            return;
+        }
+
+        try {
+            const token = await getToken();
+            await axios.delete(`${API}/bookings/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('Đã xóa booking thành công!');
+            loadBookings();
+        } catch (error) {
+            console.error('Error deleting booking:', error);
+            alert(error.response?.data?.error || 'Lỗi khi xóa booking');
+        }
+    };
+
     const getStatusBadge = (status) => {
         const styles = {
             pending: 'bg-yellow-100 text-yellow-800',
@@ -142,6 +160,14 @@ export default function AdminBookings() {
                                             Hoàn tất
                                         </button>
                                     )}
+                                    {/* Delete button always visible for admin */}
+                                    <button
+                                        onClick={() => handleDelete(booking.id)}
+                                        className="text-red-600 hover:text-red-900 font-medium ml-2"
+                                        title="Xóa booking"
+                                    >
+                                        Xóa
+                                    </button>
                                 </td>
                             </tr>
                         ))}

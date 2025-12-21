@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { listCareerValues, createCareerValue, updateCareerValue, deleteCareerValue } from '../controllers/careerValues.controller.js';
-import { clerkAuth, requireRole } from '../middleware/auth.middleware.js';
+import { clerkAuth, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 

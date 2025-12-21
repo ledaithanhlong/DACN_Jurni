@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { listGalleryImages, createGalleryImage, updateGalleryImage, deleteGalleryImage } from '../controllers/gallery.controller.js';
-import { clerkAuth, requireRole } from '../middleware/auth.middleware.js';
+import { clerkAuth, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 

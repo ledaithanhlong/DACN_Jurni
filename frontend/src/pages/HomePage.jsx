@@ -12,22 +12,26 @@ export default function HomePage() {
   const [hotels, setHotels] = useState([]);
   const [flights, setFlights] = useState([]);
   const [activities, setActivities] = useState([]);
+  const [vouchers, setVouchers] = useState([]);
 
   useEffect(() => {
     (async () => {
       try {
-        const [h, f, a] = await Promise.all([
+        const [h, f, a, v] = await Promise.all([
           axios.get(`${API}/hotels`),
           axios.get(`${API}/flights`),
-          axios.get(`${API}/activities`)
+          axios.get(`${API}/activities`),
+          axios.get(`${API}/vouchers`)
         ]);
         const hotelsData = h.data && h.data.length > 0 ? h.data : sampleHotels;
         const flightsData = f.data && f.data.length > 0 ? f.data : sampleFlights;
         const activitiesData = a.data && a.data.length > 0 ? a.data : sampleActivities;
+        const vouchersData = v.data || [];
 
         setHotels(hotelsData.slice(0, 6));
         setFlights(flightsData.slice(0, 6));
         setActivities(activitiesData.slice(0, 6));
+        setVouchers(vouchersData);
       } catch (e) {
         console.error('Homepage data fetch error, using samples:', e);
         setHotels(sampleHotels.slice(0, 6));
@@ -155,53 +159,59 @@ export default function HomePage() {
               </a>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Xanh nhạt vừa #3 */}
-              {promoCodes.map((promo, idx) => (
-                <div
-                  key={idx}
-                  className="border rounded-lg bg-white p-5 shadow-sm hover:shadow-lg transition"
-                  style={{ borderRadius: '8px', borderColor: '#BBDEFB' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#FF6B35';
-                    // Cam nhạt để nổi bật
-                    e.currentTarget.style.backgroundColor = '#FFE8E0';
-                  }}
-                  onMouseLeave={(e) => {
-                    // Xanh nhạt vừa #3
-                    e.currentTarget.style.borderColor = '#BBDEFB';
-                    e.currentTarget.style.backgroundColor = '#FFFFFF';
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="font-semibold text-sm mb-1" style={{ color: '#0D47A1' }}>{promo.title}</div>
-                      <div className="text-xs mb-3" style={{ color: '#212121' }}>{promo.desc}</div>
+              {/* Vouchers from API */}
+              {vouchers.slice(0, 6).map((promo, idx) => {
+                const isPercent = promo.discount_percent > 0;
+                const discountText = isPercent ? `${promo.discount_percent}%` : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(promo.discount_amount);
+                const minSpendText = promo.min_spend > 0 ? `Cho đơn từ ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(promo.min_spend)}` : 'Không giới hạn';
+
+                return (
+                  <div
+                    key={idx}
+                    className="border rounded-lg bg-white p-5 shadow-sm hover:shadow-lg transition"
+                    style={{ borderRadius: '8px', borderColor: '#BBDEFB' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#FF6B35';
+                      e.currentTarget.style.backgroundColor = '#FFE8E0';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#BBDEFB';
+                      e.currentTarget.style.backgroundColor = '#FFFFFF';
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-semibold text-sm mb-1" style={{ color: '#0D47A1' }}>Giảm {discountText}</div>
+                        <div className="text-xs mb-3" style={{ color: '#212121' }}>{minSpendText}</div>
+                      </div>
+                      <span
+                        className="inline-flex items-center rounded-lg px-3 py-1 text-xs font-semibold text-white"
+                        style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
+                      >
+                        {discountText}
+                      </span>
                     </div>
-                    <span
-                      className="inline-flex items-center rounded-lg px-3 py-1 text-xs font-semibold text-white"
-                      style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
-                    >
-                      {promo.discount}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Xanh nhạt #4 và #5 */}
-                    <div
-                      className="flex-1 rounded-lg px-3 py-2 font-mono text-sm font-semibold"
-                      style={{ backgroundColor: '#E8F4FD', borderRadius: '8px', color: '#0D47A1', border: '1px solid #90CAF9' }}
-                    >
-                      {promo.code}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="flex-1 rounded-lg px-3 py-2 font-mono text-sm font-semibold"
+                        style={{ backgroundColor: '#E8F4FD', borderRadius: '8px', color: '#0D47A1', border: '1px solid #90CAF9' }}
+                      >
+                        {promo.code}
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(promo.code)}
+                        className="text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md hover:opacity-90"
+                        style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
+                      >
+                        Copy
+                      </button>
                     </div>
-                    <button
-                      onClick={() => copyToClipboard(promo.code)}
-                      className="text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md hover:opacity-90"
-                      style={{ backgroundColor: '#FF6B35', borderRadius: '8px' }}
-                    >
-                      Copy
-                    </button>
                   </div>
-                </div>
-              ))}
+                )
+              })}
+              {vouchers.length === 0 && (
+                <div className="col-span-3 text-center text-gray-500 py-4">Hiện tại không có mã giảm giá nào.</div>
+              )}
             </div>
           </section>
 

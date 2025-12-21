@@ -22,6 +22,8 @@ import TermsPage from '../pages/TermsPage.jsx';
 import ServicesPage from '../pages/ServicesPage.jsx';
 import PriceAlertPage from '../pages/PriceAlertPage.jsx';
 import FlightIdeasPage from '../pages/FlightIdeasPage.jsx';
+import PromotionsPage from '../pages/PromotionsPage.jsx';
+import JobApplicationPage from '../pages/JobApplicationPage.jsx';
 import ChatWidget from '../components/ChatWidget.jsx';
 
 import TeamPage from '../pages/TeamPage.jsx';
@@ -241,6 +243,8 @@ export default function App({ clerkEnabled }) {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/price-alerts" element={<div className="max-w-7xl mx-auto px-4 py-6"><PriceAlertPage /></div>} />
+          <Route path="/promotions" element={<div className="max-w-7xl mx-auto px-4 py-6"><PromotionsPage /></div>} />
+          <Route path="/careers/apply/:jobId" element={<JobApplicationPage />} />
           <Route path="/flight-ideas" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightIdeasPage /></div>} />
         </Routes>
 

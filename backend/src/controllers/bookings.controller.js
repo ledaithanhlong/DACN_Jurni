@@ -94,4 +94,25 @@ export const updateBooking = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+export const deleteBooking = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const booking = await db.Booking.findByPk(id);
+    if (!booking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    // Check if user is admin
+    if (req.user?.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can delete bookings' });
+    }
+
+    await booking.destroy();
+    res.json({ success: true, message: 'Booking deleted successfully' });
+  } catch (e) {
+    next(e);
+  }
+};
+
 

@@ -1,69 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { sampleHotels } from '../data/mockData';
+import { HotelCard } from '../components/ServiceCards';
+import {
+  IconSearch, IconFilter, IconMap, IconStar, IconCheck, IconUsers,
+  IconHotel, IconHotelLarge, IconShield, IconPhone, IconLocation,
+  IconWifi, IconBed
+} from '../components/Icons';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-// Professional Icon Components
-const IconUsers = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-  </svg>
-);
-
-const IconHotel = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v4.875m3.75 0h3.375c.621 0 1.125-.504 1.125-1.125v-5.25c0-1.236-.84-2.232-2.025-2.51a48.308 48.308 0 00-1.927-.884 19.048 19.048 0 00-2.134-.377 19.116 19.116 0 00-2.134.377c-1.185.278-2.025 1.274-2.025 2.51v5.25c0 .621.504 1.125 1.125 1.125h3.75m-9.75 0H5.625c-.621 0-1.125.504-1.125 1.125v5.25c0 .621.504 1.125 1.125 1.125h3.75m-3.75 0h-3.75m9.75 0v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v4.875m-9.75 0h-3.75" />
-  </svg>
-);
-
-const IconHotelLarge = () => (
-  <svg className="w-24 h-24" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v4.875m3.75 0h3.375c.621 0 1.125-.504 1.125-1.125v-5.25c0-1.236-.84-2.232-2.025-2.51a48.308 48.308 0 00-1.927-.884 19.048 19.048 0 00-2.134-.377 19.116 19.116 0 00-2.134.377c-1.185.278-2.025 1.274-2.025 2.51v5.25c0 .621.504 1.125 1.125 1.125h3.75m-9.75 0H5.625c-.621 0-1.125.504-1.125 1.125v5.25c0 .621.504 1.125 1.125 1.125h3.75m-3.75 0h-3.75m9.75 0v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v4.875m-9.75 0h-3.75" />
-  </svg>
-);
-
-const IconShield = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-  </svg>
-);
-
-const IconStar = () => (
-  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-  </svg>
-);
-
-const IconCheck = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
-const IconPhone = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-  </svg>
-);
-
-const IconLocation = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-  </svg>
-);
-
-const IconWifi = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
-  </svg>
-);
-
-const IconBed = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-  </svg>
-);
 
 export default function HotelsPage() {
   const [rows, setRows] = useState([]);
@@ -77,7 +22,9 @@ export default function HotelsPage() {
       setRows(sanitized);
     } catch (error) {
       console.error('Error loading hotels:', error);
-      setRows(sampleHotels);
+      setRows([]); // We will use fallback in render or derivation logic, or just set sampleHotels here if preferred. 
+      // Actually the logic `const hotels = rows.length > 0 ? rows : sampleHotels;` handles empty rows.
+      // So setting rows to [] is fine.
     }
   };
 
@@ -87,180 +34,7 @@ export default function HotelsPage() {
     return new Intl.NumberFormat('vi-VN').format(price || 0);
   };
 
-  // Sample hotels data
-  const sampleHotels = [
-    {
-      id: 1,
-      name: 'Khách Sạn Grand Saigon',
-      location: 'Quận 1, TP.HCM',
-      price: 2500000,
-      rating: 5,
-      image_url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
-      description: 'Khách sạn 5 sao sang trọng tại trung tâm thành phố, với view đẹp và dịch vụ đẳng cấp quốc tế',
-      amenities: ['Wifi miễn phí', 'Bể bơi', 'Spa', 'Nhà hàng', 'Fitness center', 'Parking'],
-      rooms: 150,
-      checkIn: '14:00',
-      checkOut: '12:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 48 giờ',
-        children: 'Trẻ em dưới 12 tuổi ở miễn phí',
-        pets: 'Không cho phép thú cưng',
-        smoking: 'Không hút thuốc'
-      }
-    },
-    {
-      id: 2,
-      name: 'Resort Đà Lạt Premium',
-      location: 'Đà Lạt, Lâm Đồng',
-      price: 1800000,
-      rating: 4,
-      image_url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800',
-      description: 'Resort nghỉ dưỡng cao cấp với view núi rừng, không gian yên tĩnh và không khí trong lành',
-      amenities: ['Wifi miễn phí', 'Bể bơi', 'Spa', 'Nhà hàng', 'Golf', 'Parking'],
-      rooms: 80,
-      checkIn: '15:00',
-      checkOut: '11:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 72 giờ',
-        children: 'Trẻ em dưới 10 tuổi ở miễn phí',
-        pets: 'Cho phép thú cưng (phí 200.000 VND/đêm)',
-        smoking: 'Có khu vực hút thuốc'
-      }
-    },
-    {
-      id: 3,
-      name: 'Boutique Hotel Hội An',
-      location: 'Hội An, Quảng Nam',
-      price: 1200000,
-      rating: 4,
-      image_url: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800',
-      description: 'Khách sạn boutique nhỏ xinh với kiến trúc cổ điển, gần phố cổ Hội An',
-      amenities: ['Wifi miễn phí', 'Nhà hàng', 'Xe đạp miễn phí', 'Tour booking'],
-      rooms: 25,
-      checkIn: '14:00',
-      checkOut: '12:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 24 giờ',
-        children: 'Trẻ em dưới 6 tuổi ở miễn phí',
-        pets: 'Không cho phép thú cưng',
-        smoking: 'Không hút thuốc'
-      }
-    },
-    {
-      id: 4,
-      name: 'Beach Resort Nha Trang',
-      location: 'Nha Trang, Khánh Hòa',
-      price: 2200000,
-      rating: 5,
-      image_url: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800',
-      description: 'Resort bãi biển 5 sao với bãi biển riêng, view biển tuyệt đẹp và nhiều hoạt động giải trí',
-      amenities: ['Wifi miễn phí', 'Bể bơi', 'Bãi biển riêng', 'Spa', 'Nhà hàng', 'Bar', 'Fitness center'],
-      rooms: 200,
-      checkIn: '15:00',
-      checkOut: '12:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 48 giờ',
-        children: 'Trẻ em dưới 12 tuổi ở miễn phí',
-        pets: 'Không cho phép thú cưng',
-        smoking: 'Có khu vực hút thuốc'
-      }
-    },
-    {
-      id: 5,
-      name: 'City Hotel Hà Nội',
-      location: 'Hoàn Kiếm, Hà Nội',
-      price: 1500000,
-      rating: 4,
-      image_url: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800',
-      description: 'Khách sạn 4 sao hiện đại tại trung tâm Hà Nội, gần các điểm tham quan nổi tiếng',
-      amenities: ['Wifi miễn phí', 'Nhà hàng', 'Fitness center', 'Parking', 'Business center'],
-      rooms: 100,
-      checkIn: '14:00',
-      checkOut: '12:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 24 giờ',
-        children: 'Trẻ em dưới 10 tuổi ở miễn phí',
-        pets: 'Không cho phép thú cưng',
-        smoking: 'Không hút thuốc'
-      }
-    },
-    {
-      id: 6,
-      name: 'Mountain Lodge Sapa',
-      location: 'Sapa, Lào Cai',
-      price: 1600000,
-      rating: 4,
-      image_url: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800',
-      description: 'Lodge nghỉ dưỡng trên núi với view ruộng bậc thang, không gian ấm cúng và ẩm thực địa phương',
-      amenities: ['Wifi miễn phí', 'Lò sưởi', 'Nhà hàng', 'Tour trekking', 'Parking'],
-      rooms: 40,
-      checkIn: '14:00',
-      checkOut: '11:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 48 giờ',
-        children: 'Trẻ em dưới 8 tuổi ở miễn phí',
-        pets: 'Cho phép thú cưng (phí 150.000 VND/đêm)',
-        smoking: 'Có khu vực hút thuốc'
-      }
-    },
-    {
-      id: 7,
-      name: 'Luxury Hotel Đà Nẵng',
-      location: 'Sơn Trà, Đà Nẵng',
-      price: 2800000,
-      rating: 5,
-      image_url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
-      description: 'Khách sạn 5 sao sang trọng với view biển, spa cao cấp và dịch vụ đẳng cấp',
-      amenities: ['Wifi miễn phí', 'Bể bơi vô cực', 'Spa', 'Nhà hàng', 'Bar', 'Fitness center', 'Parking'],
-      rooms: 180,
-      checkIn: '15:00',
-      checkOut: '12:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 72 giờ',
-        children: 'Trẻ em dưới 12 tuổi ở miễn phí',
-        pets: 'Không cho phép thú cưng',
-        smoking: 'Không hút thuốc'
-      }
-    },
-    {
-      id: 8,
-      name: 'Eco Lodge Cần Thơ',
-      location: 'Cần Thơ',
-      price: 900000,
-      rating: 3,
-      image_url: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800',
-      description: 'Lodge sinh thái gần sông, trải nghiệm văn hóa miền Tây và ẩm thực địa phương',
-      amenities: ['Wifi miễn phí', 'Tour sông nước', 'Nhà hàng', 'Xe đạp miễn phí'],
-      rooms: 30,
-      checkIn: '14:00',
-      checkOut: '12:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 24 giờ',
-        children: 'Trẻ em dưới 8 tuổi ở miễn phí',
-        pets: 'Cho phép thú cưng',
-        smoking: 'Có khu vực hút thuốc'
-      }
-    },
-    {
-      id: 9,
-      name: 'Beachfront Hotel Phú Quốc',
-      location: 'Phú Quốc, Kiên Giang',
-      price: 3200000,
-      rating: 5,
-      image_url: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800',
-      description: 'Resort bãi biển 5 sao với villa riêng, bãi biển tuyệt đẹp và nhiều hoạt động giải trí',
-      amenities: ['Wifi miễn phí', 'Bể bơi', 'Bãi biển riêng', 'Spa', 'Nhà hàng', 'Bar', 'Fitness center', 'Diving center'],
-      rooms: 120,
-      checkIn: '15:00',
-      checkOut: '12:00',
-      policies: {
-        cancel: 'Miễn phí hủy trước 72 giờ',
-        children: 'Trẻ em dưới 12 tuổi ở miễn phí',
-        pets: 'Không cho phép thú cưng',
-        smoking: 'Không hút thuốc'
-      }
-    }
-  ];
+
 
   const hotels = rows.length > 0 ? rows : sampleHotels;
 
@@ -311,17 +85,17 @@ export default function HotelsPage() {
             backgroundSize: '50px 50px'
           }}></div>
         </div>
-        
+
         <div className="absolute top-20 right-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-10 w-96 h-96 bg-sky-500/20 rounded-full blur-3xl"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-8 shadow-lg">
               <IconShield className="w-4 h-4" />
               <span className="text-sm font-medium">Đặt phòng khách sạn chuyên nghiệp</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
               Khách Sạn & <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-cyan-200">Nghỉ Dưỡng</span>
             </h1>
@@ -363,7 +137,7 @@ export default function HotelsPage() {
             {statistics.map((stat, idx) => (
               <div key={idx} className="group relative text-center p-8 bg-white rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {stat.icon}
@@ -394,7 +168,7 @@ export default function HotelsPage() {
             {values.map((value, idx) => (
               <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {value.icon}
@@ -425,7 +199,7 @@ export default function HotelsPage() {
                 Cam Kết <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-600">Chất Lượng</span>
               </h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                Tất cả khách sạn trên Jurni đều được kiểm tra và đánh giá kỹ lưỡng. 
+                Tất cả khách sạn trên Jurni đều được kiểm tra và đánh giá kỹ lưỡng.
                 Chúng tôi cam kết mang đến cho bạn trải nghiệm nghỉ dưỡng tốt nhất với giá cả hợp lý.
               </p>
               <div className="space-y-4">

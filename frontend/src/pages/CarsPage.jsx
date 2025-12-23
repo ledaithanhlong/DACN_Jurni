@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -60,8 +61,13 @@ const IconLocation = () => (
 );
 
 export default function CarsPage() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
+
+  // Rental dates
+  const [pickupDate, setPickupDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
 
   const load = async () => {
     try {
@@ -77,6 +83,75 @@ export default function CarsPage() {
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price || 0);
+  };
+
+  const handleBookCar = (car) => {
+    // Validate rental dates
+    if (!pickupDate || !returnDate) {
+      alert('Vui lòng chọn ngày lấy xe và ngày trả xe!');
+      return;
+    }
+
+    const pickup = new Date(pickupDate);
+    const returnD = new Date(returnDate);
+
+    if (returnD <= pickup) {
+      alert('Ngày trả xe phải sau ngày lấy xe!');
+      return;
+    }
+
+    // Calculate rental days
+    const rentalDays = Math.ceil((returnD - pickup) / (1000 * 60 * 60 * 24));
+
+    // Create cart item for the car rental
+    const cartItem = {
+      id: `car-${car.id}-${Date.now()}`,
+      name: `Thuê xe ${car.company} ${car.type}`,
+      type: `${car.seats} chỗ`,
+      price: parseFloat(car.price_per_day),
+      quantity: rentalDays,
+      image: car.image_url,
+      details: {
+        car_id: car.id,
+        company: car.company,
+        model: car.type,
+        seats: car.seats,
+        specifications: car.specifications,
+        amenities: car.amenities,
+        pickup_date: pickupDate,
+        return_date: returnDate,
+        rental_days: rentalDays
+      }
+    };
+
+    // Save to localStorage
+    try {
+      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const updatedCart = [...existingCart, cartItem];
+      localStorage.setItem('pendingCart', JSON.stringify(updatedCart));
+
+      // Navigate to checkout
+      navigate('/checkout');
+    } catch (e) {
+      console.error('Failed to save to cart', e);
+      alert('Có lỗi xảy ra. Vui lòng thử lại!');
+    }
+  };
+
+  // Calculate rental days for display
+  const calculateRentalDays = () => {
+    if (!pickupDate || !returnDate) return 0;
+    const pickup = new Date(pickupDate);
+    const returnD = new Date(returnDate);
+    if (returnD <= pickup) return 0;
+    return Math.ceil((returnD - pickup) / (1000 * 60 * 60 * 24));
+  };
+
+  // Reset rental dates when modal closes
+  const handleCloseModal = () => {
+    setSelectedCar(null);
+    setPickupDate('');
+    setReturnDate('');
   };
 
   // Sample cars data
@@ -285,22 +360,22 @@ export default function CarsPage() {
             backgroundSize: '50px 50px'
           }}></div>
         </div>
-        
+
         <div className="absolute top-20 right-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-10 w-96 h-96 bg-sky-500/20 rounded-full blur-3xl"></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-8 shadow-lg">
               <IconShield className="w-4 h-4" />
               <span className="text-sm font-medium">Cho thuê xe chuyên nghiệp</span>
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
               Cho Thuê <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-cyan-200">Xe</span>
             </h1>
             <p className="text-xl md:text-2xl text-blue-100/90 mb-10 leading-relaxed max-w-3xl mx-auto">
-              Đa dạng loại xe từ xe 5 chỗ cho gia đình đến xe khách 16 chỗ và xe 50 chỗ. 
+              Đa dạng loại xe từ xe 5 chỗ cho gia đình đến xe khách 16 chỗ và xe 50 chỗ.
               Jurni mang đến dịch vụ cho thuê xe chất lượng cao với giá cả hợp lý.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
@@ -337,7 +412,7 @@ export default function CarsPage() {
             {statistics.map((stat, idx) => (
               <div key={idx} className="group relative text-center p-8 bg-white rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     {stat.icon}
@@ -347,7 +422,7 @@ export default function CarsPage() {
                   </div>
                   <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{stat.label}</div>
                 </div>
-                
+
                 <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             ))}
@@ -360,7 +435,7 @@ export default function CarsPage() {
         <div className="absolute inset-0 opacity-5" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
         }}></div>
-        
+
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
@@ -374,7 +449,7 @@ export default function CarsPage() {
             {values.map((value, idx) => (
               <div key={idx} className="group relative bg-white p-8 rounded-3xl border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-sky-600 text-white rounded-2xl mb-6 shadow-lg group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
                     {value.icon}
@@ -384,7 +459,7 @@ export default function CarsPage() {
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">{value.description}</p>
                 </div>
-                
+
                 <div className="absolute top-0 right-0 w-0 h-0 border-t-[40px] border-r-[40px] border-t-blue-500/10 border-r-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             ))}
@@ -400,10 +475,10 @@ export default function CarsPage() {
               <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
               <div className="absolute bottom-0 left-0 w-96 h-96 bg-sky-400 rounded-full blur-3xl"></div>
             </div>
-            
+
             <div className="absolute top-0 left-0 w-32 h-32 border-t-[3px] border-l-[3px] border-white/20 rounded-tl-[2.5rem]"></div>
             <div className="absolute bottom-0 right-0 w-32 h-32 border-b-[3px] border-r-[3px] border-white/20 rounded-br-[2.5rem]"></div>
-            
+
             <div className="grid md:grid-cols-2 gap-12 relative z-10">
               <div>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full mb-6">
@@ -444,7 +519,7 @@ export default function CarsPage() {
                       Tất cả xe đều được kiểm tra và bảo dưỡng trước khi cho thuê
                     </div>
                   </div>
-                  
+
                   <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-2xl rotate-12"></div>
                   <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-sky-400/20 rounded-2xl -rotate-12"></div>
                 </div>
@@ -469,13 +544,13 @@ export default function CarsPage() {
             {carTypes.map((type, idx) => (
               <div key={idx} className="group relative bg-white rounded-3xl p-8 shadow-lg border-2 border-gray-100 hover:border-orange-500 hover:shadow-2xl transition-all duration-300 overflow-hidden text-center">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/0 to-sky-50/0 group-hover:from-blue-50 group-hover:to-sky-50 transition-all duration-300"></div>
-                
+
                 <div className="relative z-10">
                   <div className="text-6xl mb-6 transform group-hover:scale-110 transition-transform duration-300">{type.icon}</div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">{type.name}</h3>
                   <div className="text-blue-600 font-semibold">{type.count} xe</div>
                 </div>
-                
+
                 <div className="absolute top-0 right-0 w-0 h-0 border-t-[50px] border-r-[50px] border-t-blue-500/10 border-r-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               </div>
             ))}
@@ -545,155 +620,270 @@ export default function CarsPage() {
               </div>
             ))}
           </div>
+          {/* Detail Modal */}
+          {selectedCar && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleCloseModal}>
+              <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center z-10">
+                  <h2 className="text-2xl font-bold text-gray-900">{selectedCar.company} {selectedCar.type}</h2>
+                  <button
+                    onClick={handleCloseModal}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="p-6 space-y-6">
+                  {selectedCar.image_url && (
+                    <img
+                      src={selectedCar.image_url}
+                      alt={`${selectedCar.company} ${selectedCar.type}`}
+                      className="w-full h-64 object-cover rounded-xl"
+                    />
+                  )}
+                  <div>
+                    <div className="mb-4">
+                      <div className="text-3xl font-bold mb-2" style={{ color: '#FF6B35' }}>
+                        {formatPrice(selectedCar.price_per_day)} VND
+                      </div>
+                      <div className="text-gray-600">/ ngày</div>
+                    </div>
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <IconUsers className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium">Số chỗ: {selectedCar.seats} chỗ</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedCar.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                          {selectedCar.available ? 'Có sẵn' : 'Đã thuê'}
+                        </span>
+                      </div>
+                    </div>
+                    {selectedCar.description && (
+                      <p className="text-gray-700 mb-4">{selectedCar.description}</p>
+                    )}
+                  </div>
+
+                  {/* Rental Period */}
+                  <div className="mb-6 bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl p-6 border-2 border-blue-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">🚗 Thời gian thuê xe</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Ngày lấy xe *
+                        </label>
+                        <input
+                          type="date"
+                          value={pickupDate}
+                          onChange={(e) => setPickupDate(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          className="w-full border-2 border-blue-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Ngày trả xe *
+                        </label>
+                        <input
+                          type="date"
+                          value={returnDate}
+                          onChange={(e) => setReturnDate(e.target.value)}
+                          min={pickupDate || new Date().toISOString().split('T')[0]}
+                          className="w-full border-2 border-blue-300 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
+                          required
+                        />
+                      </div>
+                    </div>
+                    {calculateRentalDays() > 0 && (
+                      <div className="mt-4 pt-4 border-t border-blue-300">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="text-sm text-gray-600">Số ngày thuê:</span>
+                            <span className="ml-2 text-lg font-bold text-blue-600">{calculateRentalDays()} ngày</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-gray-600 mb-1">Tổng tiền:</div>
+                            <div className="text-3xl font-extrabold" style={{ color: '#FF6B35' }}>
+                              {formatPrice(selectedCar.price_per_day * calculateRentalDays())} đ
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {formatPrice(selectedCar.price_per_day)} đ/ngày × {calculateRentalDays()} ngày
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Specifications */}
+                  {selectedCar.specifications && (
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Thông số kỹ thuật</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {(() => {
+                          let specs = selectedCar.specifications;
+
+                          // Handle if specifications is a string (JSON) - may be double stringified
+                          if (typeof specs === 'string') {
+                            try {
+                              specs = JSON.parse(specs);
+                              // Check if still a string after first parse (double stringified)
+                              if (typeof specs === 'string') {
+                                specs = JSON.parse(specs);
+                              }
+                            } catch (e) {
+                              console.error('Error parsing specifications:', e, specs);
+                              return <p className="text-gray-500 text-sm">Không có thông tin kỹ thuật</p>;
+                            }
+                          }
+
+                          // Handle if specs is not an object or is empty
+                          if (!specs || typeof specs !== 'object' || Array.isArray(specs)) {
+                            console.warn('Invalid specifications format:', specs);
+                            return <p className="text-gray-500 text-sm">Không có thông tin kỹ thuật</p>;
+                          }
+
+                          const labelMap = {
+                            engine: 'Động cơ',
+                            fuel: 'Nhiên liệu',
+                            transmission: 'Hộp số',
+                            luggageSpace: 'Khoang hành lý'
+                          };
+
+                          const entries = Object.entries(specs);
+                          if (entries.length === 0) {
+                            return <p className="text-gray-500 text-sm">Chưa có thông tin kỹ thuật</p>;
+                          }
+
+                          return entries.map(([key, value]) => (
+                            <div key={key} className="bg-blue-50 rounded-lg p-4">
+                              <div className="text-sm text-gray-600 mb-1">{labelMap[key] || key}</div>
+                              <div className="font-semibold text-gray-900">{value || 'N/A'}</div>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Amenities */}
+                  {selectedCar.amenities && (
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Tiện nghi</h3>
+                      <div className="grid md:grid-cols-2 gap-3">
+                        {(() => {
+                          let amenities = selectedCar.amenities;
+
+                          // Handle if amenities is a string (JSON)
+                          if (typeof amenities === 'string') {
+                            try {
+                              amenities = JSON.parse(amenities);
+                              // Check if still a string (double stringified)
+                              if (typeof amenities === 'string') {
+                                amenities = JSON.parse(amenities);
+                              }
+                            } catch (e) {
+                              console.error('Error parsing amenities:', e, amenities);
+                              return <p className="text-gray-500 text-sm col-span-2">Không có thông tin tiện nghi</p>;
+                            }
+                          }
+
+                          // Handle if not an array
+                          if (!Array.isArray(amenities)) {
+                            console.warn('Invalid amenities format:', amenities);
+                            return <p className="text-gray-500 text-sm col-span-2">Không có thông tin tiện nghi</p>;
+                          }
+
+                          if (amenities.length === 0) {
+                            return <p className="text-gray-500 text-sm col-span-2">Chưa có tiện nghi</p>;
+                          }
+
+                          return amenities.map((amenity, idx) => (
+                            <div key={idx} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
+                              <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
+                              <span className="text-gray-700">{amenity}</span>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Rental Conditions */}
+                  <div className="mb-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Điều kiện thuê xe</h3>
+                    <div className="space-y-4">
+                      <div className="border-l-4 border-blue-500 pl-4">
+                        <div className="font-semibold text-gray-900 mb-1">Yêu cầu</div>
+                        <div className="text-sm text-gray-600">
+                          Bằng lái xe hợp lệ, CMND/CCCD, đặt cọc 30% giá trị hợp đồng
+                        </div>
+                      </div>
+                      <div className="border-l-4 border-green-500 pl-4">
+                        <div className="font-semibold text-gray-900 mb-1">Hủy đặt xe</div>
+                        <div className="text-sm text-gray-600">
+                          Miễn phí hủy trước 48 giờ. Hủy trong vòng 48 giờ: phí 20% giá trị đơn hàng.
+                        </div>
+                      </div>
+                      <div className="border-l-4 border-yellow-500 pl-4">
+                        <div className="font-semibold text-gray-900 mb-1">Đổi ngày</div>
+                        <div className="text-sm text-gray-600">
+                          Có thể đổi ngày thuê, vui lòng liên hệ trước 24 giờ.
+                        </div>
+                      </div>
+                      <div className="border-l-4 border-purple-500 pl-4">
+                        <div className="font-semibold text-gray-900 mb-1">Bảo hiểm</div>
+                        <div className="text-sm text-gray-600">
+                          Xe đã có bảo hiểm đầy đủ. Khách hàng chịu trách nhiệm trong trường hợp vi phạm giao thông.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact */}
+                  <div id="lien-he" className="bg-gradient-to-r from-blue-600 to-sky-600 rounded-xl p-6 text-white">
+                    <h3 className="text-xl font-bold mb-4">Liên Hệ Thuê Xe</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <a href="tel:1900123456" className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition">
+                        <IconPhone />
+                        <div>
+                          <div className="text-sm text-blue-100">Hotline</div>
+                          <div className="font-semibold">1900 123 456</div>
+                        </div>
+                      </a>
+                      <a href="mailto:cars@jurni.com" className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition">
+                        <IconMail />
+                        <div>
+                          <div className="text-sm text-blue-100">Email</div>
+                          <div className="font-semibold">cars@jurni.com</div>
+                        </div>
+                      </a>
+                      <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                        <IconLocation />
+                        <div>
+                          <div className="text-sm text-blue-100">Địa chỉ</div>
+                          <div className="font-semibold">123 Đường ABC, Quận XYZ, TP.HCM</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                        <IconShield />
+                        <div>
+                          <div className="text-sm text-blue-100">Hỗ trợ</div>
+                          <div className="font-semibold">24/7 - Tất cả các ngày</div>
+                        </div>
+                      </div>
+                    </div>
+                    <button className="mt-4 w-full bg-white px-6 py-3 rounded-full font-semibold transition" style={{ color: '#FF6B35' }} onClick={() => handleBookCar(selectedCar)} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}>
+                      Đặt thuê xe ngay
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
-
-      {/* Detail Modal */}
-      {selectedCar && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedCar(null)}>
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">{selectedCar.company} {selectedCar.type}</h2>
-              <button
-                onClick={() => setSelectedCar(null)}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-            <div className="p-6 space-y-6">
-              {selectedCar.image_url && (
-                <img
-                  src={selectedCar.image_url}
-                  alt={`${selectedCar.company} ${selectedCar.type}`}
-                  className="w-full h-64 object-cover rounded-xl"
-                />
-              )}
-              <div>
-                <div className="mb-4">
-                  <div className="text-3xl font-bold mb-2" style={{ color: '#FF6B35' }}>
-                    {formatPrice(selectedCar.price_per_day)} VND
-                  </div>
-                  <div className="text-gray-600">/ ngày</div>
-                </div>
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <IconUsers className="w-5 h-5 text-blue-600" />
-                    <span className="font-medium">Số chỗ: {selectedCar.seats} chỗ</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${selectedCar.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                      {selectedCar.available ? 'Có sẵn' : 'Đã thuê'}
-                    </span>
-                  </div>
-                </div>
-                {selectedCar.description && (
-                  <p className="text-gray-700 mb-4">{selectedCar.description}</p>
-                )}
-              </div>
-
-              {/* Specifications */}
-              {selectedCar.specifications && (
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Thông số kỹ thuật</h3>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {Object.entries(selectedCar.specifications).map(([key, value]) => (
-                      <div key={key} className="bg-blue-50 rounded-lg p-4">
-                        <div className="text-sm text-gray-600 mb-1 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</div>
-                        <div className="font-semibold text-gray-900">{value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Amenities */}
-              {selectedCar.amenities && (
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Tiện nghi</h3>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    {selectedCar.amenities.map((amenity, idx) => (
-                      <div key={idx} className="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
-                        <IconCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
-                        <span className="text-gray-700">{amenity}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Rental Conditions */}
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Điều kiện thuê xe</h3>
-                <div className="space-y-4">
-                  <div className="border-l-4 border-blue-500 pl-4">
-                    <div className="font-semibold text-gray-900 mb-1">Yêu cầu</div>
-                    <div className="text-sm text-gray-600">
-                      Bằng lái xe hợp lệ, CMND/CCCD, đặt cọc 30% giá trị hợp đồng
-                    </div>
-                  </div>
-                  <div className="border-l-4 border-green-500 pl-4">
-                    <div className="font-semibold text-gray-900 mb-1">Hủy đặt xe</div>
-                    <div className="text-sm text-gray-600">
-                      Miễn phí hủy trước 48 giờ. Hủy trong vòng 48 giờ: phí 20% giá trị đơn hàng.
-                    </div>
-                  </div>
-                  <div className="border-l-4 border-yellow-500 pl-4">
-                    <div className="font-semibold text-gray-900 mb-1">Đổi ngày</div>
-                    <div className="text-sm text-gray-600">
-                      Có thể đổi ngày thuê, vui lòng liên hệ trước 24 giờ.
-                    </div>
-                  </div>
-                  <div className="border-l-4 border-purple-500 pl-4">
-                    <div className="font-semibold text-gray-900 mb-1">Bảo hiểm</div>
-                    <div className="text-sm text-gray-600">
-                      Xe đã có bảo hiểm đầy đủ. Khách hàng chịu trách nhiệm trong trường hợp vi phạm giao thông.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contact */}
-              <div id="lien-he" className="bg-gradient-to-r from-blue-600 to-sky-600 rounded-xl p-6 text-white">
-                <h3 className="text-xl font-bold mb-4">Liên Hệ Thuê Xe</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <a href="tel:1900123456" className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition">
-                    <IconPhone />
-                    <div>
-                      <div className="text-sm text-blue-100">Hotline</div>
-                      <div className="font-semibold">1900 123 456</div>
-                    </div>
-                  </a>
-                  <a href="mailto:cars@jurni.com" className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4 hover:bg-white/30 transition">
-                    <IconMail />
-                    <div>
-                      <div className="text-sm text-blue-100">Email</div>
-                      <div className="font-semibold">cars@jurni.com</div>
-                    </div>
-                  </a>
-                  <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                    <IconLocation />
-                    <div>
-                      <div className="text-sm text-blue-100">Địa chỉ</div>
-                      <div className="font-semibold">123 Đường ABC, Quận XYZ, TP.HCM</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                    <IconShield />
-                    <div>
-                      <div className="text-sm text-blue-100">Hỗ trợ</div>
-                      <div className="font-semibold">24/7 - Tất cả các ngày</div>
-                    </div>
-                  </div>
-                </div>
-                <button className="mt-4 w-full bg-white px-6 py-3 rounded-full font-semibold transition" style={{ color: '#FF6B35' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FFE8E0'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}>
-                  Đặt thuê xe ngay
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

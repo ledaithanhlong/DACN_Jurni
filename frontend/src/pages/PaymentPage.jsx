@@ -176,6 +176,12 @@ export default function PaymentPage() {
   const [cartItems, setCartItems] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // Voucher state
+  const [vouchers, setVouchers] = useState([]);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherError, setVoucherError] = useState('');
+
   // Load Cart
   useEffect(() => {
     try {
@@ -191,6 +197,17 @@ export default function PaymentPage() {
       console.error('Failed to load cart', e);
       setCartItems([]);
     }
+
+    // Fetch Vouchers
+    (async () => {
+      try {
+        const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const res = await axios.get(`${API}/vouchers`);
+        setVouchers(res.data);
+      } catch (e) {
+        console.error('Failed to fetch vouchers', e);
+      }
+    })();
   }, []);
 
   const [showQRModal, setShowQRModal] = useState(false);
@@ -233,7 +250,55 @@ export default function PaymentPage() {
     return Math.round(subtotal * (selectedMethod.feePercent || 0) + (selectedMethod.feeFixed || 0));
   }, [selectedMethod, subtotal, hasOrder]);
 
-  const total = hasOrder ? subtotal + methodFee : 0;
+  const discountAmount = useMemo(() => {
+    if (!appliedVoucher) return 0;
+
+    let discount = 0;
+    if (appliedVoucher.discount_percent > 0) {
+      discount = subtotal * (appliedVoucher.discount_percent / 100);
+      if (appliedVoucher.max_discount > 0) {
+        discount = Math.min(discount, appliedVoucher.max_discount);
+      }
+    } else {
+      discount = Number(appliedVoucher.discount_amount) || 0;
+    }
+
+    return Math.min(discount, subtotal);
+  }, [appliedVoucher, subtotal]);
+
+  const total = hasOrder ? Math.max(0, subtotal + methodFee - discountAmount) : 0;
+
+  const handleApplyVoucher = () => {
+    setVoucherError('');
+    setAppliedVoucher(null);
+
+    if (!voucherCode.trim()) return;
+
+    const voucher = vouchers.find(v => v.code === voucherCode.trim());
+    if (!voucher) {
+      setVoucherError('Mã giảm giá không hợp lệ');
+      return;
+    }
+
+    const now = new Date();
+    if (new Date(voucher.expiry_date) < now) {
+      setVoucherError('Mã giảm giá đã hết hạn');
+      return;
+    }
+
+    if (voucher.usage_limit > 0 && voucher.current_usage >= voucher.usage_limit) {
+      setVoucherError('Mã giảm giá đã hết lượt sử dụng');
+      return;
+    }
+
+    if (voucher.min_spend > subtotal) {
+      setVoucherError(`Đơn hàng tối thiểu ${formatCurrency(voucher.min_spend, 'VND')} để áp dụng mã này`);
+      return;
+    }
+
+    setAppliedVoucher(voucher);
+  };
+
 
   const toggleSelect = (id) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
@@ -286,6 +351,7 @@ export default function PaymentPage() {
     try {
       const payload = {
         amount: total,
+        currency: 'VND',
         currency: 'VND',
         paymentMethod: form.paymentMethod,
         customer: {
@@ -702,8 +768,36 @@ export default function PaymentPage() {
                           </div>
                         </li>
                       ))}
+
                     </ul>
                   </ul>
+                </div>
+
+                {/* Voucher Input */}
+                <div className="rounded-2xl border border-blue-100 bg-white px-4 py-4">
+                  <h3 className="font-semibold text-blue-900 mb-3 text-sm">Mã ưu đãi</h3>
+                  <div className="flex gap-2">
+                    <input
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value.toUpperCase())}
+                      placeholder="Nhập mã giảm giá"
+                      className="flex-1 rounded-lg border border-blue-100 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyVoucher}
+                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                      Áp dụng
+                    </button>
+                  </div>
+                  {voucherError && <p className="mt-2 text-xs text-red-500">{voucherError}</p>}
+                  {appliedVoucher && (
+                    <div className="mt-2 flex items-center justify-between rounded-lg bg-green-50 px-3 py-2 text-xs text-green-700">
+                      <span>Đã áp dụng: <b>{appliedVoucher.code}</b></span>
+                      <button onClick={() => { setAppliedVoucher(null); setVoucherCode(''); }} className="text-red-500 hover:text-red-700">Xóa</button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="rounded-2xl border border-blue-50 bg-blue-50/60 px-4 py-3 text-sm text-blue-800">
@@ -716,6 +810,12 @@ export default function PaymentPage() {
                       <span>Phí xử lý</span>
                       <span className="font-semibold">{formatCurrency(methodFee, 'VND')}</span>
                     </div>
+                    {discountAmount > 0 && (
+                      <div className="flex items-center justify-between text-emerald-600">
+                        <span>Giảm giá</span>
+                        <span className="font-semibold">-{formatCurrency(discountAmount, 'VND')}</span>
+                      </div>
+                    )}
                     <div className="border-t border-blue-100 pt-2 flex items-center justify-between text-blue-900">
                       <span className="font-semibold">Tổng thanh toán</span>
                       <span className="text-lg font-semibold">{formatCurrency(total, 'VND')}</span>
@@ -743,58 +843,60 @@ export default function PaymentPage() {
       </div>
 
       {/* QR Modal */}
-      {showQRModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in duration-300">
-            <div className="text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 mb-4">
-                <img src="/payment/vnpay.png" alt="VNPay" className="h-10 w-10 object-contain" />
+      {
+        showQRModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in duration-300">
+              <div className="text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 mb-4">
+                  <img src="/payment/vnpay.png" alt="VNPay" className="h-10 w-10 object-contain" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Quét mã để thanh toán</h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Sử dụng ứng dụng ngân hàng hoặc ví điện tử để quét mã QR bên dưới.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Quét mã để thanh toán</h3>
-              <p className="mt-2 text-sm text-gray-500">
-                Sử dụng ứng dụng ngân hàng hoặc ví điện tử để quét mã QR bên dưới.
+
+              <div className="mt-6 flex justify-center">
+                <div className="relative rounded-xl border-2 border-dashed border-blue-200 p-2">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=JURNI-${total}-${Date.now()}`}
+                    alt="Payment QR"
+                    className="h-48 w-48 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 text-center">
+                <p className="text-lg font-bold text-blue-600">{formatCurrency(total, 'VND')}</p>
+                <p className="text-xs text-gray-400">Nội dung: JURNI THANH TOAN</p>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowQRModal(false)}
+                  disabled={submitting}
+                  className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmPayment}
+                  disabled={submitting}
+                  className="flex-1 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 shadow-md shadow-blue-200"
+                >
+                  {submitting ? 'Đang xác nhận...' : 'Đã thanh toán'}
+                </button>
+              </div>
+              <p className="mt-4 text-xs text-center text-gray-400">
+                Sau khi chuyển khoản thành công, vui lòng nhấn "Đã thanh toán" để hệ thống xử lý.
               </p>
             </div>
-
-            <div className="mt-6 flex justify-center">
-              <div className="relative rounded-xl border-2 border-dashed border-blue-200 p-2">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=JURNI-${total}-${Date.now()}`}
-                  alt="Payment QR"
-                  className="h-48 w-48 rounded-lg"
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 text-center">
-              <p className="text-lg font-bold text-blue-600">{formatCurrency(total, 'VND')}</p>
-              <p className="text-xs text-gray-400">Nội dung: JURNI THANH TOAN</p>
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowQRModal(false)}
-                disabled={submitting}
-                className="flex-1 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                type="button"
-                onClick={confirmPayment}
-                disabled={submitting}
-                className="flex-1 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 shadow-md shadow-blue-200"
-              >
-                {submitting ? 'Đang xác nhận...' : 'Đã thanh toán'}
-              </button>
-            </div>
-            <p className="mt-4 text-xs text-center text-gray-400">
-              Sau khi chuyển khoản thành công, vui lòng nhấn "Đã thanh toán" để hệ thống xử lý.
-            </p>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }

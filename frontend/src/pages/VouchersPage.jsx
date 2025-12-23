@@ -212,20 +212,73 @@ export default function VouchersPage() {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Transform bookings to vouchers format
-        const transformedVouchers = res.data.map(booking => ({
-          booking_code: booking.booking_code || `JRN-${booking.id}`,
-          booking_date: booking.created_at || booking.createdAt,
-          status: booking.status || 'pending',
-          payment_method: booking.payment_method || 'VNPay',
-          customer: {
-            name: booking.customer_name || 'Khách hàng',
-            phone: booking.customer_phone || '',
-            email: booking.customer_email || ''
-          },
-          services: booking.services || [],
-          total_price: booking.total_price || 0
-        }));
+        console.log('Raw booking data from API:', res.data);
+
+        // Group bookings by transaction_id to combine services from same payment
+        const bookingGroups = {};
+        res.data.forEach(booking => {
+          const txnId = booking.transaction_id || `single-${booking.id}`;
+          if (!bookingGroups[txnId]) {
+            bookingGroups[txnId] = [];
+          }
+          bookingGroups[txnId].push(booking);
+        });
+
+        // Transform each group into a voucher
+        const transformedVouchers = Object.values(bookingGroups).map(bookings => {
+          const firstBooking = bookings[0];
+
+          // Build services array from all bookings in group
+          const services = bookings.map(booking => {
+            const serviceData = booking.hotel || booking.flight || booking.car || booking.activity;
+
+            let description = '';
+            let serviceName = 'Dịch vụ'; // Default fallback
+
+            if (booking.hotel) {
+              serviceName = serviceData?.name || 'Khách sạn';
+              description = booking.item_variant || 'Phòng khách sạn';
+            } else if (booking.flight) {
+              serviceName = serviceData?.airline || 'Chuyến bay';
+              description = `${serviceData?.departure || ''} – ${serviceData?.destination || ''}`;
+            } else if (booking.car) {
+              // Cars have company and model, not just name
+              serviceName = serviceData?.company
+                ? `${serviceData.company}${serviceData.model ? ' ' + serviceData.model : ''}`
+                : 'Xe thuê';
+              description = `${serviceData?.seats || ''} chỗ`;
+            } else if (booking.activity) {
+              serviceName = serviceData?.name || 'Hoạt động';
+              description = serviceData?.description || '';
+            }
+
+            return {
+              type: booking.service_type || (booking.hotel ? 'hotel' : booking.flight ? 'flight' : booking.car ? 'car' : 'activity'),
+              name: serviceName,
+              description: description,
+              start_date: booking.start_date,
+              end_date: booking.end_date,
+              price: parseFloat(booking.total_price) || 0
+            };
+          });
+
+          // Calculate total from all bookings in group
+          const totalPrice = bookings.reduce((sum, b) => sum + (parseFloat(b.total_price) || 0), 0);
+
+          return {
+            booking_code: firstBooking.transaction_id || `JRN-${firstBooking.id}`,
+            booking_date: firstBooking.createdAt || firstBooking.created_at,
+            status: firstBooking.status || 'pending',
+            payment_method: firstBooking.payment_method || 'VNPay',
+            customer: {
+              name: firstBooking.customer_name || firstBooking.user?.name || 'Khách hàng',
+              phone: firstBooking.customer_phone || '',
+              email: firstBooking.customer_email || firstBooking.user?.email || ''
+            },
+            services: services,
+            total_price: totalPrice
+          };
+        });
 
         setVouchers(transformedVouchers.length > 0 ? transformedVouchers : [mockVoucherData]);
       } catch (error) {

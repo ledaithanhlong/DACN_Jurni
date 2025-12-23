@@ -70,7 +70,9 @@ export const createFlight = async (req, res, next) => {
 
     const created = await db.Flight.create({
       airline,
-      flight_number: flight_number || null,
+      flight_number: flight_number || `FL${Date.now()}`,
+      origin: departure_city, // Required field in model
+      destination: arrival_city, // Required field in model
       departure_city,
       arrival_city,
       departure_time: depTime,
@@ -152,7 +154,9 @@ export const createBulkFlights = async (req, res, next) => {
 
       flights.push({
         airline,
-        flight_number: flightNumber,
+        flight_number: flightNumber || `FL${Date.now()}-${i}`,
+        origin: departure_city,
+        destination: arrival_city,
         departure_city,
         arrival_city,
         departure_time: currentDepTime,
@@ -234,9 +238,15 @@ export const updateFlight = async (req, res, next) => {
 
     const updateData = {};
     if (airline) updateData.airline = airline;
-    if (flight_number !== undefined) updateData.flight_number = flight_number || null;
-    if (departure_city) updateData.departure_city = departure_city;
-    if (arrival_city) updateData.arrival_city = arrival_city;
+    if (flight_number !== undefined) updateData.flight_number = flight_number || `FL${Date.now()}`;
+    if (departure_city) {
+      updateData.departure_city = departure_city;
+      updateData.origin = departure_city;
+    }
+    if (arrival_city) {
+      updateData.arrival_city = arrival_city;
+      updateData.destination = arrival_city;
+    }
     if (departure_time) updateData.departure_time = new Date(departure_time);
     if (arrival_time) updateData.arrival_time = new Date(arrival_time);
     if (finalPrice !== undefined) updateData.price = finalPrice;

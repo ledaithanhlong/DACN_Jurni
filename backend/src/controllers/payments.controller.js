@@ -139,10 +139,11 @@ export const processPayment = async (req, res, next) => {
         }
 
         if (subServiceType) {
-          // Extract details
-          const details = item.details || {};
-          const startDate = details.checkIn || details.startDate || details.pickupDate || details.departureTime || details.date;
-          const endDate = details.checkOut || details.endDate || details.dropoffDate || details.arrivalTime;
+          // Extract details (handle both nested and flat structures)
+          const details = item.details || item || {};
+
+          const startDate = details.checkIn || details.startDate || details.pickupDate || details.pickup_date || details.departureTime || details.departure_time || details.date || details.tour_date;
+          const endDate = details.checkOut || details.endDate || details.dropoffDate || details.return_date || details.arrivalTime || details.arrival_time;
 
           const bookingData = {
             user_id: bookingUserId,

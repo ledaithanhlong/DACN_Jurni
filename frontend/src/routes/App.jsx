@@ -99,7 +99,7 @@ const Nav = ({ clerkEnabled, dbUser }) => {
             {clerkEnabled ? (
               <>
                 <SignedIn>
-                  {/* Pass dbUser to NavUserSection if needed, or check role here for extra links */}
+                  {/* Pass dbUser to NavUserSection if needed, or check role here... */}
                   {dbUser?.role === 'staff' && (
                     <Link
                       to="/staff"

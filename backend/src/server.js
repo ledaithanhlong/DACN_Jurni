@@ -34,8 +34,26 @@ io.on('connection', (socket) => {
   });
 
   // Start a conversation (Staff or Customer sends message)
-  socket.on('send_message', (data) => {
+  socket.on('send_message', async (data) => {
     // data: { roomId, sender, content, timestamp, role }
+    
+    try {
+      // Save to database
+      await db.Message.create({
+        senderId: data.sender, // Or better: user ID if available, but for now name is used in frontend
+        // For robustness, we should use IDs, but sticking to current data structure:
+        // Note: data.sender is currently name (e.g. "Nguyen"). Ideally should be userId or "staff".
+        // Let's assume we store what we receive.
+        senderId: data.role === 'staff' ? 'staff' : data.sender, 
+        receiverId: data.role === 'staff' ? data.roomId : 'staff', // simplistic
+        content: data.content,
+        roomId: data.roomId,
+        isRead: false
+      });
+    } catch (e) {
+      console.error('Error saving message:', e);
+    }
+
     // Broadcast to the room (both staff and customer in that room receive it)
     io.to(data.roomId).emit('receive_message', data);
     

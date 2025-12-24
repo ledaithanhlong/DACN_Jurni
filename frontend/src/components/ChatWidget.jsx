@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { SignedIn, SignedOut, useUser } from '@clerk/clerk-react';
 import { io } from 'socket.io-client';
+import axios from 'axios';
 
 // Socket URL should be the root domain, not including /api
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -28,6 +29,27 @@ export default function ChatWidget() {
   if (!user && !sessionStorage.getItem('guest_chat_id')) {
     sessionStorage.setItem('guest_chat_id', roomId);
   }
+
+  // Fetch history on mount
+  useEffect(() => {
+    if (!roomId) return;
+    const fetchHistory = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/messages/${roomId}`);
+        if (res.data.length > 0) {
+          setMessages(res.data.map(m => ({
+            id: m.id,
+            text: m.text,
+            role: m.role,
+            timestamp: m.timestamp
+          })));
+        }
+      } catch (e) {
+        console.error('Failed to fetch chat history', e);
+      }
+    };
+    fetchHistory();
+  }, [roomId]);
 
   useEffect(() => {
     // Connect to Socket.IO

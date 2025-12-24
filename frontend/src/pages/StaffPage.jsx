@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useUser, RedirectToSignIn } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 // Initialize socket outside component to prevent multiple connections
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -60,9 +61,22 @@ export default function StaffPage() {
         }
     }, [messages]);
 
-    const handleSelectRoom = (room) => {
+    const handleSelectRoom = async (room) => {
         setSelectedRoom(room);
-        setMessages([]); // In a real app, fetch history from API here
+        setMessages([]);
+
+        // Fetch history
+        try {
+            const res = await axios.get(`${API_URL}/messages/${room.roomId}`);
+            setMessages(res.data.map(m => ({
+                content: m.text,
+                role: m.role,
+                timestamp: m.timestamp,
+                sender: m.sender // optional
+            })));
+        } catch (e) {
+            console.error('Failed to fetch history', e);
+        }
 
         // Join the socket room
         if (socket) {
@@ -162,7 +176,7 @@ export default function StaffPage() {
 
                             {/* Messages */}
                             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                {messages.map((msg, idx) => (
+                                {messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)).map((msg, idx) => (
                                     <div
                                         key={idx}
                                         className={`flex ${msg.role === 'staff' ? 'justify-end' : 'justify-start'}`}

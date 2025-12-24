@@ -87,23 +87,34 @@ export const processPayment = async (req, res, next) => {
     let bookingRecord = null;
     const createdBookings = [];
 
-    // Use a default system user ID to avoid foreign key constraint issues
-    // Customer info is stored in customer_name, customer_email, customer_phone fields
-    // We'll use user_id = 1 as a system/guest user
-    const systemUserId = 1;
+    // Determine User ID for the booking
+    let bookingUserId = 1; // Default to System User
+    
+    // Try to find the actual user based on Clerk Auth or payload
+    if (req.auth?.userId) {
+      const dbUser = await db.User.findOne({ where: { clerkId: req.auth.userId } });
+      if (dbUser) bookingUserId = dbUser.id;
+    } else if (req.body.user_id) {
+       // If passed from frontend (less secure but handled)
+       // Note: Frontend sends Clerk ID usually.
+       const dbUser = await db.User.findOne({ where: { clerkId: req.body.user_id } });
+       if (dbUser) bookingUserId = dbUser.id;
+    }
 
-    // Ensure system user exists in database
-    try {
-      await db.User.findOrCreate({
-        where: { id: systemUserId },
-        defaults: {
-          name: 'System User',
-          email: 'system@jurni.com',
-          role: 'user',
-        }
-      });
-    } catch (userErr) {
-      console.log('System user setup error:', userErr.message);
+    // Ensure system user exists in database (fallback)
+    if (bookingUserId === 1) {
+      try {
+        await db.User.findOrCreate({
+          where: { id: 1 },
+          defaults: {
+            name: 'System User',
+            email: 'system@jurni.com',
+            role: 'user',
+          }
+        });
+      } catch (userErr) {
+        console.log('System user setup error:', userErr.message);
+      }
     }
 
     // Prioritize looping through items if provided and requested
@@ -134,7 +145,7 @@ export const processPayment = async (req, res, next) => {
           const endDate = details.checkOut || details.endDate || details.dropoffDate || details.arrivalTime;
 
           const bookingData = {
-            user_id: systemUserId,
+            user_id: bookingUserId,
             // service_type: subServiceType, // Removed
             // service_id: subServiceId || 1, // Removed
             total_price: item.price * item.quantity,
@@ -176,7 +187,7 @@ export const processPayment = async (req, res, next) => {
         const endDate = details.checkOut || details.endDate || booking.checkOut;
 
         const bookingData = {
-          user_id: systemUserId,
+          user_id: bookingUserId,
           total_price: amountNumber, // Total amount
           status: 'pending',
           customer_name: customer.name,

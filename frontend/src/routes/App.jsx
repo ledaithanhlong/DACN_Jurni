@@ -29,6 +29,7 @@ import ChatWidget from '../components/ChatWidget.jsx';
 import TeamPage from '../pages/TeamPage.jsx';
 import BookingsPage from '../pages/BookingsPage.jsx';
 import CareersPage from '../pages/CareersPage.jsx';
+import StaffPage from '../pages/StaffPage.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -57,7 +58,7 @@ const NavUserSection = () => {
   );
 };
 
-const Nav = ({ clerkEnabled }) => {
+const Nav = ({ clerkEnabled, dbUser }) => {
   const location = useLocation();
   const [isSolid, setIsSolid] = useState(location.pathname !== '/');
 
@@ -98,6 +99,15 @@ const Nav = ({ clerkEnabled }) => {
             {clerkEnabled ? (
               <>
                 <SignedIn>
+                  {/* Pass dbUser to NavUserSection if needed, or check role here for extra links */}
+                  {dbUser?.role === 'staff' && (
+                    <Link
+                      to="/staff"
+                      className="text-sm text-white px-3 py-1 rounded-lg transition shadow-md font-medium hover:opacity-90 whitespace-nowrap bg-green-600"
+                    >
+                      Staff Portal
+                    </Link>
+                  )}
                   <NavUserSection />
                 </SignedIn>
                 <SignedOut>
@@ -135,7 +145,7 @@ const AdminOnly = ({ children, clerkEnabled }) => {
 };
 
 // Component to sync clerk user to backend
-function SyncUser() {
+function SyncUser({ onUserSynced }) {
   const { getToken, isSignedIn, isLoaded, userId } = useAuth();
   const { user } = useUser();
   const [synced, setSynced] = React.useState(false);
@@ -178,6 +188,7 @@ function SyncUser() {
         if (mounted) {
           console.log('sync-user: success', response.data);
           setSynced(true);
+          if (onUserSynced) onUserSynced(response.data.user);
         }
       } catch (err) {
         console.error('sync-user failed', {
@@ -208,14 +219,16 @@ function SyncUser() {
 }
 
 export default function App({ clerkEnabled }) {
+  const [dbUser, setDbUser] = useState(null);
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Nav clerkEnabled={clerkEnabled} />
+      <Nav clerkEnabled={clerkEnabled} dbUser={dbUser} />
       <main className="flex-1 pt-16">
         {/* Sync user when signed in */}
         {clerkEnabled && (
           <SignedIn>
-            <SyncUser />
+            <SyncUser onUserSynced={setDbUser} />
           </SignedIn>
         )}
 
@@ -246,10 +259,12 @@ export default function App({ clerkEnabled }) {
           <Route path="/promotions" element={<div className="max-w-7xl mx-auto px-4 py-6"><PromotionsPage /></div>} />
           <Route path="/careers/apply/:jobId" element={<JobApplicationPage />} />
           <Route path="/flight-ideas" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightIdeasPage /></div>} />
+          <Route path="/staff" element={<StaffPage />} />
         </Routes>
 
       </main>
-      <ChatWidget />
+      {/* Hide ChatWidget for staff */}
+      {dbUser?.role !== 'staff' && <ChatWidget />}
       <footer className="text-white" style={{ backgroundColor: '#0D47A1' }}>
         <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
           <div>

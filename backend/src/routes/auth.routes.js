@@ -120,27 +120,39 @@ router.post('/sync-user', clerkAuth, requireAuth, async (req, res, next) => {
       }
     });
 
+    // Determine new role
+    let newRole = user.role;
+    if (isAdmin) {
+      newRole = 'admin'; // Force admin if in admin list
+    } else {
+      // If not admin in env...
+      if (user.role === 'admin') {
+        // ...but was admin in DB => Demote to user
+        newRole = 'user';
+      }
+      // If user.role is 'staff' or 'user', keep it as is. 
+      // Do NOT force 'user' if they are 'staff'.
+    }
+
     // Update if email, name or role changed
-    // Also update if user has temporary email and now has real email
     const hasTempEmail = user.email && user.email.includes('@pending.clerk');
     const needsUpdate = user.email !== email || 
                        user.name !== name || 
-                       (isAdmin && user.role !== 'admin') ||
-                       (!isAdmin && user.role === 'admin' && !env.adminEmails.includes(user.email)) ||
+                       user.role !== newRole ||
                        (hasTempEmail && email && !email.includes('@pending.clerk'));
     
     if (needsUpdate) {
       await user.update({ 
         email, 
         name,
-        role: isAdmin ? 'admin' : 'user'
+        role: newRole
       });
       console.log('Updated user:', { 
         id: user.id, 
         oldEmail: hasTempEmail ? user.email : null,
         newEmail: email, 
         name, 
-        role: isAdmin ? 'admin' : 'user' 
+        role: newRole 
       });
     }
 

@@ -7,8 +7,26 @@ import apiRouter from './routes/index.js';
 
 const app = express();
 
-app.use(cors({ origin: ['http://localhost:5173', 'https://jurni-lake.vercel.app'], credentials: true }));
-app.use(helmet());
+// Configure CORS - must be before other middleware
+const corsOptions = {
+  origin: ['http://localhost:5173', 'https://jurni-lake.vercel.app'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400 // 24 hours
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
+
+// Configure helmet to not interfere with CORS
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 

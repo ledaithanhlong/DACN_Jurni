@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { sampleActivities } from '../data/mockData';
 import { ActivityCard } from '../components/ServiceCards';
+import { useUser, useAuth } from '@clerk/clerk-react';
 
 import {
   IconUsers, IconActivity, IconActivityLarge, IconShield,
@@ -14,6 +15,7 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export default function ActivitiesPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isSignedIn } = useUser();
   const [rows, setRows] = useState([]);
   const [selectedActivity, setSelectedActivity] = useState(null);
 
@@ -46,6 +48,12 @@ export default function ActivitiesPage() {
   };
 
   const handleBookActivity = (activity) => {
+    if (!isSignedIn) {
+      alert('Vui lòng đăng nhập để đặt tour!');
+      navigate('/sign-in');
+      return;
+    }
+
     // Validate booking details
     if (!tourDate) {
       alert('Vui lòng chọn ngày khởi hành!');
@@ -78,9 +86,9 @@ export default function ActivitiesPage() {
 
     // Save to localStorage
     try {
-      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const existingCart = JSON.parse(localStorage.getItem(`pendingCart_${user.id}`) || '[]');
       const updatedCart = [...existingCart, cartItem];
-      localStorage.setItem('pendingCart', JSON.stringify(updatedCart));
+      localStorage.setItem(`pendingCart_${user.id}`, JSON.stringify(updatedCart));
 
       // Navigate to checkout
       navigate('/checkout');

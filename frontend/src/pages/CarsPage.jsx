@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useUser, useAuth } from '@clerk/clerk-react';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -62,6 +63,7 @@ const IconLocation = () => (
 
 export default function CarsPage() {
   const navigate = useNavigate();
+  const { user, isSignedIn } = useUser();
   const [rows, setRows] = useState([]);
   const [selectedCar, setSelectedCar] = useState(null);
 
@@ -86,6 +88,12 @@ export default function CarsPage() {
   };
 
   const handleBookCar = (car) => {
+    if (!isSignedIn) {
+      alert('Vui lòng đăng nhập để đặt xe!');
+      navigate('/sign-in');
+      return;
+    }
+
     // Validate rental dates
     if (!pickupDate || !returnDate) {
       alert('Vui lòng chọn ngày lấy xe và ngày trả xe!');
@@ -126,9 +134,9 @@ export default function CarsPage() {
 
     // Save to localStorage
     try {
-      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const existingCart = JSON.parse(localStorage.getItem(`pendingCart_${user.id}`) || '[]');
       const updatedCart = [...existingCart, cartItem];
-      localStorage.setItem('pendingCart', JSON.stringify(updatedCart));
+      localStorage.setItem(`pendingCart_${user.id}`, JSON.stringify(updatedCart));
 
       // Navigate to checkout
       navigate('/checkout');

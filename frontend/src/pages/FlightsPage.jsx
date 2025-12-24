@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { sampleFlights } from '../data/mockData';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -72,6 +73,7 @@ const AirlineLogo = ({ logo, name, bgColor }) => {
 export default function FlightsPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isSignedIn } = useUser();
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -138,6 +140,11 @@ export default function FlightsPage() {
   };
 
   const handleBook = (flight, selectedOption = null) => {
+    if (!isSignedIn) {
+      alert('Vui lòng đăng nhập để đặt vé!');
+      navigate('/sign-in');
+      return;
+    }
     setBookingModal({ flight, option: selectedOption });
     setQuantity(1);
   };
@@ -170,9 +177,9 @@ export default function FlightsPage() {
 
     // Save to localStorage so PaymentPage can read it
     try {
-      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const existingCart = JSON.parse(localStorage.getItem(`pendingCart_${user.id}`) || '[]');
       const updatedCart = [...existingCart, orderItem];
-      localStorage.setItem('pendingCart', JSON.stringify(updatedCart));
+      localStorage.setItem(`pendingCart_${user.id}`, JSON.stringify(updatedCart));
     } catch (e) {
       console.error('Failed to save to cart', e);
     }

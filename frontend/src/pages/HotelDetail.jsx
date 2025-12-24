@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -57,6 +57,7 @@ export default function HotelDetail() {
     rooms: 1
   });
   const { getToken, isSignedIn } = useAuth();
+  const { user } = useUser();
 
   useEffect(() => {
     const loadHotel = async () => {
@@ -135,12 +136,12 @@ export default function HotelDetail() {
 
     // Save to persistence (Cart style)
     try {
-      const existingCart = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const existingCart = JSON.parse(localStorage.getItem(`pendingCart_${user.id}`) || '[]');
       // Avoid duplicates if needed, or allow multiple same items? - User wants "Cart", so allow multiple.
       // But maybe check unique ID to prevent double-click duplicates.
       if (!existingCart.some(i => i.id === orderItem.id)) {
         existingCart.push(orderItem);
-        localStorage.setItem('pendingCart', JSON.stringify(existingCart));
+        localStorage.setItem(`pendingCart_${user.id}`, JSON.stringify(existingCart));
       }
     } catch (e) {
       console.error('Failed to save order to storage', e);

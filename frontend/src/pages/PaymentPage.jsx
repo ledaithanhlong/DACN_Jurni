@@ -184,8 +184,13 @@ export default function PaymentPage() {
 
   // Load Cart
   useEffect(() => {
+    if (!user) {
+      setCartItems([]);
+      return;
+    }
+
     try {
-      const saved = JSON.parse(localStorage.getItem('pendingCart') || '[]');
+      const saved = JSON.parse(localStorage.getItem(`pendingCart_${user.id}`) || '[]');
       if (Array.isArray(saved)) {
         setCartItems(saved);
         // Default select all
@@ -208,7 +213,7 @@ export default function PaymentPage() {
         console.error('Failed to fetch vouchers', e);
       }
     })();
-  }, []);
+  }, [user]);
 
   const [showQRModal, setShowQRModal] = useState(false);
   const [form, setForm] = useState({
@@ -305,10 +310,11 @@ export default function PaymentPage() {
   };
 
   const removeItem = (id) => {
+    if (!user) return;
     const newCart = cartItems.filter(i => i.id !== id);
     setCartItems(newCart);
     setSelectedIds(prev => prev.filter(i => i !== id));
-    localStorage.setItem('pendingCart', JSON.stringify(newCart));
+    localStorage.setItem(`pendingCart_${user.id}`, JSON.stringify(newCart));
   };
 
   const handleChange = (field) => (event) => {
@@ -376,7 +382,9 @@ export default function PaymentPage() {
         const remainingCart = cartItems.filter(i => !selectedIds.includes(i.id));
         setCartItems(remainingCart);
         setSelectedIds([]);
-        localStorage.setItem('pendingCart', JSON.stringify(remainingCart));
+        if (user) {
+          localStorage.setItem(`pendingCart_${user.id}`, JSON.stringify(remainingCart));
+        }
 
         setTimeout(() => {
           navigate('/vouchers');

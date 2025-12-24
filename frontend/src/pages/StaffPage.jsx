@@ -196,7 +196,7 @@ export default function StaffPage() {
 
     // Basic layout: "Trắng trơn" (Plain white) with Navbar
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
             {/* Navbar */}
             <nav className="bg-white shadow-sm border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10">
                 <div className="flex items-center gap-4">

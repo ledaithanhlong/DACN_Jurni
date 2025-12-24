@@ -56,8 +56,40 @@ export default function ChatWidget() {
     const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
 
-    // Join room
+    // Join room & Listen for status
     newSocket.emit('join_room', roomId);
+
+    // Initial status check
+    newSocket.on('consultation_status', (data) => {
+      // data: { status, consultantId, consultantName }
+      if (data.status === 'active' && data.consultantName) {
+        setMessages(prev => [...prev, {
+          id: 'sys-joined-' + Date.now(),
+          role: 'system',
+          text: `${data.consultantName} đã tiếp nhận cuộc hội thoại này.`,
+          timestamp: new Date().toISOString()
+        }]);
+      }
+    });
+
+    newSocket.on('consultation_update', (data) => {
+      // Staff accepted
+      setMessages(prev => [...prev, {
+        id: 'sys-accept-' + Date.now(),
+        role: 'system',
+        text: data.message, // "Name đã tiếp nhận..."
+        timestamp: new Date().toISOString()
+      }]);
+    });
+
+    newSocket.on('consultation_ended', (data) => {
+      setMessages(prev => [...prev, {
+        id: 'sys-end-' + Date.now(),
+        role: 'system',
+        text: data.message, // "Cuộc hội thoại đã kết thúc"
+        timestamp: new Date().toISOString()
+      }]);
+    });
 
     // Listen for incoming messages
     newSocket.on('receive_message', (data) => {
@@ -77,8 +109,26 @@ export default function ChatWidget() {
       });
     });
 
-    return () => newSocket.disconnect();
-  }, [roomId]);
+    // If chat is open, mark as read immediately
+    if (isOpen) {
+      socket.emit('mark_read', { roomId: roomId, role: 'customer' });
+    }
+
+
+    return () => {
+      newSocket.off('consultation_status');
+      newSocket.off('consultation_update');
+      newSocket.off('consultation_ended');
+      newSocket.off('receive_message');
+    };
+  }, [roomId, isOpen]); // Add isOpen dependency
+
+  // Effect to mark read when opening
+  useEffect(() => {
+    if (isOpen && socket && roomId) {
+      socket.emit('mark_read', { roomId: roomId, role: 'customer' });
+    }
+  }, [isOpen, socket, roomId]);
 
   useEffect(() => {
     if (isOpen && messagesEndRef.current) {
@@ -159,27 +209,38 @@ export default function ChatWidget() {
             </div>
           </header>
           <div className="max-h-80 overflow-y-auto bg-blue-50/60 px-4 py-4 space-y-3 text-sm text-blue-900">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.role === 'customer' ? 'justify-end' : 'justify-start'}`}
-              >
+            {messages.map((message) => {
+              if (message.role === 'system') {
+                return (
+                  <div key={message.id} className="flex justify-center my-2">
+                    <span className="text-xs bg-gray-100 text-gray-500 px-3 py-1 rounded-full">
+                      {message.text}
+                    </span>
+                  </div>
+                );
+              }
+              return (
                 <div
-                  className={`max-w-[75%] rounded-2xl px-3 py-2 shadow-sm ${message.role === 'customer'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-blue-900 border border-blue-100'
-                    }`}
+                  key={message.id}
+                  className={`flex ${message.role === 'customer' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <p>{message.text}</p>
-                  <span className="mt-1 block text-[10px] opacity-70">
-                    {new Date(message.timestamp).toLocaleTimeString('vi-VN', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+                  <div
+                    className={`max-w-[75%] rounded-2xl px-3 py-2 shadow-sm ${message.role === 'customer'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-blue-900 border border-blue-100'
+                      }`}
+                  >
+                    <p>{message.text}</p>
+                    <span className="mt-1 block text-[10px] opacity-70">
+                      {new Date(message.timestamp).toLocaleTimeString('vi-VN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
             <div ref={messagesEndRef} />
           </div>
           <form onSubmit={handleSubmit} className="border-t border-blue-100 bg-white/90 px-4 py-3">

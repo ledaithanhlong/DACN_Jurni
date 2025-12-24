@@ -14,9 +14,15 @@ export default function StaffPage() {
     const [socket, setSocket] = useState(null);
     const [activeConversations, setActiveConversations] = useState([]); // { roomId, sender, lastMessage, timestamp, unread }
     const [selectedRoom, setSelectedRoom] = useState(null);
+    const selectedRoomRef = useRef(null);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef(null);
+
+    // Sync selectedRoom state to ref
+    useEffect(() => {
+        selectedRoomRef.current = selectedRoom;
+    }, [selectedRoom]);
 
     useEffect(() => {
         // Fetch active conversations list (Snapshot)
@@ -43,16 +49,61 @@ export default function StaffPage() {
 
                 const updatedDetails = {
                     roomId: data.roomId,
-                    // If we already have sender info (e.g. from API), preserve it, else use socket data
                     senderName: existingDetails?.senderName || data.sender,
                     lastMessage: data.content,
                     timestamp: data.timestamp,
                     unread: (existingDetails?.unread || 0) + 1,
-                    avatar: existingDetails?.avatar
+                    avatar: existingDetails?.avatar,
+                    status: existingDetails?.status === 'ended' ? 'pending' : (existingDetails?.status || 'pending'), // Reset if needed
+                    consultantId: existingDetails?.status === 'ended' ? null : existingDetails?.consultantId,
+                    consultantClerkId: existingDetails?.status === 'ended' ? null : existingDetails?.consultantClerkId,
+                    consultantName: existingDetails?.status === 'ended' ? null : existingDetails?.consultantName
                 };
 
                 return [updatedDetails, ...others];
             });
+        });
+
+        // Global Consultation Updates (Someone accepted/ended)
+        newSocket.on('consultation_global_update', (data) => {
+            // data: { roomId, status, consultantId, consultantName, consultantClerkId }
+            setActiveConversations(prev => prev.map(c =>
+                c.roomId === data.roomId ? {
+                    ...c,
+                    status: data.status,
+                    consultantId: data.consultantId,
+                    consultantName: data.consultantName,
+                    consultantClerkId: data.consultantClerkId
+                } : c
+            ));
+
+            // Also update selectedRoom if it matches (using ref to access current)
+            if (selectedRoomRef.current?.roomId === data.roomId) {
+                setSelectedRoom(prev => ({
+                    ...prev,
+                    status: data.status,
+                    consultantId: data.consultantId,
+                    consultantName: data.consultantName,
+                    consultantClerkId: data.consultantClerkId
+                }));
+            }
+        });
+
+        // Listen for internal messages
+        newSocket.on('consultation_update', (data) => {
+            setMessages(prev => [...prev, {
+                role: 'system',
+                content: data.message,
+                timestamp: new Date().toISOString()
+            }]);
+        });
+
+        newSocket.on('consultation_ended', (data) => {
+            setMessages(prev => [...prev, {
+                role: 'system',
+                content: data.message,
+                timestamp: new Date().toISOString()
+            }]);
         });
 
         // Listen for messages in the active room
@@ -60,8 +111,27 @@ export default function StaffPage() {
             setMessages((prev) => [...prev, data]);
         });
 
+        // Listen for read receipts
+        newSocket.on('messages_read', ({ roomId, readerRole }) => {
+            if (selectedRoomRef.current?.roomId === roomId) {
+                setMessages(prev => prev.map(msg => {
+                    // If reader is customer, mark staff messages as read
+                    if (readerRole === 'customer' && msg.role === 'staff') {
+                        return { ...msg, isRead: true };
+                    }
+                    return msg;
+                }));
+            }
+            // Clear unread if read by staff
+            if (readerRole === 'staff') {
+                setActiveConversations(prev =>
+                    prev.map(c => c.roomId === roomId ? { ...c, unread: 0 } : c)
+                );
+            }
+        });
+
         return () => newSocket.disconnect();
-    }, []);
+    }, []); // Empty dependency array -> Run ONCE on mount
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -81,18 +151,21 @@ export default function StaffPage() {
                 content: m.text,
                 role: m.role,
                 timestamp: m.timestamp,
-                sender: m.sender // optional
+                sender: m.sender,
+                isRead: m.isRead
             })));
         } catch (e) {
             console.error('Failed to fetch history', e);
         }
 
-        // Join the socket room
+        // Join the socket room using existing socket
         if (socket) {
             socket.emit('join_room', room.roomId);
+            // Mark as read immediately
+            socket.emit('mark_read', { roomId: room.roomId, role: 'staff' });
         }
 
-        // Mark as read in UI
+        // Mark as read in UI immediately
         setActiveConversations(prev =>
             prev.map(c => c.roomId === room.roomId ? { ...c, unread: 0 } : c)
         );
@@ -106,6 +179,7 @@ export default function StaffPage() {
             roomId: selectedRoom.roomId,
             sender: user?.firstName || 'Support Staff',
             role: 'staff',
+            staffId: user.id, // Send Clerk ID
             content: input,
             timestamp: new Date().toISOString()
         };
@@ -197,64 +271,135 @@ export default function StaffPage() {
                     {selectedRoom ? (
                         <>
                             {/* Chat Header */}
-                            {/* Chat Header */}
-                            <div className="p-4 border-b bg-gray-50 flex items-center gap-3">
-                                <div className="h-10 w-10 text-white flex items-center justify-center rounded-full bg-blue-600 shadow-md">
-                                    <span className="text-base font-bold">
-                                        {(selectedRoom.senderName || selectedRoom.sender || 'U').charAt(0).toUpperCase()}
-                                    </span>
+                            <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 text-white flex items-center justify-center rounded-full bg-blue-600 shadow-md">
+                                        <span className="text-base font-bold">
+                                            {(selectedRoom.senderName || selectedRoom.sender || 'U').charAt(0).toUpperCase()}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h2 className="font-bold text-lg text-gray-800">
+                                            {selectedRoom.senderName || selectedRoom.sender}
+                                        </h2>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                                                ID: {selectedRoom.roomId}
+                                            </p>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${selectedRoom.status === 'active' ? 'bg-green-100 text-green-700' :
+                                                selectedRoom.status === 'ended' ? 'bg-gray-200 text-gray-600' :
+                                                    'bg-yellow-100 text-yellow-700'
+                                                }`}>
+                                                {selectedRoom.status === 'active' ? 'Đang tư vấn' :
+                                                    selectedRoom.status === 'ended' ? 'Đã kết thúc' : 'Chờ tư vấn'}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                {/* Controls */}
                                 <div>
-                                    <h2 className="font-bold text-lg text-gray-800">
-                                        {selectedRoom.senderName || selectedRoom.sender}
-                                    </h2>
-                                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                                        <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
-                                        ID: {selectedRoom.roomId}
-                                    </p>
+                                    {(selectedRoom.status === 'pending' || selectedRoom.status === 'ended') && (
+                                        <button
+                                            onClick={() => socket.emit('accept_consultation', {
+                                                roomId: selectedRoom.roomId,
+                                                staffId: user.id, // Send Clerk ID (Reliable)
+                                                staffName: user.fullName || user.firstName
+                                            })}
+                                            className="bg-blue-600 text-white px-4 py-2 rounded-full font-bold text-sm hover:bg-blue-700 transition shadow-sm"
+                                        >
+                                            Nhận Tư Vấn
+                                        </button>
+                                    )}
+
+                                    {selectedRoom.status === 'active' && (
+                                        // Check ownership using Clerk ID (Robust)
+                                        (selectedRoom.consultantClerkId === user.id) ? (
+                                            <button
+                                                onClick={() => socket.emit('end_consultation', { roomId: selectedRoom.roomId, staffId: user.id })}
+                                                className="bg-red-100 text-red-600 px-4 py-2 rounded-full font-bold text-sm hover:bg-red-200 transition"
+                                            >
+                                                Kết Thúc
+                                            </button>
+                                        ) : (
+                                            <div className="flex flex-col items-end">
+                                                <div className="text-xs text-gray-500 italic bg-gray-100 px-3 py-1 rounded-full">
+                                                    Đang được tư vấn bởi {selectedRoom.consultantName || 'người khác'}
+                                                </div>
+                                            </div>
+                                        )
+                                    )}
                                 </div>
                             </div>
 
                             {/* Messages */}
                             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                {messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)).map((msg, idx) => (
-                                    <div
-                                        key={idx}
-                                        className={`flex ${msg.role === 'staff' ? 'justify-end' : 'justify-start'}`}
-                                    >
-                                        <div className={`max-w-[70%] rounded-2xl px-4 py-3 ${msg.role === 'staff'
-                                            ? 'bg-blue-600 text-white rounded-br-none'
-                                            : 'bg-gray-100 text-gray-800 rounded-bl-none'
-                                            }`}>
-                                            <p>{msg.content}</p>
-                                            <p className={`text-[10px] mt-1 text-right ${msg.role === 'staff' ? 'text-blue-100' : 'text-gray-500'}`}>
-                                                {new Date(msg.timestamp).toLocaleTimeString()}
-                                            </p>
+                                {messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)).map((msg, idx) => {
+                                    if (msg.role === 'system') {
+                                        return (
+                                            <div key={idx} className="flex justify-center">
+                                                <span className="text-xs bg-gray-200 text-gray-600 px-3 py-1 rounded-full italic">
+                                                    {msg.content || msg.text}
+                                                </span>
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <div
+                                            key={idx}
+                                            className={`flex flex-col ${msg.role === 'staff' ? 'items-end' : 'items-start'}`}
+                                        >
+                                            <div className={`max-w-[70%] rounded-2xl px-4 py-3 ${msg.role === 'staff'
+                                                ? 'bg-blue-600 text-white rounded-br-none'
+                                                : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                                                }`}>
+                                                <p>{msg.content}</p>
+                                                <p className={`text-[10px] mt-1 text-right ${msg.role === 'staff' ? 'text-blue-100' : 'text-gray-500'}`}>
+                                                    {new Date(msg.timestamp).toLocaleTimeString()}
+                                                </p>
+                                            </div>
+                                            {/* Read Receipt (Only for last message from Staff) */}
+                                            {msg.role === 'staff' && idx === messages.filter(m => m.role === 'staff').length - 1 + (messages.length - messages.filter(m => m.role === 'staff').length) && msg.isRead && (
+                                                <span className="text-[10px] text-gray-400 mt-1 mr-1">Đã xem</span>
+                                            )}
+                                            {/* Better Logic: just check if it's the very last message of the thread and isRead */}
+                                            {msg.role === 'staff' && msg.isRead && idx === messages.length - 1 && (
+                                                <span className="text-[10px] text-gray-400 mt-1 mr-1">Đã xem</span>
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                                 <div ref={messagesEndRef} />
                             </div>
 
                             {/* Input Area */}
-                            <div className="p-4 border-t bg-gray-50">
-                                <form onSubmit={handleSendMessage} className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={input}
-                                        onChange={(e) => setInput(e.target.value)}
-                                        placeholder="Nhập tin nhắn..."
-                                        className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={!input.trim()}
-                                        className="bg-blue-600 text-white rounded-full px-6 py-2 font-semibold hover:bg-blue-700 disabled:opacity-50 transition"
-                                    >
-                                        Gửi
-                                    </button>
-                                </form>
-                            </div>
+                            {(selectedRoom.status === 'active' && selectedRoom.consultantClerkId === user.id) ? (
+                                <div className="p-4 border-t bg-gray-50">
+                                    <form onSubmit={handleSendMessage} className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={input}
+                                            onChange={(e) => setInput(e.target.value)}
+                                            placeholder="Nhập tin nhắn..."
+                                            className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={!input.trim()}
+                                            className="bg-blue-600 text-white rounded-full px-6 py-2 font-semibold hover:bg-blue-700 disabled:opacity-50 transition"
+                                        >
+                                            Gửi
+                                        </button>
+                                    </form>
+                                </div>
+                            ) : (
+                                <div className="p-4 border-t bg-gray-100 text-center text-gray-500 text-sm">
+                                    {selectedRoom.status === 'pending' ? 'Vui lòng nhận tư vấn để bắt đầu chat.' :
+                                        selectedRoom.status === 'ended' ? 'Cuộc hội thoại đã kết thúc.' :
+                                            'Bạn không có quyền chat trong cuộc hội thoại này.'}
+                                </div>
+                            )}
                         </>
                     ) : (
                         <div className="flex-1 flex items-center justify-center text-gray-400">

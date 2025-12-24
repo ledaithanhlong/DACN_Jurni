@@ -39,8 +39,25 @@ router.get('/conversations', async (req, res, next) => {
 
     const conversations = Array.from(conversationsMap.values());
 
-    // 2. Fetch User Details for each conversation
+    // 2. Fetch User Details & Conversation Status for each conversation
     for (const conv of conversations) {
+        // Fetch Conversation Status
+        const statusRecord = await db.Conversation.findOne({ where: { roomId: conv.roomId } });
+        if (statusRecord) {
+            conv.status = statusRecord.status;
+            conv.consultantId = statusRecord.consultantId;
+            // Fetch consultant Clerk ID for frontend checks
+            if (statusRecord.consultantId) {
+                 const consultant = await db.User.findByPk(statusRecord.consultantId);
+                 if (consultant) {
+                     conv.consultantClerkId = consultant.clerkId;
+                     conv.consultantName = consultant.name;
+                 }
+            }
+        } else {
+            conv.status = 'pending';
+        }
+
         if (!conv.roomId.startsWith('guest-')) {
             // Try to find user by clerkId (since roomId seems to be the Clerk ID string)
             let user = await db.User.findOne({ where: { clerkId: conv.roomId } });
@@ -80,8 +97,11 @@ router.get('/:roomId', async (req, res, next) => {
       id: msg.id,
       text: msg.content,
       role: msg.senderId === 'staff' ? 'staff' : 'customer',
+      text: msg.content,
+      role: msg.senderId === 'staff' ? 'staff' : 'customer',
       sender: msg.senderId, // for detailed UI if needed
-      timestamp: msg.createdAt
+      timestamp: msg.createdAt,
+      isRead: msg.isRead
     }));
 
     res.json(formattedMessages);

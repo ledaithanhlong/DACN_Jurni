@@ -19,10 +19,17 @@ export default function StaffPage() {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        // Only connect if user is staff (In a real app, we'd check DB role, 
-        // but for this demo we'll assume access if they are here, or check metadata if available)
-        // For verifying role, we might need an API call or check token claims.
-        // Proceeding with connection.
+        // Fetch active conversations list (Snapshot)
+        const fetchConversations = async () => {
+            try {
+                const res = await axios.get(`${API_URL}/messages/conversations`);
+                setActiveConversations(res.data);
+            } catch (e) {
+                console.error('Failed to fetch active conversations', e);
+            }
+        };
+
+        fetchConversations();
 
         const newSocket = io(SOCKET_URL);
         setSocket(newSocket);
@@ -36,10 +43,12 @@ export default function StaffPage() {
 
                 const updatedDetails = {
                     roomId: data.roomId,
-                    sender: data.sender,
+                    // If we already have sender info (e.g. from API), preserve it, else use socket data
+                    senderName: existingDetails?.senderName || data.sender,
                     lastMessage: data.content,
                     timestamp: data.timestamp,
-                    unread: (existingDetails?.unread || 0) + 1
+                    unread: (existingDetails?.unread || 0) + 1,
+                    avatar: existingDetails?.avatar
                 };
 
                 return [updatedDetails, ...others];
@@ -146,15 +155,36 @@ export default function StaffPage() {
                                     onClick={() => handleSelectRoom(conv)}
                                     className={`p-4 border-b cursor-pointer hover:bg-gray-50 transition ${selectedRoom?.roomId === conv.roomId ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`}
                                 >
-                                    <div className="flex justify-between items-start mb-1">
-                                        <span className="font-semibold text-gray-900">{conv.sender}</span>
-                                        <span className="text-xs text-gray-500">
-                                            {new Date(conv.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        {/* Avatar */}
+                                        <div className="flex-shrink-0 h-10 w-10 text-white flex items-center justify-center rounded-full bg-blue-200">
+                                            {/* Simple Initials or Icon */}
+                                            <span className="text-sm font-bold text-blue-700">
+                                                {conv.senderName ? conv.senderName.charAt(0).toUpperCase() : 'U'}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-baseline">
+                                                <span className="font-semibold text-gray-900 truncate">
+                                                    {conv.senderName || conv.sender || `User ${conv.roomId}`}
+                                                </span>
+                                                <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                                    {new Date(conv.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                            <div className="text-sm text-gray-600 truncate mt-0.5">
+                                                {conv.lastMessage}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="text-sm text-gray-600 truncate">{conv.lastMessage}</div>
+
                                     {conv.unread > 0 && (
-                                        <div className="mt-2 text-xs font-bold text-red-500">{conv.unread} tin nhắn mới</div>
+                                        <div className="ml-14 flex justify-end">
+                                            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                                {conv.unread} tin nhắn mới
+                                            </span>
+                                        </div>
                                     )}
                                 </li>
                             ))}
@@ -167,10 +197,21 @@ export default function StaffPage() {
                     {selectedRoom ? (
                         <>
                             {/* Chat Header */}
-                            <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                            {/* Chat Header */}
+                            <div className="p-4 border-b bg-gray-50 flex items-center gap-3">
+                                <div className="h-10 w-10 text-white flex items-center justify-center rounded-full bg-blue-600 shadow-md">
+                                    <span className="text-base font-bold">
+                                        {(selectedRoom.senderName || selectedRoom.sender || 'U').charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
                                 <div>
-                                    <h2 className="font-bold text-lg">{selectedRoom.sender}</h2>
-                                    <p className="text-xs text-gray-500">Room ID: {selectedRoom.roomId}</p>
+                                    <h2 className="font-bold text-lg text-gray-800">
+                                        {selectedRoom.senderName || selectedRoom.sender}
+                                    </h2>
+                                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                                        <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                                        ID: {selectedRoom.roomId}
+                                    </p>
                                 </div>
                             </div>
 

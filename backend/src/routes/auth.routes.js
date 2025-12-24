@@ -74,16 +74,60 @@ router.post('/sync-user', clerkAuth, requireAuth, async (req, res, next) => {
     }
     
     // Validate required fields
+    if (!email || !name || name === 'User') {
+      // Fallback: Fetch from Clerk API if Secret Key is available
+      if (env.clerk.secretKey) {
+          try {
+              console.log('Fetching user details from Clerk API for:', clerkId);
+              const clerkRes = await fetch(`https://api.clerk.com/v1/users/${clerkId}`, {
+                  headers: {
+                      'Authorization': `Bearer ${env.clerk.secretKey}`,
+                      'Content-Type': 'application/json'
+                  }
+              });
+              
+              if (clerkRes.ok) {
+                  const clerkUser = await clerkRes.json();
+                  console.log('Clerk API User:', JSON.stringify(clerkUser, null, 2));
+
+                  if (clerkUser.email_addresses && clerkUser.email_addresses.length > 0) {
+                      email = clerkUser.email_addresses[0].email_address;
+                  }
+                  
+                  const first = clerkUser.first_name || '';
+                  const last = clerkUser.last_name || '';
+                  if (first || last) {
+                      name = `${last} ${first}`.trim(); // Vietnamese order often Last First or First Last depending on preference. 
+                      // User in screenshot "Minh hiếu Nguyễn Khắc" -> First: Minh hiếu, Last: Nguyễn Khắc? 
+                      // Clerk usually has first_name and last_name.
+                      // Let's use standard Western "First Last" or if user provided, "Last First". 
+                      // Actually, let's just join them.
+                      name = `${first} ${last}`.trim();
+                  }
+              } else {
+                  console.warn('Failed to fetch from Clerk API:', await clerkRes.text());
+              }
+          } catch (apiErr) {
+              console.error('Clerk API fetch error:', apiErr);
+          }
+      }
+    }
+
     if (!email) {
-      // If email is not available, try to create user with temporary email
-      // This can happen if email verification is pending
+      // If email is STILL not available, try to create user with temporary email
+      // This can happen if email verification is pending or API failed
       const tempEmail = `temp_${clerkId}@pending.clerk`;
       console.warn(`Email not found in session claims for user ${clerkId}, using temporary email: ${tempEmail}`);
       
       // Try to find existing user first
       let user = await db.User.findOne({ where: { clerkId } });
       
-      if (!user) {
+      if (user) {
+          // If user exists, we might want to update their name if we found it from API but still no email?
+          if (name && name !== 'User' && user.name !== name) {
+               await user.update({ name });
+          }
+      } else {
         // Create user with temporary email
         user = await db.User.create({
           clerkId,

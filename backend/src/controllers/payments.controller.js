@@ -85,16 +85,119 @@ export const processPayment = async (req, res, next) => {
     const transactionReference = `PAY-${Date.now()}`;
 
     let bookingRecord = null;
-    if (booking?.service_type && booking?.service_id) {
-      const userId = req.user?.id || booking.user_id;
-      if (userId) {
-        bookingRecord = await db.Booking.create({
-          user_id: userId,
-          service_type: booking.service_type,
-          service_id: booking.service_id,
-          total_price: amountNumber,
-          status: 'confirmed',
-        });
+    const createdBookings = [];
+
+    // Use a default system user ID to avoid foreign key constraint issues
+    // Customer info is stored in customer_name, customer_email, customer_phone fields
+    // We'll use user_id = 1 as a system/guest user
+    const systemUserId = 1;
+
+    // Ensure system user exists in database
+    try {
+      await db.User.findOrCreate({
+        where: { id: systemUserId },
+        defaults: {
+          name: 'System User',
+          email: 'system@jurni.com',
+          role: 'user',
+        }
+      });
+    } catch (userErr) {
+      console.log('System user setup error:', userErr.message);
+    }
+
+    // Prioritize looping through items if provided and requested
+    if (items && Array.isArray(items) && items.length > 0) {
+      for (const item of items) {
+        let subServiceType = null;
+        let subServiceId = null;
+
+        // Detect service type from item
+        if (item.type === 'hotel' || item.type === 'Khách sạn' || item.id?.includes('hotel')) {
+          subServiceType = 'hotel';
+          subServiceId = item.id?.split('-')[1] || item.id;
+        } else if (item.type === 'flight' || item.type === 'Chuyến bay' || item.id?.includes('flight')) {
+          subServiceType = 'flight';
+          subServiceId = item.id?.split('-')[1] || item.id;
+        } else if (item.type === 'car' || item.type === 'Thuê xe' || item.id?.includes('car')) {
+          subServiceType = 'car';
+          subServiceId = item.id?.split('-')[1] || item.id;
+        } else if (item.type === 'activity' || item.type === 'Hoạt động' || item.id?.includes('activity')) {
+          subServiceType = 'activity';
+          subServiceId = item.id?.split('-')[1] || item.id;
+        }
+
+        if (subServiceType) {
+          // Extract details
+          const details = item.details || {};
+          const startDate = details.checkIn || details.startDate || details.pickupDate || details.departureTime || details.date;
+          const endDate = details.checkOut || details.endDate || details.dropoffDate || details.arrivalTime;
+
+          const bookingData = {
+            user_id: systemUserId,
+            // service_type: subServiceType, // Removed
+            // service_id: subServiceId || 1, // Removed
+            total_price: item.price * item.quantity,
+            status: 'pending',
+            customer_name: customer.name,
+            customer_email: customer.email,
+            customer_phone: customer.phone,
+            payment_method: method.name,
+            transaction_id: transactionReference,
+
+            start_date: startDate ? new Date(startDate) : null,
+            end_date: endDate ? new Date(endDate) : null,
+            quantity: item.quantity || 1,
+            item_variant: details.roomType || details.ticketType || details.ticketClass || details.carType || details.activityType || null
+          };
+
+          // Set Explicit FK
+          if (subServiceType === 'hotel') bookingData.hotel_id = subServiceId;
+          else if (subServiceType === 'flight') bookingData.flight_id = subServiceId;
+          else if (subServiceType === 'car') bookingData.car_id = subServiceId;
+          else if (subServiceType === 'activity') bookingData.activity_id = subServiceId;
+
+          const newBooking = await db.Booking.create(bookingData);
+          createdBookings.push(newBooking);
+        }
+      }
+      // If we created multiple, maybe return the list
+      bookingRecord = createdBookings;
+    }
+    // Fallback to single booking object (legacy support or single item)
+    else if (booking?.service_type && booking?.service_id) {
+      // Legacy handling of single item booking from simplified payload
+      // Map to explicit FK based on incoming service_type
+      // Note: Frontend should ideally send 'items' array. This is fallback.
+      if (systemUserId) {
+        // Handle single booking legacy
+        const details = booking.details || {};
+        const startDate = details.checkIn || details.startDate || booking.checkIn;
+        const endDate = details.checkOut || details.endDate || booking.checkOut;
+
+        const bookingData = {
+          user_id: systemUserId,
+          total_price: amountNumber, // Total amount
+          status: 'pending',
+          customer_name: customer.name,
+          customer_email: customer.email,
+          customer_phone: customer.phone,
+          payment_method: method.name,
+          transaction_id: transactionReference,
+
+          start_date: startDate ? new Date(startDate) : null,
+          end_date: endDate ? new Date(endDate) : null,
+          quantity: booking.quantity || 1,
+          item_variant: details.roomType || details.ticketType || details.ticketClass || details.carType || details.activityType || null
+        };
+
+        // Set Explicit FK
+        if (booking.service_type === 'hotel') bookingData.hotel_id = booking.service_id;
+        else if (booking.service_type === 'flight') bookingData.flight_id = booking.service_id;
+        else if (booking.service_type === 'car') bookingData.car_id = booking.service_id;
+        else if (booking.service_type === 'activity') bookingData.activity_id = booking.service_id;
+
+        bookingRecord = await db.Booking.create(bookingData);
       }
     }
 

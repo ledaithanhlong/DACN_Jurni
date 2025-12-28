@@ -11,6 +11,11 @@ import vouchersRouter from './vouchers.routes.js';
 import notificationsRouter from './notifications.routes.js';
 import uploadRouter from './upload.routes.js';
 import paymentsRouter from './payments.routes.js';
+import teamRouter from './team.routes.js';
+import careerValuesRouter from './careerValues.routes.js';
+import galleryRouter from './gallery.routes.js';
+import testimonialsRouter from './testimonials.routes.js';
+import adminRouter from './admin.routes.js';
 
 const router = Router();
 
@@ -26,6 +31,11 @@ router.use('/vouchers', vouchersRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/upload', uploadRouter);
 router.use('/payments', paymentsRouter);
+router.use('/team', teamRouter);
+router.use('/career-values', careerValuesRouter);
+router.use('/gallery', galleryRouter);
+router.use('/testimonials', testimonialsRouter);
+router.use('/admin', adminRouter);
 
 export default router;
 

@@ -163,6 +163,36 @@ const getServiceName = (type) => {
   }
 };
 
+const getStatusBadge = (status) => {
+  switch (status) {
+    case 'pending':
+      return {
+        text: '🟡 Đang chờ xác nhận',
+        className: 'bg-yellow-50 text-yellow-700 border-yellow-200'
+      };
+    case 'confirmed':
+      return {
+        text: '🟢 Đã xác nhận',
+        className: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      };
+    case 'cancelled':
+      return {
+        text: '🔴 Đã hủy',
+        className: 'bg-red-50 text-red-700 border-red-200'
+      };
+    case 'completed':
+      return {
+        text: '🔵 Đã hoàn thành',
+        className: 'bg-blue-50 text-blue-700 border-blue-200'
+      };
+    default:
+      return {
+        text: status,
+        className: 'bg-gray-50 text-gray-700 border-gray-200'
+      };
+  }
+};
+
 export default function VouchersPage() {
   const [vouchers, setVouchers] = useState([mockVoucherData]);
   const [loading, setLoading] = useState(false);
@@ -182,20 +212,84 @@ export default function VouchersPage() {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        // Transform bookings to vouchers format
-        const transformedVouchers = res.data.map(booking => ({
-          booking_code: booking.booking_code || `JRN-${booking.id}`,
-          booking_date: booking.created_at,
-          status: booking.status || 'Đã thanh toán',
-          payment_method: booking.payment_method || 'VNPay',
-          customer: {
-            name: booking.customer_name || 'Khách hàng',
-            phone: booking.customer_phone || '',
-            email: booking.customer_email || ''
-          },
-          services: booking.services || [],
-          total_price: booking.total_price || 0
-        }));
+        console.log('Raw booking data from API:', res.data);
+
+        // Group bookings by transaction_id to combine services from same payment
+        const bookingGroups = {};
+        res.data.forEach(booking => {
+          const txnId = booking.transaction_id || `single-${booking.id}`;
+          if (!bookingGroups[txnId]) {
+            bookingGroups[txnId] = [];
+          }
+          bookingGroups[txnId].push(booking);
+        });
+
+        // Transform each group into a voucher
+        const transformedVouchers = Object.values(bookingGroups).map(bookings => {
+          const firstBooking = bookings[0];
+
+          // Build services array from all bookings in group
+          const services = bookings.map(booking => {
+            const serviceData = booking.hotel || booking.flight || booking.car || booking.activity;
+
+            let description = '';
+            let serviceName = 'Dịch vụ'; // Default fallback
+
+            if (booking.hotel) {
+              serviceName = serviceData?.name || 'Khách sạn';
+              description = booking.item_variant || 'Phòng khách sạn';
+            } else if (booking.flight) {
+              serviceName = serviceData?.airline || 'Chuyến bay';
+              description = `${serviceData?.departure || ''} – ${serviceData?.destination || ''}`;
+            } else if (booking.car) {
+              // Cars have company and model, not just name
+              serviceName = serviceData?.company
+                ? `${serviceData.company}${serviceData.model ? ' ' + serviceData.model : ''}`
+                : 'Xe thuê';
+              description = `${serviceData?.seats || ''} chỗ`;
+            } else if (booking.activity) {
+              serviceName = serviceData?.name || 'Hoạt động';
+              description = serviceData?.description || '';
+            }
+
+            const serviceObj = {
+              type: booking.service_type || (booking.hotel ? 'hotel' : booking.flight ? 'flight' : booking.car ? 'car' : 'activity'),
+              name: serviceName,
+              description: description,
+              start_date: booking.start_date,
+              end_date: booking.end_date,
+              price: parseFloat(booking.total_price) || 0
+            };
+
+            console.log('Service data:', {
+              type: serviceObj.type,
+              name: serviceObj.name,
+              start_date: booking.start_date,
+              end_date: booking.end_date,
+              formatted_start: booking.start_date ? formatDate(booking.start_date) : 'NO START',
+              formatted_end: booking.end_date ? formatDate(booking.end_date) : 'NO END'
+            });
+
+            return serviceObj;
+          });
+
+          // Calculate total from all bookings in group
+          const totalPrice = bookings.reduce((sum, b) => sum + (parseFloat(b.total_price) || 0), 0);
+
+          return {
+            booking_code: firstBooking.transaction_id || `JRN-${firstBooking.id}`,
+            booking_date: firstBooking.createdAt || firstBooking.created_at,
+            status: firstBooking.status || 'pending',
+            payment_method: firstBooking.payment_method || 'VNPay',
+            customer: {
+              name: firstBooking.customer_name || firstBooking.user?.name || 'Khách hàng',
+              phone: firstBooking.customer_phone || '',
+              email: firstBooking.customer_email || firstBooking.user?.email || ''
+            },
+            services: services,
+            total_price: totalPrice
+          };
+        });
 
         setVouchers(transformedVouchers.length > 0 ? transformedVouchers : [mockVoucherData]);
       } catch (error) {
@@ -636,8 +730,22 @@ export default function VouchersPage() {
                       </td>
                       <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
                         <div style="font-size: 9px; color: #1f2937; white-space: nowrap;">
-                          <div style="font-weight: 600;">${formatDate(service.start_date)}</div>
-                          <div style="color: #4b5563; font-size: 8px;">đến ${formatDate(service.end_date)}</div>
+                          ${(() => {
+        const start = formatDate(service.start_date);
+        const end = formatDate(service.end_date);
+        if (start && end && start !== end) {
+          return `
+                                <div style="font-weight: 600;">${start}</div>
+                                <div style="color: #4b5563; font-size: 8px;">đến ${end}</div>
+                              `;
+        } else if (start) {
+          return `<div style="font-weight: 600;">${start}</div>`;
+        } else if (end) {
+          return `<div style="font-weight: 600;">${end}</div>`;
+        } else {
+          return `<div style="color: #9ca3af; font-style: italic;">-</div>`;
+        }
+      })()}
                         </div>
                       </td>
                       <td style="padding: 8px 10px; text-align: right;">
@@ -746,17 +854,17 @@ export default function VouchersPage() {
       </html>
     `);
     printWindow.document.close();
-    
+
     setTimeout(() => {
       // Đảm bảo title được set để browser tự động đề xuất tên file khi in PDF
       printWindow.document.title = fileName;
-      
+
       // Thêm meta tag để hỗ trợ một số browser
       const metaTitle = printWindow.document.createElement('meta');
       metaTitle.setAttribute('name', 'title');
       metaTitle.setAttribute('content', fileName);
       printWindow.document.head.appendChild(metaTitle);
-      
+
       printWindow.print();
     }, 500);
   };
@@ -773,9 +881,9 @@ export default function VouchersPage() {
       iframe.style.opacity = '0';
       iframe.style.pointerEvents = 'none';
       document.body.appendChild(iframe);
-      
+
       const qrCodeUrl = generateQRCode(voucher.booking_code);
-      
+
       iframe.contentDocument.open();
       iframe.contentDocument.write(`
         <!DOCTYPE html>
@@ -1310,18 +1418,18 @@ export default function VouchersPage() {
       });
 
       const element = iframe.contentDocument.getElementById('voucher-content');
-      
+
       // Đợi tất cả hình ảnh load xong
       await new Promise((resolve) => {
         const images = element.querySelectorAll('img');
         let loadedCount = 0;
         const totalImages = images.length;
-        
+
         if (totalImages === 0) {
           resolve();
           return;
         }
-        
+
         images.forEach((img) => {
           if (img.complete) {
             loadedCount++;
@@ -1337,11 +1445,11 @@ export default function VouchersPage() {
             };
           }
         });
-        
+
         // Timeout sau 5 giây
         setTimeout(() => resolve(), 5000);
       });
-      
+
       const canvas = await html2canvas(element, {
         scale: 3,
         useCORS: true,
@@ -1378,7 +1486,7 @@ export default function VouchersPage() {
           }
           return;
         }
-        
+
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -1386,7 +1494,7 @@ export default function VouchersPage() {
         link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
-        
+
         setTimeout(() => {
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
@@ -1452,8 +1560,8 @@ export default function VouchersPage() {
           <div className="space-y-8">
             {vouchers.map((voucher, index) => {
               const qrCodeUrl = generateQRCode(voucher.booking_code);
-              
-  return (
+
+              return (
                 <div
                   key={index}
                   className="bg-white rounded-3xl shadow-2xl border border-gray-200/50 overflow-hidden relative backdrop-blur-sm"
@@ -1463,7 +1571,7 @@ export default function VouchersPage() {
                   }}
                 >
                   {/* Seal Background Watermark */}
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-[0.03] pointer-events-none z-0"
                     style={{
                       backgroundImage: 'url(/JurniLogo/jurni-seal.png)',
@@ -1472,15 +1580,15 @@ export default function VouchersPage() {
                       backgroundSize: '400px 400px'
                     }}
                   />
-                  
+
                   {/* Voucher Content */}
                   <div className="p-8 relative z-10">
                     {/* Header */}
                     <div className="text-center mb-8 pb-6 border-b border-gray-200/60">
                       <div className="mb-4">
-                        <img 
-                          src="/JurniLogo/apple-touch-icon.png" 
-                          alt="Jurni Logo" 
+                        <img
+                          src="/JurniLogo/apple-touch-icon.png"
+                          alt="Jurni Logo"
                           className="w-20 h-20 mx-auto object-contain drop-shadow-sm"
                         />
                       </div>
@@ -1511,9 +1619,8 @@ export default function VouchersPage() {
                           </div>
                           <div>
                             <div className="text-xs text-gray-500 mb-1.5 font-medium">Trạng thái</div>
-                            <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-emerald-200">
-                              <IconCheck className="w-3 h-3" />
-                              {voucher.status}
+                            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${getStatusBadge(voucher.status).className}`}>
+                              {getStatusBadge(voucher.status).text}
                             </div>
                           </div>
                         </div>
@@ -1583,7 +1690,7 @@ export default function VouchersPage() {
                           </thead>
                           <tbody>
                             {voucher.services?.map((service, idx) => (
-                              <tr 
+                              <tr
                                 key={idx}
                                 className={`border-b-2 border-gray-200 transition-all duration-150 ${idx % 2 === 0 ? 'bg-white' : 'bg-orange-50/30'} hover:bg-orange-100/50 hover:shadow-sm`}
                               >
@@ -1598,8 +1705,36 @@ export default function VouchersPage() {
                                 </td>
                                 <td className="py-3 px-5 border-r-2 border-gray-200">
                                   <div className="text-xs text-gray-800 whitespace-nowrap">
-                                    <div className="font-semibold">{formatDate(service.start_date)}</div>
-                                    <div className="text-[10px] text-gray-600 mt-0.5">đến {formatDate(service.end_date)}</div>
+                                    {(() => {
+                                      const start = service.start_date ? formatDate(service.start_date) : null;
+                                      const end = service.end_date ? formatDate(service.end_date) : null;
+
+                                      // If both dates exist and are different
+                                      if (start && end && start !== end) {
+                                        return (
+                                          <>
+                                            <div className="font-semibold">{start}</div>
+                                            <div className="text-[10px] text-gray-600 mt-0.5">đến {end}</div>
+                                          </>
+                                        );
+                                      }
+                                      // If both dates exist and are the same
+                                      else if (start && end && start === end) {
+                                        return <div className="font-semibold">{start}</div>;
+                                      }
+                                      // If only start date exists
+                                      else if (start && !end) {
+                                        return <div className="font-semibold">{start}</div>;
+                                      }
+                                      // If only end date exists
+                                      else if (!start && end) {
+                                        return <div className="font-semibold">{end}</div>;
+                                      }
+                                      // If neither exists
+                                      else {
+                                        return <div className="text-gray-400 italic">-</div>;
+                                      }
+                                    })()}
                                   </div>
                                 </td>
                                 <td className="py-3 px-5 text-right">
@@ -1662,13 +1797,13 @@ export default function VouchersPage() {
                           </li>
                         </ul>
                       </div>
-                      
+
                       {/* Dấu mộc */}
                       <div className="flex flex-col items-center justify-center">
                         <div className="w-36 h-36 flex items-center justify-center">
-                          <img 
-                            src="/JurniLogo/jurni-seal.png" 
-                            alt="Jurni Seal" 
+                          <img
+                            src="/JurniLogo/jurni-seal.png"
+                            alt="Jurni Seal"
                             className="w-full h-full object-contain"
                             onError={(e) => {
                               e.target.style.display = 'none';

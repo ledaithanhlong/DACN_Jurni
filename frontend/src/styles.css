@@ -39,4 +39,37 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+/* Clerk component overrides - ensure all fields are visible */
+.cl-formFieldInput,
+.cl-formFieldInput[type="password"],
+.cl-formFieldInput[type="email"],
+.cl-formFieldInput[type="text"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 100% !important;
+  min-height: 40px !important;
+}
+
+.cl-formFieldRow {
+  display: block !important;
+  visibility: visible !important;
+  margin-bottom: 1rem !important;
+}
+
+.cl-formFieldLabel {
+  display: block !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.cl-rootBox {
+  width: 100% !important;
+}
+
+.cl-card {
+  width: 100% !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+
 

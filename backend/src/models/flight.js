@@ -2,27 +2,30 @@ export default (sequelize, DataTypes) => {
   const Flight = sequelize.define('Flight', {
     id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     airline: { type: DataTypes.STRING, allowNull: false },
-    flight_number: { type: DataTypes.STRING, allowNull: true },
+    flight_number: { type: DataTypes.STRING, allowNull: false },
+    origin: { type: DataTypes.STRING, allowNull: false },
+    destination: { type: DataTypes.STRING, allowNull: false },
     departure_city: { type: DataTypes.STRING, allowNull: false },
     arrival_city: { type: DataTypes.STRING, allowNull: false },
     departure_time: { type: DataTypes.DATE, allowNull: false },
     arrival_time: { type: DataTypes.DATE, allowNull: false },
-    price: { type: DataTypes.DECIMAL(10,2), allowNull: false },
-    image_url: { type: DataTypes.STRING, allowNull: true },
-    flight_type: { 
-      type: DataTypes.ENUM('economy', 'premium_economy', 'business', 'first_class'),
-      allowNull: true,
-      defaultValue: 'economy'
-    },
-    amenities: { type: DataTypes.JSON, allowNull: true },
-    policies: { type: DataTypes.JSON, allowNull: true },
-    available_seats: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true, defaultValue: 180 }
+    price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+    seats_available: { type: DataTypes.INTEGER, defaultValue: 0 },
+    available_seats: { type: DataTypes.INTEGER, defaultValue: 0 },
+    image_url: { type: DataTypes.STRING },
+    flight_type: { type: DataTypes.STRING },
+    aircraft: { type: DataTypes.STRING, defaultValue: 'Airbus A320' },
+    amenities: { type: DataTypes.JSON },
+    policies: { type: DataTypes.JSON },
+    ticket_options: { type: DataTypes.JSON }
   }, {
-    tableName: 'flights',
-    underscored: true
+    tableName: 'Flights',
+    timestamps: true
   });
 
-  Flight.associate = () => {};
+  Flight.associate = (models) => {
+    Flight.hasMany(models.Booking, { foreignKey: 'flight_id', as: 'bookings' });
+  };
+
   return Flight;
 };
-

@@ -2,14 +2,14 @@ import db from '../models/index.js';
 
 export const listUsers = async (req, res, next) => {
   try {
-    const rows = await db.User.findAll({ 
+    const rows = await db.User.findAll({
       order: [['id', 'DESC']],
-      attributes: ['id', 'name', 'email', 'role', 'created_at', 'updated_at'] // Chỉ lấy các trường cần thiết
+      attributes: ['id', 'name', 'email', 'role', 'createdAt', 'updatedAt'] // Chỉ lấy các trường cần thiết
     });
     res.json(rows);
-  } catch (e) { 
+  } catch (e) {
     console.error('Error in listUsers:', e);
-    next(e); 
+    next(e);
   }
 };
 

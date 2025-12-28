@@ -3,11 +3,12 @@ export default (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     user_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     title: { type: DataTypes.STRING, allowNull: false },
-    message: { type: DataTypes.TEXT, allowNull: false },
-    is_read: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false }
+    message: { type: DataTypes.TEXT },
+    type: { type: DataTypes.STRING },
+    is_read: { type: DataTypes.BOOLEAN, defaultValue: false }
   }, {
-    tableName: 'notifications',
-    underscored: true
+    tableName: 'Notifications',
+    timestamps: true
   });
 
   Notification.associate = (models) => {
@@ -16,5 +17,3 @@ export default (sequelize, DataTypes) => {
 
   return Notification;
 };
-
-

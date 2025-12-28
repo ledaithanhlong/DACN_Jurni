@@ -5,8 +5,8 @@ export default (sequelize, DataTypes) => {
     service_type: { type: DataTypes.ENUM('hotel', 'flight', 'car', 'activity'), allowNull: false },
     service_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false }
   }, {
-    tableName: 'favorites',
-    underscored: true
+    tableName: 'Favorites',
+    timestamps: true
   });
 
   Favorite.associate = (models) => {
@@ -15,4 +15,3 @@ export default (sequelize, DataTypes) => {
 
   return Favorite;
 };
-

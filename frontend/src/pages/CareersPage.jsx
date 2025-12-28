@@ -47,7 +47,7 @@ const CareersPage = () => {
             id: 4,
             title: 'Customer Success Manager',
             department: 'Operations',
-            location: 'Hồ Chí Minh (Hybrid)',
+            location: 'Đà Nẵng',
             type: 'Full-time',
         },
     ];

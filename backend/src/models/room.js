@@ -3,18 +3,16 @@ export default (sequelize, DataTypes) => {
     id: { type: DataTypes.INTEGER.UNSIGNED, primaryKey: true, autoIncrement: true },
     hotel_id: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
     name: { type: DataTypes.STRING, allowNull: false },
-    room_type: { 
-      type: DataTypes.ENUM('standard', 'deluxe', 'suite', 'family'),
-      allowNull: true,
-      defaultValue: 'standard'
-    },
-    price_per_night: { type: DataTypes.DECIMAL(10,2), allowNull: false },
-    capacity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false },
-    quantity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: true, defaultValue: 1 },
-    image_url: { type: DataTypes.STRING, allowNull: true }
+    type: { type: DataTypes.STRING },
+    room_type: { type: DataTypes.STRING },
+    price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+    capacity: { type: DataTypes.INTEGER },
+    quantity: { type: DataTypes.INTEGER, defaultValue: 1 },
+    available: { type: DataTypes.BOOLEAN, defaultValue: true },
+    images: { type: DataTypes.JSON, defaultValue: [] }
   }, {
-    tableName: 'rooms',
-    underscored: true
+    tableName: 'Rooms',
+    timestamps: true
   });
 
   Room.associate = (models) => {
@@ -23,5 +21,3 @@ export default (sequelize, DataTypes) => {
 
   return Room;
 };
-
-

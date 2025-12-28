@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AdminUsers from '../components/admin/AdminUsers.jsx';
 import AdminFlights from '../components/admin/AdminFlights.jsx';
@@ -22,7 +23,9 @@ import {
   TrendingUp,
   ShoppingBag,
   DollarSign,
-  Activity
+  Activity,
+  MessageSquare,
+  UsersRound
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -40,6 +43,7 @@ export default function AdminDashboard() {
   const [recentActivity, setRecentActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const navigate = useNavigate();
   const menuItems = [
     { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
     { id: 'bookings', label: 'Đặt chỗ', icon: FileText },
@@ -49,6 +53,8 @@ export default function AdminDashboard() {
     { id: 'cars', label: 'Xe cho thuê', icon: Car },
     { id: 'activities', label: 'Hoạt động', icon: Compass },
     { id: 'vouchers', label: 'Voucher', icon: Ticket },
+    { id: 'chat', label: 'Quản lý Chat', icon: MessageSquare, isExternal: true },
+    { id: 'team', label: 'Quản lý Team', icon: UsersRound, isExternal: true, path: '/team' },
   ];
 
   // Fetch real stats from API
@@ -83,20 +89,20 @@ export default function AdminDashboard() {
   };
 
   const StatCard = ({ title, value, icon: Icon, trend, color }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mb-2">{value}</p>
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-600 mb-2">{title}</p>
+          <p className="text-3xl font-bold text-gray-900 mb-1 truncate">{value}</p>
           {trend && (
-            <p className="text-sm text-green-600 flex items-center gap-1">
-              <TrendingUp className="w-4 h-4" />
+            <p className="text-xs text-green-600 flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" />
               {trend}
             </p>
           )}
         </div>
-        <div className={`p-4 rounded-xl ${color} shadow-lg`}>
-          <Icon className="w-7 h-7 text-white" />
+        <div className={`p-3 rounded-xl ${color} shadow-lg flex-shrink-0`}>
+          <Icon className="w-6 h-6 text-white" />
         </div>
       </div>
     </div>
@@ -135,7 +141,7 @@ export default function AdminDashboard() {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => item.isExternal ? navigate(item.path || '/admin/chat') : setActiveTab(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 ${isActive
                   ? 'bg-white/20 text-white shadow-lg scale-105 font-bold'
                   : 'text-white/80 hover:bg-white/10 hover:translate-x-1'
@@ -205,35 +211,43 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <StatCard
-                    title="Tổng đặt chỗ"
-                    value={stats.totalBookings.toLocaleString()}
-                    icon={ShoppingBag}
-                    trend="+12.5% so với tháng trước"
-                    color="bg-gradient-to-br from-blue-500 to-blue-600"
-                  />
-                  <StatCard
-                    title="Người dùng"
-                    value={stats.totalUsers.toLocaleString()}
-                    icon={Users}
-                    trend="+8.2% so với tháng trước"
-                    color="bg-gradient-to-br from-green-500 to-green-600"
-                  />
-                  <StatCard
-                    title="Doanh thu"
-                    value={formatCurrency(stats.totalRevenue)}
-                    icon={DollarSign}
-                    trend="+15.3% so với tháng trước"
-                    color="bg-gradient-to-br from-purple-500 to-purple-600"
-                  />
-                  <StatCard
-                    title="Dịch vụ hoạt động"
-                    value={stats.activeServices.toLocaleString()}
-                    icon={Activity}
-                    trend="+5 dịch vụ mới"
-                    color="bg-gradient-to-br from-orange-500 to-orange-600"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
+                  <div className="lg:col-span-2">
+                    <StatCard
+                      title="Tổng đặt chỗ"
+                      value={stats.totalBookings.toLocaleString()}
+                      icon={ShoppingBag}
+                      trend="+12.5% so với tháng trước"
+                      color="bg-gradient-to-br from-blue-500 to-blue-600"
+                    />
+                  </div>
+                  <div className="lg:col-span-2">
+                    <StatCard
+                      title="Người dùng"
+                      value={stats.totalUsers.toLocaleString()}
+                      icon={Users}
+                      trend="+8.2% so với tháng trước"
+                      color="bg-gradient-to-br from-green-500 to-green-600"
+                    />
+                  </div>
+                  <div className="lg:col-span-2">
+                    <StatCard
+                      title="Dịch vụ hoạt động"
+                      value={stats.activeServices.toLocaleString()}
+                      icon={Activity}
+                      trend="+5 dịch vụ mới"
+                      color="bg-gradient-to-br from-orange-500 to-orange-600"
+                    />
+                  </div>
+                  <div className="lg:col-span-6">
+                    <StatCard
+                      title="Doanh thu"
+                      value={formatCurrency(stats.totalRevenue)}
+                      icon={DollarSign}
+                      trend="+15.3% so với tháng trước"
+                      color="bg-gradient-to-br from-purple-500 to-purple-600"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -249,7 +263,7 @@ export default function AdminDashboard() {
                     return (
                       <button
                         key={item.id}
-                        onClick={() => setActiveTab(item.id)}
+                        onClick={() => item.isExternal ? navigate(item.path || '/admin/chat') : setActiveTab(item.id)}
                         className="flex items-center gap-4 p-5 rounded-xl border-2 border-gray-200 hover:border-sky-500 hover:bg-sky-50 transition-all duration-200 group"
                       >
                         <div className="p-3 bg-sky-100 rounded-xl group-hover:bg-sky-500 transition-all duration-200">

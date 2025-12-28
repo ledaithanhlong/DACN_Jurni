@@ -29,6 +29,7 @@ import ChatWidget from '../components/ChatWidget.jsx';
 import TeamPage from '../pages/TeamPage.jsx';
 import BookingsPage from '../pages/BookingsPage.jsx';
 import CareersPage from '../pages/CareersPage.jsx';
+import AdminChatPage from '../pages/AdminChatPage.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -246,6 +247,7 @@ export default function App({ clerkEnabled }) {
           <Route path="/promotions" element={<div className="max-w-7xl mx-auto px-4 py-6"><PromotionsPage /></div>} />
           <Route path="/careers/apply/:jobId" element={<JobApplicationPage />} />
           <Route path="/flight-ideas" element={<div className="max-w-7xl mx-auto px-4 py-6"><FlightIdeasPage /></div>} />
+          <Route path="/admin/chat" element={<AdminOnly clerkEnabled={clerkEnabled}><AdminChatPage /></AdminOnly>} />
         </Routes>
 
       </main>

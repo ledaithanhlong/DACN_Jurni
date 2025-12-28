@@ -16,6 +16,7 @@ import careerValuesRouter from './careerValues.routes.js';
 import galleryRouter from './gallery.routes.js';
 import testimonialsRouter from './testimonials.routes.js';
 import adminRouter from './admin.routes.js';
+import chatRouter from './chat.routes.js';
 
 const router = Router();
 
@@ -36,6 +37,7 @@ router.use('/career-values', careerValuesRouter);
 router.use('/gallery', galleryRouter);
 router.use('/testimonials', testimonialsRouter);
 router.use('/admin', adminRouter);
+router.use('/chat', chatRouter);
 
 export default router;
 

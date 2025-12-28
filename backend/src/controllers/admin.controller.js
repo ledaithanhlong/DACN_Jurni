@@ -2,6 +2,8 @@ import db from '../models/index.js';
 
 export async function getAdminStats(req, res, next) {
     try {
+        console.log('=== getAdminStats called ===');
+
         // Get total counts from database
         const [
             totalBookings,
@@ -21,17 +23,21 @@ export async function getAdminStats(req, res, next) {
             db.Voucher.count()
         ]);
 
+        console.log('Counts:', { totalBookings, totalUsers, totalHotels, totalFlights, totalCars, totalActivities, totalVouchers });
+
         // Calculate total revenue from bookings
         const bookingsWithRevenue = await db.Booking.findAll({
-            attributes: ['totalPrice'],
+            attributes: ['total_price'],
             where: {
                 status: 'confirmed'
             }
         });
 
         const totalRevenue = bookingsWithRevenue.reduce((sum, booking) => {
-            return sum + (parseFloat(booking.totalPrice) || 0);
+            return sum + (parseFloat(booking.total_price) || 0);
         }, 0);
+
+        console.log('Total revenue:', totalRevenue);
 
         // Get recent bookings for activity feed
         const recentBookings = await db.Booking.findAll({
@@ -40,7 +46,8 @@ export async function getAdminStats(req, res, next) {
             include: [
                 {
                     model: db.User,
-                    attributes: ['email', 'firstName', 'lastName']
+                    as: 'user',
+                    attributes: ['email']
                 }
             ]
         });
@@ -48,12 +55,12 @@ export async function getAdminStats(req, res, next) {
         // Format recent activity
         const recentActivity = recentBookings.map(booking => ({
             action: 'Đặt chỗ mới',
-            detail: `${booking.serviceType} - ${booking.User?.email || 'N/A'}`,
+            detail: `${booking.serviceType || 'N/A'} - ${booking.user?.email || 'N/A'}`,
             time: formatTimeAgo(booking.createdAt),
-            amount: booking.totalPrice
+            amount: booking.total_price
         }));
 
-        res.json({
+        const response = {
             stats: {
                 totalBookings,
                 totalUsers,
@@ -68,8 +75,12 @@ export async function getAdminStats(req, res, next) {
                 vouchers: totalVouchers
             },
             recentActivity
-        });
+        };
+
+        console.log('Sending response:', JSON.stringify(response, null, 2));
+        res.json(response);
     } catch (error) {
+        console.error('getAdminStats error:', error);
         next(error);
     }
 }

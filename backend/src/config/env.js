@@ -20,7 +20,9 @@ export const env = {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
     apiKey: process.env.CLOUDINARY_API_KEY || '',
     apiSecret: process.env.CLOUDINARY_API_SECRET || ''
-  }
+  },
+  tunnelUrl: process.env.TUNNEL_URL || '',
+  frontendTunnelUrl: process.env.FRONTEND_TUNNEL_URL || ''
 };
 
 

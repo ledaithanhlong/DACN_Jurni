@@ -233,7 +233,7 @@ export default function App({ clerkEnabled }) {
           <Route path="/vouchers" element={<div className="max-w-7xl mx-auto px-4 py-6"><VouchersPage /></div>} />
           <Route path="/favorites" element={<div className="max-w-7xl mx-auto px-4 py-6"><FavoritesPage /></div>} />
           <Route path="/notifications" element={<div className="max-w-7xl mx-auto px-4 py-6"><NotificationsPage /></div>} />
-          <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><div className="max-w-7xl mx-auto px-4 py-6"><AdminDashboard /></div></AdminOnly>} />
+          <Route path="/admin" element={<AdminOnly clerkEnabled={clerkEnabled}><AdminDashboard /></AdminOnly>} />
           <Route path="/bookings" element={<div className="max-w-7xl mx-auto px-4 py-6"><BookingsPage /></div>} />
           <Route path="/checkout" element={<PaymentPage />} />
           <Route path="/about" element={<AboutPage />} />
@@ -250,60 +250,63 @@ export default function App({ clerkEnabled }) {
 
       </main>
       <ChatWidget />
-      <footer className="text-white" style={{ backgroundColor: '#0D47A1' }}>
-        <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
-          <div>
-            <div className="text-xl font-semibold tracking-wide">Jurni</div>
-            <p className="mt-3 text-sm text-white/80">
-              © 2025 Jurni – Khám phá Việt Nam theo cách của bạn.
-            </p>
-            <div className="mt-3 text-sm text-white/80">
-              Nhóm thực hiện: <Link to="/team" className="font-semibold hover:text-orange-accent transition">Nước Code Dừa</Link>
+      {/* Hide footer on admin page */}
+      {location.pathname !== '/admin' && (
+        <footer className="text-white" style={{ backgroundColor: '#0D47A1' }}>
+          <div className="max-w-7xl mx-auto px-4 py-8 grid gap-8 md:grid-cols-3">
+            <div>
+              <div className="text-xl font-semibold tracking-wide">Jurni</div>
+              <p className="mt-3 text-sm text-white/80">
+                © 2025 Jurni – Khám phá Việt Nam theo cách của bạn.
+              </p>
+              <div className="mt-3 text-sm text-white/80">
+                Nhóm thực hiện: <Link to="/team" className="font-semibold hover:text-orange-accent transition">Nước Code Dừa</Link>
+              </div>
+              <ul className="mt-1 text-sm text-white/80 space-y-1">
+                <li><Link to="/team" className="hover:text-orange-accent transition">Nguyễn Huy Sơn</Link></li>
+                <li><Link to="/team" className="hover:text-orange-accent transition">Lê Đại Thanh Long</Link></li>
+                <li><Link to="/team" className="hover:text-orange-accent transition">Nguyễn Khắc Minh Hiếu</Link></li>
+              </ul>
             </div>
-            <ul className="mt-1 text-sm text-white/80 space-y-1">
-              <li><Link to="/team" className="hover:text-orange-accent transition">Nguyễn Huy Sơn</Link></li>
-              <li><Link to="/team" className="hover:text-orange-accent transition">Lê Đại Thanh Long</Link></li>
-              <li><Link to="/team" className="hover:text-orange-accent transition">Nguyễn Khắc Minh Hiếu</Link></li>
-            </ul>
-          </div>
 
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
-              Thông tin liên hệ
-            </h3>
-            <ul className="space-y-2 text-sm text-white/80">
-              <li>
-                Giảng viên hướng dẫn: <span className="font-semibold">Trần Đăng Khoa</span>
-              </li>
-              <li>
-                Lớp học: <span className="font-semibold">22DTHD4</span>
-              </li>
-              <li>
-                Source code:{" "}
-                <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold hover:text-orange-accent transition">
-                  Nước Code Dừa's GitHub repository
-                </a>
-              </li>
-              <li>Địa chỉ: Trường Đại học Công nghệ TP.HCM (HUTECH)</li>
-            </ul>
-          </div>
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
+                Thông tin liên hệ
+              </h3>
+              <ul className="space-y-2 text-sm text-white/80">
+                <li>
+                  Giảng viên hướng dẫn: <span className="font-semibold">Trần Đăng Khoa</span>
+                </li>
+                <li>
+                  Lớp học: <span className="font-semibold">22DTHD4</span>
+                </li>
+                <li>
+                  Source code:{" "}
+                  <a href="https://github.com/ledaithanhlong/DACN_Jurni" target="_blank" rel="noreferrer" className="font-semibold hover:text-orange-accent transition">
+                    Nước Code Dừa's GitHub repository
+                  </a>
+                </li>
+                <li>Địa chỉ: Trường Đại học Công nghệ TP.HCM (HUTECH)</li>
+              </ul>
+            </div>
 
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
-              Liên kết nhanh
-            </h3>
-            <nav className="flex flex-col space-y-2 text-sm">
-              <Link to="/" className="text-white/80 hover:text-orange-accent transition">Trang chủ</Link>
-              <Link to="/about" className="text-white/80 hover:text-orange-accent transition">Giới thiệu</Link>
-              <Link to="/services" className="text-white/80 hover:text-orange-accent transition">Dịch vụ</Link>
-              <Link to="/activities" className="text-white/80 hover:text-orange-accent transition">Tour trong nước</Link>
-              <Link to="/support" className="text-white/80 hover:text-orange-accent transition">Liên hệ / Hỗ trợ</Link>
-              <Link to="/careers" className="text-white/80 hover:text-orange-accent transition">Tuyển dụng</Link>
-              <Link to="/terms" className="text-white/80 hover:text-orange-accent transition">Điều khoản &amp; Chính sách</Link>
-            </nav>
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/60 mb-3">
+                Liên kết nhanh
+              </h3>
+              <nav className="flex flex-col space-y-2 text-sm">
+                <Link to="/" className="text-white/80 hover:text-orange-accent transition">Trang chủ</Link>
+                <Link to="/about" className="text-white/80 hover:text-orange-accent transition">Giới thiệu</Link>
+                <Link to="/services" className="text-white/80 hover:text-orange-accent transition">Dịch vụ</Link>
+                <Link to="/activities" className="text-white/80 hover:text-orange-accent transition">Tour trong nước</Link>
+                <Link to="/support" className="text-white/80 hover:text-orange-accent transition">Liên hệ / Hỗ trợ</Link>
+                <Link to="/careers" className="text-white/80 hover:text-orange-accent transition">Tuyển dụng</Link>
+                <Link to="/terms" className="text-white/80 hover:text-orange-accent transition">Điều khoản &amp; Chính sách</Link>
+              </nav>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

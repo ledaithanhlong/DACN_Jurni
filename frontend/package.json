@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tunnel:frontend": "tunnelto --port 5173",
+    "tunnel:frontend:custom": "tunnelto --port 5173 --subdomain"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.11.2",

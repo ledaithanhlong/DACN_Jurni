@@ -252,7 +252,7 @@ export default function VouchersPage() {
               description = serviceData?.description || '';
             }
 
-            return {
+            const serviceObj = {
               type: booking.service_type || (booking.hotel ? 'hotel' : booking.flight ? 'flight' : booking.car ? 'car' : 'activity'),
               name: serviceName,
               description: description,
@@ -260,6 +260,17 @@ export default function VouchersPage() {
               end_date: booking.end_date,
               price: parseFloat(booking.total_price) || 0
             };
+
+            console.log('Service data:', {
+              type: serviceObj.type,
+              name: serviceObj.name,
+              start_date: booking.start_date,
+              end_date: booking.end_date,
+              formatted_start: booking.start_date ? formatDate(booking.start_date) : 'NO START',
+              formatted_end: booking.end_date ? formatDate(booking.end_date) : 'NO END'
+            });
+
+            return serviceObj;
           });
 
           // Calculate total from all bookings in group
@@ -719,8 +730,22 @@ export default function VouchersPage() {
                       </td>
                       <td style="padding: 8px 10px; border-right: 2px solid #e5e7eb;">
                         <div style="font-size: 9px; color: #1f2937; white-space: nowrap;">
-                          <div style="font-weight: 600;">${formatDate(service.start_date)}</div>
-                          <div style="color: #4b5563; font-size: 8px;">đến ${formatDate(service.end_date)}</div>
+                          ${(() => {
+        const start = formatDate(service.start_date);
+        const end = formatDate(service.end_date);
+        if (start && end && start !== end) {
+          return `
+                                <div style="font-weight: 600;">${start}</div>
+                                <div style="color: #4b5563; font-size: 8px;">đến ${end}</div>
+                              `;
+        } else if (start) {
+          return `<div style="font-weight: 600;">${start}</div>`;
+        } else if (end) {
+          return `<div style="font-weight: 600;">${end}</div>`;
+        } else {
+          return `<div style="color: #9ca3af; font-style: italic;">-</div>`;
+        }
+      })()}
                         </div>
                       </td>
                       <td style="padding: 8px 10px; text-align: right;">
@@ -1680,8 +1705,36 @@ export default function VouchersPage() {
                                 </td>
                                 <td className="py-3 px-5 border-r-2 border-gray-200">
                                   <div className="text-xs text-gray-800 whitespace-nowrap">
-                                    <div className="font-semibold">{formatDate(service.start_date)}</div>
-                                    <div className="text-[10px] text-gray-600 mt-0.5">đến {formatDate(service.end_date)}</div>
+                                    {(() => {
+                                      const start = service.start_date ? formatDate(service.start_date) : null;
+                                      const end = service.end_date ? formatDate(service.end_date) : null;
+
+                                      // If both dates exist and are different
+                                      if (start && end && start !== end) {
+                                        return (
+                                          <>
+                                            <div className="font-semibold">{start}</div>
+                                            <div className="text-[10px] text-gray-600 mt-0.5">đến {end}</div>
+                                          </>
+                                        );
+                                      }
+                                      // If both dates exist and are the same
+                                      else if (start && end && start === end) {
+                                        return <div className="font-semibold">{start}</div>;
+                                      }
+                                      // If only start date exists
+                                      else if (start && !end) {
+                                        return <div className="font-semibold">{start}</div>;
+                                      }
+                                      // If only end date exists
+                                      else if (!start && end) {
+                                        return <div className="font-semibold">{end}</div>;
+                                      }
+                                      // If neither exists
+                                      else {
+                                        return <div className="text-gray-400 italic">-</div>;
+                                      }
+                                    })()}
                                   </div>
                                 </td>
                                 <td className="py-3 px-5 text-right">

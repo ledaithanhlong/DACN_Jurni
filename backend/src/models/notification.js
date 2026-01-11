@@ -5,6 +5,7 @@ export default (sequelize, DataTypes) => {
     title: { type: DataTypes.STRING, allowNull: false },
     message: { type: DataTypes.TEXT },
     type: { type: DataTypes.STRING },
+    action_url: { type: DataTypes.STRING },
     is_read: { type: DataTypes.BOOLEAN, defaultValue: false }
   }, {
     tableName: 'Notifications',

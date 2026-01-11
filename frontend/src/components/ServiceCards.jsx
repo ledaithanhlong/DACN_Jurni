@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { IconStar, IconLocation, IconBed, IconClock } from './Icons';
+import FavoriteButton from './FavoriteButton';
 
 // Format price utility
 const formatPrice = (price) => {
@@ -21,6 +22,15 @@ export function HotelCard({ hotel }) {
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-1">
                         <IconStar className="w-4 h-4 text-yellow-500 fill-current" />
                         <span className="font-bold text-gray-900">{hotel.rating || 4}</span>
+                    </div>
+                    <div className="absolute top-4 left-4">
+                        <FavoriteButton
+                            serviceType="hotel"
+                            serviceId={hotel.id}
+                            serviceName={hotel.name}
+                            meta={hotel.location}
+                            price={hotel.price}
+                        />
                     </div>
                 </div>
             )}
@@ -96,6 +106,15 @@ export function ActivityCard({ activity, onClick }) {
                         {activity.category}
                     </div>
                 )}
+                <div className="absolute top-4 right-4">
+                    <FavoriteButton
+                        serviceType="activity"
+                        serviceId={activity.id}
+                        serviceName={activity.name}
+                        meta={activity.location || activity.city}
+                        price={activity.price}
+                    />
+                </div>
             </div>
             <div className="p-5 flex flex-col flex-1">
                 <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">{activity.name}</h3>

@@ -9,6 +9,7 @@ import AdminActivities from '../components/admin/AdminActivities.jsx';
 import AdminHotels from '../components/admin/AdminHotels.jsx';
 import AdminVouchers from '../components/admin/AdminVouchers.jsx';
 import AdminBookings from '../components/admin/AdminBookings.jsx';
+import NotificationSender from '../components/NotificationSender.jsx';
 import {
   LayoutDashboard,
   Users,
@@ -25,7 +26,8 @@ import {
   DollarSign,
   Activity,
   MessageSquare,
-  UsersRound
+  UsersRound,
+  Bell
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -53,6 +55,7 @@ export default function AdminDashboard() {
     { id: 'cars', label: 'Xe cho thuê', icon: Car },
     { id: 'activities', label: 'Hoạt động', icon: Compass },
     { id: 'vouchers', label: 'Voucher', icon: Ticket },
+    { id: 'notifications', label: 'Gửi thông báo', icon: Bell },
     { id: 'chat', label: 'Quản lý Chat', icon: MessageSquare, isExternal: true },
     { id: 'team', label: 'Quản lý Team', icon: UsersRound, isExternal: true, path: '/team' },
   ];
@@ -332,6 +335,7 @@ export default function AdminDashboard() {
               {activeTab === 'cars' && <AdminCars />}
               {activeTab === 'activities' && <AdminActivities />}
               {activeTab === 'vouchers' && <AdminVouchers />}
+              {activeTab === 'notifications' && <NotificationSender />}
             </div>
           )}
         </div>

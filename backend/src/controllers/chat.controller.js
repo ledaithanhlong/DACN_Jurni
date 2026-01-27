@@ -47,12 +47,17 @@ export async function createConversation(req, res) {
     try {
         const { customer_name, customer_email, user_id, conversation_type } = req.body;
 
+        const conversationType = conversation_type || 'human';
+
+        // AI conversations start as 'active', human conversations start as 'waiting'
+        const initialStatus = conversationType === 'ai' ? 'active' : 'waiting';
+
         const conversation = await db.ChatConversation.create({
             customer_name,
             customer_email,
             user_id,
-            conversation_type: conversation_type || 'human',
-            status: 'waiting',
+            conversation_type: conversationType,
+            status: initialStatus,
             last_message_at: new Date(),
         });
 

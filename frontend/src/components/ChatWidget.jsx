@@ -13,6 +13,8 @@ export default function ChatWidget() {
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -23,18 +25,40 @@ export default function ChatWidget() {
 
   // Initialize socket connection
   useEffect(() => {
-    socketRef.current = io(`${API_URL}/chat`, {
+    const socketUrl = API_URL + '/chat';
+    console.log('Initializing socket connection to:', socketUrl);
+
+    socketRef.current = io(socketUrl, {
       transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
     });
 
     socketRef.current.on('connect', () => {
       setIsConnected(true);
-      console.log('Connected to chat server');
+      setError(null);
+      console.log('✅ Connected to chat server');
     });
 
-    socketRef.current.on('disconnect', () => {
+    socketRef.current.on('disconnect', (reason) => {
       setIsConnected(false);
-      console.log('Disconnected from chat server');
+      console.log('Disconnected from chat server. Reason:', reason);
+    });
+
+    socketRef.current.on('connect_error', (error) => {
+      setIsConnected(false);
+      console.error('Socket connection error:', error.message);
+      setError('Không thể kết nối đến server chat. Vui lòng kiểm tra kết nối.');
+    });
+
+    socketRef.current.on('reconnect_attempt', (attemptNumber) => {
+      console.log(`🔄 Reconnection attempt ${attemptNumber}...`);
+    });
+
+    socketRef.current.on('reconnect_failed', () => {
+      console.error('Failed to reconnect after multiple attempts');
+      setError('Không thể kết nối lại. Vui lòng tải lại trang.');
     });
 
     socketRef.current.on('new-message', (message) => {
@@ -48,6 +72,7 @@ export default function ChatWidget() {
 
     return () => {
       if (socketRef.current) {
+        console.log('🔌 Disconnecting socket...');
         socketRef.current.disconnect();
       }
     };
@@ -60,7 +85,15 @@ export default function ChatWidget() {
 
   // Start conversation
   const startConversation = async (type) => {
+    setIsLoading(true);
+    setError(null);
+
     try {
+      // Check if socket is connected
+      if (!socketRef.current || !isConnected) {
+        throw new Error('Chưa kết nối đến server. Vui lòng thử lại.');
+      }
+
       const response = await fetch(`${API_URL}/api/chat/conversations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,6 +104,10 @@ export default function ChatWidget() {
           conversation_type: type,
         }),
       });
+
+      if (!response.ok) {
+        throw new Error('Không thể tạo cuộc hội thoại. Vui lòng thử lại.');
+      }
 
       const data = await response.json();
       if (data.success) {
@@ -94,9 +131,14 @@ export default function ChatWidget() {
           message: welcomeMsg,
           timestamp: new Date(),
         }]);
+      } else {
+        throw new Error(data.error || 'Không thể tạo cuộc hội thoại');
       }
     } catch (error) {
       console.error('Error starting conversation:', error);
+      setError(error.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -156,6 +198,8 @@ export default function ChatWidget() {
     setConversationId(null);
     setMessages([]);
     setInputMessage('');
+    setError(null);
+    setIsLoading(false);
   };
 
   if (!isOpen) {
@@ -208,9 +252,22 @@ export default function ChatWidget() {
           <h3 className="text-lg font-semibold text-blue-900">Chọn loại hỗ trợ</h3>
           <p className="text-center text-sm text-blue-700/70">Bạn muốn chat với AI hay nhân viên?</p>
 
+          {error && (
+            <div className="w-full rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          {!isConnected && (
+            <div className="w-full rounded-lg bg-orange-50 border border-orange-200 px-4 py-3 text-sm text-orange-700">
+              Đang kết nối đến server...
+            </div>
+          )}
+
           <button
             onClick={() => startConversation('ai')}
-            className="w-full rounded-xl border-2 border-blue-500 bg-blue-50 px-6 py-4 text-left transition hover:bg-blue-100"
+            disabled={isLoading || !isConnected}
+            className="w-full rounded-xl border-2 border-blue-500 bg-blue-50 px-6 py-4 text-left transition hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-white">
@@ -227,7 +284,8 @@ export default function ChatWidget() {
 
           <button
             onClick={() => startConversation('human')}
-            className="w-full rounded-xl border-2 border-orange-500 bg-orange-50 px-6 py-4 text-left transition hover:bg-orange-100"
+            disabled={isLoading || !isConnected}
+            className="w-full rounded-xl border-2 border-orange-500 bg-orange-50 px-6 py-4 text-left transition hover:bg-orange-100 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-white">
